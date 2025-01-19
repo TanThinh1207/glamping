@@ -20,4 +20,8 @@ public class Image {
 
     @Column(name = "path")
     private String path;
+
+    @ManyToOne
+    @JoinColumn(name = "id_camp_site")
+    private CampSite campSite;
 }

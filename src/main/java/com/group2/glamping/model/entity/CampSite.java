@@ -47,5 +47,10 @@ public class CampSite {
     @OneToMany(mappedBy = "camp_site")
     private List<Booking> bookingList;
 
+    @OneToMany(mappedBy = "camp_site")
+    private List<Image> imageList;
+
+    @OneToMany(mappedBy = "camp_site")
+    private List<Report> reportList;
 
 }

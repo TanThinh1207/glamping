@@ -17,8 +17,9 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "id_booking")
-    private int bookingId;
+    @ManyToOne
+    @JoinColumn(name = "id_booking")
+    private Booking booking;
 
     @Column(name = "payment_method")
     private String paymentMethod;

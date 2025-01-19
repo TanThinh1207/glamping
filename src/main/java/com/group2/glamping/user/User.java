@@ -2,6 +2,7 @@ package com.group2.glamping.user;
 
 import com.group2.glamping.model.entity.Booking;
 import com.group2.glamping.model.entity.CampSite;
+import com.group2.glamping.model.entity.Report;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -51,6 +52,9 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user")
     private List<CampSite> campSiteList;
+
+    @OneToMany(mappedBy = "user")
+    private List<Report> reportList;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

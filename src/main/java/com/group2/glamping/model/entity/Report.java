@@ -1,5 +1,6 @@
 package com.group2.glamping.model.entity;
 
+import com.group2.glamping.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,11 +18,13 @@ public class Report {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "id_camp_site")
-    private int campSiteId;
+    @ManyToOne
+    @JoinColumn(name = "id_camp_site")
+    private CampSite campSite;
 
-    @Column(name = "id_user")
-    private int userId;
+    @ManyToOne
+    @JoinColumn(name = "id_user")
+    private User user;
 
     @Column(name = "status")
     private String status;
