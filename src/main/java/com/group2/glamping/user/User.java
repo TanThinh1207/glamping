@@ -1,5 +1,8 @@
 package com.group2.glamping.user;
 
+import com.group2.glamping.model.entity.Booking;
+import com.group2.glamping.model.entity.CampSite;
+import com.group2.glamping.model.entity.Report;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,6 +50,14 @@ public class User implements UserDetails {
     @Column(name = "role")
     private Role role;
 
+    @OneToMany(mappedBy = "user")
+    private List<Booking> bookingList;
+
+    @OneToMany(mappedBy = "user")
+    private List<CampSite> campSiteList;
+
+    @OneToMany(mappedBy = "user")
+    private List<Report> reportList;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
