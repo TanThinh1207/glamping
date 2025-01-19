@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "order")
+@Entity(name = "booking_detail_order")
 public class BookingDetailOrder {
 
     @EmbeddedId

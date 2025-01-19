@@ -37,9 +37,6 @@ public class Booking {
     @Column(name = "total_amount")
     private double totalAmount;
 
-    @OneToMany(mappedBy = "booking",cascade = CascadeType.ALL)
-    private List<BookingDetailService> bookingDetailServiceList;
-
     @OneToMany(mappedBy = "booking")
     private List<Payment> payments;
 }
