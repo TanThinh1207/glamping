@@ -17,7 +17,8 @@ import java.util.function.Function;
 // Binh
 public class JwtService {
 
-    private static final String SECRET_KEY  = "5e2f6f4d3b9e4d7c3a6d8e5f9b2c4a8f";
+    private static final String SECRET_KEY = "SNMBP1D7/V2QFUC4Twr1cZgictGITTT6FSJrA3Y6o2nljOsSgrAUNrvQIFgtDKvwkTkemjEPMTa9pRZvsDhpQjuSJc9I4dNMQ/Y8O6DZdE7pWH9ISEQKpAxwU4cQ4sqUVYEnzLEU8+GFMihfE/Z/jESlKpwcaPuT2ygcQwBTz3of2M0K3yEFQK9usaKKX9+C2ryu6F5Q6rclJUd7DlBxTdRRstqCumu3EEAVSwqzXEBdx73TV3cFAxh93YpzaFjCc6xTaKZR7Sb5irKVPXH0rW0c+8Zi+KVVxh5PdTDuDCVqwZn2O6bpDNFpG1yK4g1fcsDfH2+XWXLeMMdpSkUWTTPDW0tRF+jas/ss70kuXvI=\n" +
+            "\n";
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
