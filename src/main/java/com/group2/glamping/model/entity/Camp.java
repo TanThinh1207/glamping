@@ -1,4 +1,4 @@
-package com.group2.glamping.entity;
+package com.group2.glamping.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

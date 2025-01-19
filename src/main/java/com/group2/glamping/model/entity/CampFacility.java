@@ -1,7 +1,7 @@
-package com.group2.glamping.entity;
+package com.group2.glamping.model.entity;
 
 
-import com.group2.glamping.entity.id.IdCampFacility;
+import com.group2.glamping.model.entity.id.IdCampFacility;
 import jakarta.persistence.*;
 import lombok.Data;
 

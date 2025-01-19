@@ -1,11 +1,13 @@
-package com.group2.glamping.entity;
+package com.group2.glamping.model.entity;
 
+import com.group2.glamping.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -38,6 +40,12 @@ public class CampSite {
     @Column(name = "status")
     private String status;
 
-    @Column(name = "id_user")
-    private int userId;
+    @ManyToOne
+    @JoinColumn(name = "id_user")
+    private User user;
+
+    @OneToMany(mappedBy = "camp_site")
+    private List<Booking> bookingList;
+
+
 }

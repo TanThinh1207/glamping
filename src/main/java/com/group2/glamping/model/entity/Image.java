@@ -1,4 +1,4 @@
-package com.group2.glamping.entity;
+package com.group2.glamping.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,16 +8,16 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "utility")
-public class Utility {
+@Entity(name = "image")
+public class Image {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "id_camp_site")
+    private int campSiteId;
 
-    @Column(name = "status")
-    private boolean status;
+    @Column(name = "path")
+    private String path;
 }

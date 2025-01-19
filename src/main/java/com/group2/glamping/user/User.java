@@ -1,5 +1,7 @@
 package com.group2.glamping.user;
 
+import com.group2.glamping.model.entity.Booking;
+import com.group2.glamping.model.entity.CampSite;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -44,6 +46,11 @@ public class User implements UserDetails {
     @Column(name = "role")
     private Role role;
 
+    @OneToMany(mappedBy = "user")
+    private List<Booking> bookingList;
+
+    @OneToMany(mappedBy = "user")
+    private List<CampSite> campSiteList;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

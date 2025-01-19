@@ -1,5 +1,6 @@
-package com.group2.glamping.entity;
+package com.group2.glamping.model.entity;
 
+import com.group2.glamping.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,10 +22,11 @@ public class Booking {
 
     @ManyToOne
     @JoinColumn(name = "id_user")
-    private int userId;
+    private User user;
 
-    @Column(name = "id_camp_site")
-    private int campSiteId;
+    @ManyToOne
+    @JoinColumn(name = "id_camp_site")
+    private CampSite campSite;
 
     @Column(name = "created_at")
     private LocalDateTime createdTime;
@@ -36,6 +38,6 @@ public class Booking {
     private double totalAmount;
 
     @OneToMany(mappedBy = "booking",cascade = CascadeType.ALL)
-    private List<BookingDetailService> bookingDetailServiceList = new ArrayList<>();
+    private List<BookingDetailService> bookingDetailServiceList;
 
 }

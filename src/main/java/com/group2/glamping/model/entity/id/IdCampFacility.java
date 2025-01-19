@@ -1,4 +1,4 @@
-package com.group2.glamping.entity.id;
+package com.group2.glamping.model.entity.id;
 
 
 import jakarta.persistence.Embeddable;
