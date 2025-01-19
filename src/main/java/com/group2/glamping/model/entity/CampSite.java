@@ -44,13 +44,13 @@ public class CampSite {
     @JoinColumn(name = "id_user")
     private User user;
 
-    @OneToMany(mappedBy = "camp_site")
+    @OneToMany(mappedBy = "campSite")
     private List<Booking> bookingList;
 
-    @OneToMany(mappedBy = "camp_site")
+    @OneToMany(mappedBy = "campSite")
     private List<Image> imageList;
 
-    @OneToMany(mappedBy = "camp_site")
+    @OneToMany(mappedBy = "campSite")
     private List<Report> reportList;
 
 }

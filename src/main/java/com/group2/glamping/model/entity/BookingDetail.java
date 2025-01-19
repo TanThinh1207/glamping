@@ -45,6 +45,9 @@ public class BookingDetail {
     @Column(name = "add_on")
     private double addOn;
 
-    @OneToMany(mappedBy = "booking_detail")
+    @OneToMany(mappedBy = "bookingDetail")
     private List<BookingDetailOrder> bookingDetailOrders;
+
+    @OneToMany(mappedBy = "bookingDetail",cascade = CascadeType.ALL)
+    private List<BookingDetailService> bookingDetailServiceList;
 }
