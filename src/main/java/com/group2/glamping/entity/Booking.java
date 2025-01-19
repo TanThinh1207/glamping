@@ -19,22 +19,23 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "id_user")
-    private int id_user;
+    @ManyToOne
+    @JoinColumn(name = "id_user")
+    private int userId;
 
     @Column(name = "id_camp_site")
-    private int id_camp_site;
+    private int campSiteId;
 
     @Column(name = "created_at")
-    private LocalDateTime created_at;
+    private LocalDateTime createdTime;
 
     @Column(name = "status")
     private String status;
 
     @Column(name = "total_amount")
-    private double total_amount;
+    private double totalAmount;
 
     @OneToMany(mappedBy = "booking",cascade = CascadeType.ALL)
-    private List<Booking_Detail_Service> Booking_Detail_Service_List = new ArrayList<>();
+    private List<BookingDetailService> bookingDetailServiceList = new ArrayList<>();
 
 }

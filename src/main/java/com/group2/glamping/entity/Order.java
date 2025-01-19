@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity(name = "order")
 public class Order {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -30,5 +31,5 @@ public class Order {
     private LocalDateTime updatedTime;
 
     @OneToMany(mappedBy = "order")
-    private List<Booking_Detail_Order> booking_Detail_Orders;
+    private List<BookingDetailOrder> bookingDetailOrders;
 }

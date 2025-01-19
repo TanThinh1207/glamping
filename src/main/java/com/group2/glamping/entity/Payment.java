@@ -18,7 +18,7 @@ public class Payment {
     private int id;
 
     @Column(name = "id_booking")
-    private int id_booking;
+    private int bookingId;
 
     @Column(name = "payment_method")
     private String paymentMethod;
@@ -30,7 +30,7 @@ public class Payment {
     private String status;
 
     @Column(name = "id_transaction")
-    private String id_transaction;
+    private String transactionId;
 
     @Column(name = "completed_at")
     private LocalDateTime completedTime;

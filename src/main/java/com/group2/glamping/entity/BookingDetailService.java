@@ -1,5 +1,6 @@
 package com.group2.glamping.entity;
 
+import com.group2.glamping.entity.id.IdBookingDetailService;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,20 +10,20 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity(name = "booking_detail_service")
-public class Booking_Detail_Service {
+public class BookingDetailService {
 
     @EmbeddedId
-    private int id_Booking_Detail_Service;
+    private IdBookingDetailService idBookingDetailService;
 
     @ManyToOne
     @MapsId("bookingDetailId")
     @JoinColumn(name = "id_booking_detail", insertable = false, updatable = false)
-    private Booking_Detail bookingDetail;
+    private BookingDetail bookingDetail;
 
     @ManyToOne
     @MapsId("serviceId")
     @JoinColumn(name = "id_service", insertable = false, updatable = false)
-    private Service Service;
+    private Service service;
 
     @Column(name = "name")
     private String name;

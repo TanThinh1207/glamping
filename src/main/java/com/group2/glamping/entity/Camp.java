@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity(name = "camp")
 public class Camp {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -42,7 +43,7 @@ public class Camp {
     private String view;
 
     @Column(name = "id_camp_type")
-    private int id_camp_type;
+    private int campTypeId;
 
     @OneToMany(mappedBy = "camp")
     private List<CampFacility> campFacilities;

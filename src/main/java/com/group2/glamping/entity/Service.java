@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -14,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity(name = "service")
 public class Service {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -34,5 +34,5 @@ public class Service {
     private LocalDateTime updatedTime;
 
     @OneToMany(mappedBy = "service",cascade = CascadeType.ALL)
-    private List<Booking_Detail_Service> Booking_Detail_Service_List = new ArrayList<>();
+    private List<BookingDetailService> bookingDetailServices;
 }

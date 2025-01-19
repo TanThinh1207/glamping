@@ -1,5 +1,6 @@
 package com.group2.glamping.entity;
 
+import com.group2.glamping.entity.id.IdCampSiteUtility;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,15 +10,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity(name = "camp_site_utility")
-public class Camp_Site_Utility {
+public class CampSiteUtility {
 
     @EmbeddedId
-    private int id_Camp_Site_Utility;
+    private IdCampSiteUtility idCampSiteUtility;
 
     @ManyToOne
     @MapsId("campSiteId")
     @JoinColumn(name = "id_camp_site", insertable = false, updatable = false)
-    private Camp_Site campSite;
+    private CampSite campSite;
 
     @ManyToOne
     @MapsId("utilityId")

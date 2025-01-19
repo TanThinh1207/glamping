@@ -12,17 +12,17 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity(name = "booking_detail")
-public class Booking_Detail {
+public class BookingDetail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column(name = "id_booking")
-    private int id_booking;
+    private int bookingId;
 
     @Column(name = "id_camp")
-    private int id_camp;
+    private int campId;
 
     @Column(name = "check_in_at")
     private LocalDateTime checkInTime;
@@ -46,5 +46,5 @@ public class Booking_Detail {
     private double addOn;
 
     @OneToMany(mappedBy = "booking_detail")
-    private List<Booking_Detail_Order> booking_Detail_Orders;
+    private List<BookingDetailOrder> bookingDetailOrders;
 }

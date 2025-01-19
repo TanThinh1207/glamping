@@ -12,15 +12,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Entity(name = "report")
 public class Report {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column(name = "id_camp_site")
-    private int id_camp_site;
+    private int campSiteId;
 
     @Column(name = "id_user")
-    private int id_user;
+    private int userId;
 
     @Column(name = "status")
     private String status;

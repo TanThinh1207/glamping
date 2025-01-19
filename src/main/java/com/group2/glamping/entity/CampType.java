@@ -11,7 +11,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity(name = "camp_type")
-public class Camp_Type {
+public class CampType {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -35,7 +36,7 @@ public class Camp_Type {
     private LocalDateTime updatedTime;
 
     @Column(name = "id_camp_site")
-    private int id_camp_site;
+    private int campSiteId;
 
     @Column(name = "quantity")
     private int quantity;
