@@ -41,5 +41,5 @@ public class Booking {
     private List<BookingDetailService> bookingDetailServiceList;
 
     @OneToMany(mappedBy = "booking")
-    private Payment payments;
+    private List<Payment> payments;
 }
