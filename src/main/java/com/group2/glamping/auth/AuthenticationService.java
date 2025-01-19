@@ -3,14 +3,13 @@ package com.group2.glamping.auth;
 
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
-import com.group2.glamping.model.entity.User;
 import com.group2.glamping.model.dto.requests.AuthenticationRequest;
 import com.group2.glamping.model.dto.requests.RegisterRequest;
 import com.group2.glamping.model.dto.response.AuthenticationResponse;
+import com.group2.glamping.model.entity.User;
 import com.group2.glamping.model.enums.Role;
 import com.group2.glamping.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,7 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private final AuthenticationManager authenticationManager;
+    //private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterRequest request) throws AppException {
 
