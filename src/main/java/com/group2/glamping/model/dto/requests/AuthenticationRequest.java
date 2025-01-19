@@ -1,17 +1,16 @@
-package com.group2.glamping.model.entity.dto.requests;
-
+package com.group2.glamping.model.dto.requests;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Data
 @Builder
-public class LoginDTO {
+@AllArgsConstructor
+@NoArgsConstructor
+public class AuthenticationRequest {
 
     private String email;
-    private String password;
+    String password;
 }

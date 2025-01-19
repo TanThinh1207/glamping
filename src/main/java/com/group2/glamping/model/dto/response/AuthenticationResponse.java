@@ -1,4 +1,4 @@
-package com.group2.glamping.model.entity.dto.response;
+package com.group2.glamping.model.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

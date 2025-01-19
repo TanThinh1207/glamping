@@ -1,4 +1,4 @@
-package com.group2.glamping.model.entity.id;
+package com.group2.glamping.model.id;
 
 
 import jakarta.persistence.Column;

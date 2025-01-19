@@ -1,8 +1,8 @@
 package com.group2.glamping.auth;
 
-import com.group2.glamping.model.entity.dto.requests.AuthenticationRequest;
-import com.group2.glamping.model.entity.dto.requests.RegisterRequest;
-import com.group2.glamping.model.entity.dto.response.AuthenticationResponse;
+import com.group2.glamping.model.dto.requests.AuthenticationRequest;
+import com.group2.glamping.model.dto.requests.RegisterRequest;
+import com.group2.glamping.model.dto.response.AuthenticationResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

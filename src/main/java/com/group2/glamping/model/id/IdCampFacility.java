@@ -1,4 +1,4 @@
-package com.group2.glamping.model.entity.id;
+package com.group2.glamping.model.id;
 
 
 import jakarta.persistence.Column;
@@ -15,11 +15,11 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class IdBookingDetailService implements Serializable {
+public class IdCampFacility implements Serializable {
 
-    @Column(name = "id_booking_detail")
-    private int bookingDetailId;
+    @Column(name = "id_camp")
+    private int campId;
 
-    @Column(name = "id_service")
-    private int serviceId;
+    @Column(name = "id_facility")
+    private int facilityId;
 }
