@@ -5,14 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "camp")
-public class Camp {
+@Entity
+@Table(name = "facility")
+public class Facility {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -23,27 +23,9 @@ public class Camp {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdTime;
-
     @Column(name = "status")
     private boolean status;
 
-    @Column(name = "capacity")
-    private int capacity;
-
-    @Column(name = "price")
-    private double price;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedTime;
-
-    @Column(name = "view")
-    private String view;
-
-    @Column(name = "id_camp_type")
-    private int id_camp_type;
-
-    @OneToMany(mappedBy = "camp")
+    @OneToMany(mappedBy = "facility")
     private List<CampFacility> campFacilities;
 }
