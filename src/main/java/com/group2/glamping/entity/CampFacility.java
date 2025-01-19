@@ -21,4 +21,7 @@ public class CampFacility {
     @MapsId("facilityId")
     @JoinColumn(name = "id_facility", insertable = false, updatable = false)
     private Facility facility;
+
+    @Column(name = "status")
+    private boolean status;
 }

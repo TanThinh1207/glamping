@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -18,7 +19,7 @@ public class Booking_Detail {
     private int id;
 
     @Column(name = "id_booking")
-    private int bookingId;
+    private int id_booking;
 
     @Column(name = "id_camp")
     private int id_camp;
@@ -43,4 +44,7 @@ public class Booking_Detail {
 
     @Column(name = "add_on")
     private double addOn;
+
+    @OneToMany(mappedBy = "booking_detail")
+    private List<Booking_Detail_Order> booking_Detail_Orders;
 }

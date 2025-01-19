@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "booking_detail_service")
-public class Booking_Detail_Service {
+@Entity(name = "order")
+public class Booking_Detail_Order {
 
     @EmbeddedId
-    private int id_Booking_Detail_Service;
+    private int id_Booking_Detail_Order;
 
     @ManyToOne
     @MapsId("bookingDetailId")
@@ -20,13 +20,13 @@ public class Booking_Detail_Service {
     private Booking_Detail bookingDetail;
 
     @ManyToOne
-    @MapsId("serviceId")
-    @JoinColumn(name = "id_service", insertable = false, updatable = false)
-    private Service Service;
-
-    @Column(name = "name")
-    private String name;
+    @MapsId("orderId")
+    @JoinColumn(name = "id_order", insertable = false, updatable = false)
+    private Order order;
 
     @Column(name = "quantity")
-    private double quantity;
+    private int quantity;
+
+    @Column(name = "total_amount")
+    private double totalAmount;
 }
