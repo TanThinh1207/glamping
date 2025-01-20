@@ -62,6 +62,7 @@ public class AuthenticationService {
         var jwtToken = jwtService.generateToken(user);
 
         return AuthenticationResponse.builder()
+                .user(user)
                 .message("いいですね")
                 .accessToken(jwtToken)
                 .build();
