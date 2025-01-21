@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -35,9 +36,19 @@ public class CampType {
     @Column(name = "updated_at")
     private LocalDateTime updatedTime;
 
-    @Column(name = "id_camp_site")
-    private int campSiteId;
+    @ManyToOne
+    @JoinColumn(name = "id_camp_site")
+    private CampSite campSite;
 
     @Column(name = "quantity")
     private int quantity;
+
+    @Column(name = "status")
+    private String status;
+
+    @OneToMany(mappedBy = "camp_type")
+    private List<CampTypeFacility> campTypeFacilityList;
+
+    @OneToMany(mappedBy = "camp_type")
+    private List<BookingDetail> bookingDetailList;
 }
