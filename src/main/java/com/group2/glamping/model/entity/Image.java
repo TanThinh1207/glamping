@@ -15,9 +15,6 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "id_camp_site")
-    private int campSiteId;
-
     @Column(name = "path")
     private String path;
 

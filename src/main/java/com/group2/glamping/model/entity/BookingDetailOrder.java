@@ -1,6 +1,6 @@
 package com.group2.glamping.model.entity;
 
-import com.group2.glamping.model.entity.id.IdBookingDetailOrder;
+import com.group2.glamping.model.id.IdBookingDetailOrder;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "order")
+@Entity(name = "booking_detail_order")
 public class BookingDetailOrder {
 
     @EmbeddedId

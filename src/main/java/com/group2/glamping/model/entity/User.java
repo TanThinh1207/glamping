@@ -1,14 +1,15 @@
-package com.group2.glamping.user;
+package com.group2.glamping.model.entity;
 
-import com.group2.glamping.model.entity.Booking;
-import com.group2.glamping.model.entity.CampSite;
-import com.group2.glamping.model.entity.Report;
+import com.group2.glamping.model.enums.Role;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.management.relation.Role;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -22,8 +23,8 @@ import java.util.List;
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue
-    @Column(name="id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
 
     @Column(name = "email")
@@ -49,7 +50,7 @@ public class User implements UserDetails {
     private Role role;
 
     @Column(name = "created_at")
-    private LocalDateTime createdTime;
+    private LocalDateTime created_at;
 
     @Column(name = "status")
     private boolean status;
@@ -65,12 +66,12 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override
     public String getUsername() {
-        return "";
+        return email;
     }
 
     @Override

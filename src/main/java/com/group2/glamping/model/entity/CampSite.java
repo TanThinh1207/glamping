@@ -1,6 +1,5 @@
 package com.group2.glamping.model.entity;
 
-import com.group2.glamping.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -44,13 +43,13 @@ public class CampSite {
     @JoinColumn(name = "id_user")
     private User user;
 
-    @OneToMany(mappedBy = "camp_site")
+    @OneToMany(mappedBy = "campSite")
     private List<Booking> bookingList;
 
-    @OneToMany(mappedBy = "camp_site")
+    @OneToMany(mappedBy = "campSite")
     private List<Image> imageList;
 
-    @OneToMany(mappedBy = "camp_site")
+    @OneToMany(mappedBy = "campSite")
     private List<Report> reportList;
 
     @OneToMany(mappedBy = "camp_site")
