@@ -27,6 +27,9 @@ public class Service {
     @Column(name = "price")
     private double price;
 
+    @Column(name = "image")
+    private String imageUrl;
+
     @Column(name = "status")
     private boolean status;
 
@@ -34,5 +37,5 @@ public class Service {
     private LocalDateTime updatedTime;
 
     @OneToMany(mappedBy = "service",cascade = CascadeType.ALL)
-    private List<BookingDetailService> bookingDetailServices;
+    private List<BookingService> bookingServiceList;
 }

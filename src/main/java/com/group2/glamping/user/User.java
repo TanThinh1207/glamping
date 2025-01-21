@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.management.relation.Role;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -46,6 +47,12 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private Role role;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdTime;
+
+    @Column(name = "status")
+    private boolean status;
 
     @OneToMany(mappedBy = "user")
     private List<Booking> bookingList;

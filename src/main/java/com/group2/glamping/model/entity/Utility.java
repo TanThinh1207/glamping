@@ -18,6 +18,9 @@ public class Utility {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "image")
+    private String imageUrl;
+
     @Column(name = "status")
     private boolean status;
 }

@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -37,9 +36,12 @@ public class Booking {
     @Column(name = "total_amount")
     private double totalAmount;
 
-    @OneToMany(mappedBy = "booking",cascade = CascadeType.ALL)
-    private List<BookingDetailService> bookingDetailServiceList;
+    @OneToMany(mappedBy = "booking")
+    private List<BookingService> bookingServiceList;
 
     @OneToMany(mappedBy = "booking")
-    private Payment payments;
+    private List<Payment> paymentList;
+
+    @OneToMany(mappedBy = "booking")
+    private List<BookingDetail> bookingDetailList;
 }
