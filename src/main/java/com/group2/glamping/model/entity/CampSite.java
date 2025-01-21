@@ -52,4 +52,6 @@ public class CampSite {
     @OneToMany(mappedBy = "campSite")
     private List<Report> reportList;
 
+    @OneToMany(mappedBy = "camp_site")
+    private List<CampType> campTypeList;
 }

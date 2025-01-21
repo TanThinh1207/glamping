@@ -18,11 +18,13 @@ public class BookingDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "id_booking")
-    private int bookingId;
+    @ManyToOne
+    @JoinColumn(name = "id_booking")
+    private Booking booking;
 
-    @Column(name = "id_camp")
-    private int campId;
+    @ManyToOne
+    @JoinColumn(name = "id_camp_type")
+    private CampType campType;
 
     @Column(name = "check_in_at")
     private LocalDateTime checkInTime;
@@ -45,9 +47,9 @@ public class BookingDetail {
     @Column(name = "add_on")
     private double addOn;
 
-    @OneToMany(mappedBy = "bookingDetail")
-    private List<BookingDetailOrder> bookingDetailOrders;
+    @Column(name = "status")
+    private String status;
 
-    @OneToMany(mappedBy = "bookingDetail",cascade = CascadeType.ALL)
-    private List<BookingDetailService> bookingDetailServiceList;
+    @OneToMany(mappedBy = "booking_detail")
+    private List<BookingDetailOrder> bookingDetailOrders;
 }

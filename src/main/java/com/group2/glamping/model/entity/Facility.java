@@ -24,9 +24,12 @@ public class Facility {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "image")
+    private String imageUrl;
+
     @Column(name = "status")
     private boolean status;
 
     @OneToMany(mappedBy = "facility")
-    private List<CampFacility> campFacilities;
+    private List<CampTypeFacility> campTypeFacilityList;
 }

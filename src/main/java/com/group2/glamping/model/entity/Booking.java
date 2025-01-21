@@ -1,5 +1,6 @@
 package com.group2.glamping.model.entity;
 
+import com.group2.glamping.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,5 +37,11 @@ public class Booking {
     private double totalAmount;
 
     @OneToMany(mappedBy = "booking")
-    private List<Payment> payments;
+    private List<BookingService> bookingServiceList;
+
+    @OneToMany(mappedBy = "booking")
+    private List<Payment> paymentList;
+
+    @OneToMany(mappedBy = "booking")
+    private List<BookingDetail> bookingDetailList;
 }
