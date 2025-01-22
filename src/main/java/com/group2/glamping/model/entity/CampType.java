@@ -44,7 +44,7 @@ public class CampType {
     private int quantity;
 
     @Column(name = "status")
-    private String status;
+    private boolean status;
 
     @OneToMany(mappedBy = "campType")
     private List<CampTypeFacility> campTypeFacilityList;

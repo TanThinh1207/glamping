@@ -1,7 +1,9 @@
 package com.group2.glamping.model.entity;
 
+import com.group2.glamping.model.enums.CampSiteStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity(name = "camp_site")
+@Builder
 public class CampSite {
 
     @Id
@@ -37,7 +40,8 @@ public class CampSite {
     private int quantity;
 
     @Column(name = "status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private CampSiteStatus status;
 
     @ManyToOne
     @JoinColumn(name = "id_user")
@@ -49,9 +53,11 @@ public class CampSite {
     @OneToMany(mappedBy = "campSite")
     private List<Image> imageList;
 
+
     @OneToMany(mappedBy = "campSite")
     private List<Report> reportList;
 
-    @OneToMany(mappedBy = "campSite")
+    @OneToMany(mappedBy = "campSite", cascade = CascadeType.ALL)
     private List<CampType> campTypeList;
+
 }
