@@ -1,5 +1,6 @@
 package com.group2.glamping.model.entity;
 
+import com.group2.glamping.model.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,7 +29,8 @@ public class Payment {
     private double totalAmount;
 
     @Column(name = "status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status;
 
     @Column(name = "id_transaction")
     private String transactionId;
