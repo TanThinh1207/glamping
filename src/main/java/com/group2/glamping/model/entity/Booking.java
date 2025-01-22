@@ -1,5 +1,6 @@
 package com.group2.glamping.model.entity;
 
+import com.group2.glamping.model.enums.BookingStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,7 +31,8 @@ public class Booking {
     private LocalDateTime createdTime;
 
     @Column(name = "status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private BookingStatus status;
 
     @Column(name = "total_amount")
     private double totalAmount;

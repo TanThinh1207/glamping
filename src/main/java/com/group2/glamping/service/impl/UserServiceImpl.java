@@ -1,11 +1,11 @@
 package com.group2.glamping.service.impl;
 
-import com.group2.glamping.service.interfaces.IUserService;
+import com.group2.glamping.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
-public class UserService implements IUserService {
+public class UserServiceImpl implements UserService {
 
 }

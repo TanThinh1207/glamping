@@ -23,7 +23,7 @@ public class SecurityConfig {
 
     private final String[] WHITE_LIST = {
             "/api-docs/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**",
-            "/api/v1/auth/**"
+            "/api/v1/auth/**", "/api/campsites/**"
 
 
     };
@@ -36,7 +36,7 @@ public class SecurityConfig {
                         sessionManagementCustomizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
                             req.requestMatchers(WHITE_LIST).permitAll();
-                            req.requestMatchers("/api/demo/**").hasRole("USER");
+                            req.requestMatchers("/api/demo/**", "/api/campsites/**").hasRole("USER");
                         }
                 )
 
