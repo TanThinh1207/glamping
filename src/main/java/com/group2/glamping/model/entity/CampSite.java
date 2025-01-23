@@ -57,6 +57,12 @@ public class CampSite {
     @OneToMany(mappedBy = "campSite")
     private List<Report> reportList;
 
+
+    @OneToMany(mappedBy = "campSite")
+    private List<CampType> campTypeList;
+
+    @OneToMany(mappedBy = "campSite")
+    private List<CampSiteUtility> campSiteUtilityList;
     @OneToMany(mappedBy = "campSite", cascade = CascadeType.ALL)
     private List<CampType> campTypeList;
 

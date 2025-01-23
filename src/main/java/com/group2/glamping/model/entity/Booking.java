@@ -1,5 +1,6 @@
 package com.group2.glamping.model.entity;
 
+import com.group2.glamping.model.entity.User;
 import com.group2.glamping.model.enums.BookingStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
