@@ -1,6 +1,6 @@
 package com.group2.glamping.model.entity;
 
-import com.group2.glamping.model.id.IdBookingDetailOrder;
+import com.group2.glamping.model.entity.id.IdBookingDetailOrder;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

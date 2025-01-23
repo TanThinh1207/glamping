@@ -1,7 +1,6 @@
-package com.group2.glamping.model.id;
+package com.group2.glamping.model.entity.id;
 
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,9 +16,7 @@ import java.io.Serializable;
 @Builder
 public class IdBookingDetailOrder implements Serializable {
 
-    @Column(name = "id_booking_detail")
     private int bookingDetailId;
 
-    @Column(name = "id_order")
     private int orderId;
 }

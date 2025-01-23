@@ -1,5 +1,6 @@
 package com.group2.glamping.model.entity;
 
+import com.group2.glamping.model.enums.BookingDetailStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -48,7 +49,8 @@ public class BookingDetail {
     private double addOn;
 
     @Column(name = "status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private BookingDetailStatus status;
 
     @OneToMany(mappedBy = "bookingDetail")
     private List<BookingDetailOrder> bookingDetailOrders;
