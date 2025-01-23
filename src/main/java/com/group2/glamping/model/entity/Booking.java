@@ -1,6 +1,6 @@
 package com.group2.glamping.model.entity;
 
-import com.group2.glamping.user.User;
+import com.group2.glamping.model.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

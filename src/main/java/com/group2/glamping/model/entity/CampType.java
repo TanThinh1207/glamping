@@ -46,9 +46,9 @@ public class CampType {
     @Column(name = "status")
     private String status;
 
-    @OneToMany(mappedBy = "camp_type")
+    @OneToMany(mappedBy = "campType")
     private List<CampTypeFacility> campTypeFacilityList;
 
-    @OneToMany(mappedBy = "camp_type")
+    @OneToMany(mappedBy = "campType")
     private List<BookingDetail> bookingDetailList;
 }

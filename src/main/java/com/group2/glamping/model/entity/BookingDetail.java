@@ -50,6 +50,6 @@ public class BookingDetail {
     @Column(name = "status")
     private String status;
 
-    @OneToMany(mappedBy = "booking_detail")
+    @OneToMany(mappedBy = "bookingDetail")
     private List<BookingDetailOrder> bookingDetailOrders;
 }

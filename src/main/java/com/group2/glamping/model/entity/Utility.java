@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,4 +25,7 @@ public class Utility {
 
     @Column(name = "status")
     private boolean status;
+
+    @OneToMany(mappedBy = "utility")
+    private List<CampSiteUtility> campSiteUtilityList;
 }
