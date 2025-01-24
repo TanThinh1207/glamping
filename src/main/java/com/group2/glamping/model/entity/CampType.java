@@ -51,4 +51,7 @@ public class CampType {
 
     @OneToMany(mappedBy = "campType")
     private List<BookingDetail> bookingDetailList;
+
+    @OneToMany(mappedBy = "campType")
+    private List<Camp> campList;
 }
