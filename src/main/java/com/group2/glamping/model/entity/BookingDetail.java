@@ -27,6 +27,10 @@ public class BookingDetail {
     @JoinColumn(name = "id_camp_type")
     private CampType campType;
 
+    @ManyToOne
+    @JoinColumn(name = "id_camp")
+    private Camp camp;
+
     @Column(name = "check_in_at")
     private LocalDateTime checkInTime;
 

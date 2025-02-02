@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -34,4 +35,7 @@ public class Camp {
     @ManyToOne
     @JoinColumn(name = "id_camp_type")
     private CampType campType;
+
+    @OneToMany(mappedBy = "camp")
+    private List<BookingDetail> bookingDetailList;
 }
