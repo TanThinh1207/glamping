@@ -3,6 +3,7 @@ package com.group2.glamping.model.entity;
 import com.group2.glamping.model.enums.BookingDetailStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity(name = "booking_detail")
+@Builder
 public class BookingDetail {
 
     @Id
