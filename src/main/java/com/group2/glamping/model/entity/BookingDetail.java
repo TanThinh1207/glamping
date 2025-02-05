@@ -13,7 +13,8 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "booking_detail")
+@Entity
+@Table(name = "booking_detail")
 @Builder
 public class BookingDetail {
 

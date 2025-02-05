@@ -62,7 +62,7 @@ public class CampSite {
     private List<CampSiteUtility> campSiteUtilityList;
 
     @OneToMany(mappedBy = "campSite", cascade = CascadeType.ALL)
-    private List<CampType> campTypeList;
+    private List<CampType> campTypes;
 
     @OneToMany(mappedBy = "campSite")
     private List<CampSitePlaceType> campSitePlaceTypes;
