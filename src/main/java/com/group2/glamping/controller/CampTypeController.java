@@ -17,7 +17,7 @@ import java.util.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/camps")
+@RequestMapping("/api/camp_types")
 public class CampTypeController {
 
     private final CampTypeServiceImpl campTypeService;
