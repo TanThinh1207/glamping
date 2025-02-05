@@ -13,9 +13,9 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "booking_detail")
-@Builder
 public class BookingDetail {
 
     @Id

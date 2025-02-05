@@ -1,19 +1,17 @@
 package com.group2.glamping.service.impl;
 
 import com.group2.glamping.model.dto.requests.CampTypeCreateRequest;
-import com.group2.glamping.model.dto.response.CampTypeRemainingRespone;
+import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
+import com.group2.glamping.model.dto.response.BaseResponse;
+import com.group2.glamping.model.dto.response.CampTypeRemainingResponse;
 import com.group2.glamping.model.dto.response.CampTypeResponse;
 import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.model.entity.CampType;
-import com.group2.glamping.model.enums.CampSiteStatus;
-import com.group2.glamping.repository.BookingRepository;
-import com.group2.glamping.repository.CampSiteRepository;
 import com.group2.glamping.repository.CampTypeRepository;
-import com.group2.glamping.repository.UserRepository;
+import com.group2.glamping.repository.CampSiteRepository;
 import com.group2.glamping.service.interfaces.ICampTypeService;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,27 +19,18 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Service
 @RequiredArgsConstructor
 @Transactional
-@Data
-@Service
 public class CampTypeServiceImpl implements ICampTypeService {
-    @Autowired
+
     private final CampTypeRepository campTypeRepository;
-
-    @Autowired
-    private final BookingRepository bookingRepository;
-
-    @Autowired
-    private final UserRepository userService;
-
-    @Autowired
     private final CampSiteRepository campSiteRepository;
 
     @Override
     public Long findAvailableSlots(Integer idCampType, LocalDateTime checkInDate, LocalDateTime checkOutDate) {
         List<Object[]> results = campTypeRepository.getRemainingCampTypes(idCampType, checkInDate, checkOutDate);
-        List<CampTypeRemainingRespone> campTypeRemainingRespones = new ArrayList<>();
+        List<CampTypeRemainingResponse> campTypeRemainingResponses = new ArrayList<>();
 
         for (Object[] result : results) {
             Integer campTypeId = (Integer) result[0];
@@ -49,23 +38,39 @@ public class CampTypeServiceImpl implements ICampTypeService {
             Integer capacity = (Integer) result[2];
             Long remainingQuantity = (Long) result[3];
 
-            CampTypeRemainingRespone response = new CampTypeRemainingRespone();
+
+            CampTypeRemainingResponse response = new CampTypeRemainingResponse();
             response.setCampTypeId(campTypeId);
             response.setType(type);
             response.setCapacity(capacity);
             response.setRemainingQuantity(remainingQuantity);
-            campTypeRemainingRespones.add(response);
+            campTypeRemainingResponses.add(response);
         }
-        return campTypeRemainingRespones.stream()
-                .mapToLong(CampTypeRemainingRespone::getRemainingQuantity)
+
+        return campTypeRemainingResponses.stream()
+                .mapToLong(CampTypeRemainingResponse::getRemainingQuantity)
                 .sum();
     }
 
+    //CREATE
     @Override
-    public Optional<CampTypeResponse> saveCampType(CampTypeCreateRequest request) {
+    public BaseResponse saveCampType(CampTypeCreateRequest request) {
+        BaseResponse response = new BaseResponse();
+
         if (request.getQuantity() <= 0) {
-            throw new IllegalArgumentException("Quantity must be greater than 0");
+            response.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            response.setMessage("Quantity must be greater than 0");
+            return response;
         }
+
+        Optional<CampSite> campSiteOpt = campSiteRepository.findById(request.getCampSiteId());
+        if (campSiteOpt.isEmpty()) {
+            response.setStatusCode(HttpStatus.NOT_FOUND.value());
+            response.setMessage("CampSite not found");
+            return response;
+        }
+      
+      
         CampType campType = CampType.builder()
                 .type(request.getType())
                 .capacity(request.getCapacity())
@@ -73,36 +78,111 @@ public class CampTypeServiceImpl implements ICampTypeService {
                 .weekendRate(request.getWeekendRate())
                 .holidayRate(request.getHolidayRate())
                 .quantity(request.getQuantity())
-                .campSite(campSiteRepository.findById(request.getCampSiteId()).orElse(null))
+                .campSite(campSiteOpt.get())
                 .status(true)
+                .updatedTime(LocalDateTime.now())
                 .build();
+
+        campTypeRepository.save(campType);
+
+        CampTypeResponse campTypeResponse = CampTypeResponse.builder()
+                .id(campType.getId())
+                .type(campType.getType())
+                .capacity(campType.getCapacity())
+                .price(campType.getPrice())
+                .weekendRate(campType.getWeekendRate())
+                .holidayRate(campType.getHolidayRate())
+                .quantity(campType.getQuantity())
+                .status(campType.isStatus())
+                .build();
+
+        response.setStatusCode(HttpStatus.OK.value());
+        response.setMessage("CampType created successfully");
+        response.setData(campTypeResponse);
+
+        return response;
+    }
+
+    @Override
+    public BaseResponse updateCampType(int campTypeId, CampTypeUpdateRequest request) {
+        BaseResponse response = new BaseResponse();
+
+        Optional<CampType> campTypeOpt = campTypeRepository.findById(campTypeId);
+        if (campTypeOpt.isEmpty()) {
+            response.setStatusCode(HttpStatus.NOT_FOUND.value());
+            response.setMessage("CampType not found");
+            return response;
+        }
+
+        CampType campType = campTypeOpt.get();
+
+        if (request.getType() != null) campType.setType(request.getType());
+        if (request.getCapacity() > 0) campType.setCapacity(request.getCapacity());
+        if (request.getPrice() > 0) campType.setPrice(request.getPrice());
+        if (request.getWeekendRate() > 0) campType.setWeekendRate(request.getWeekendRate());
+        if (request.getHolidayRate() > 0) campType.setHolidayRate(request.getHolidayRate());
+        if (request.getQuantity() >= 0) campType.setQuantity(request.getQuantity());
+        campType.setStatus(request.isStatus());
+
         campType.setUpdatedTime(LocalDateTime.now());
         campTypeRepository.save(campType);
 
-        CampTypeResponse response = new CampTypeResponse();
-        response.setId(campType.getId());
-        response.setType(campType.getType());
-        response.setCapacity(campType.getCapacity());
-        response.setPrice(campType.getPrice());
-        response.setWeekendRate(campType.getWeekendRate());
-        response.setHolidayRate(campType.getHolidayRate());
-        response.setQuantity(campType.getQuantity());
-        response.setStatus(campType.isStatus());
+        CampTypeResponse campTypeResponse = CampTypeResponse.builder()
+                .id(campType.getId())
+                .type(campType.getType())
+                .capacity(campType.getCapacity())
+                .price(campType.getPrice())
+                .weekendRate(campType.getWeekendRate())
+                .holidayRate(campType.getHolidayRate())
+                .quantity(campType.getQuantity())
+                .status(campType.isStatus())
+                .build();
 
-        return Optional.of(response);
+        response.setStatusCode(HttpStatus.OK.value());
+        response.setMessage("CampType updated successfully");
+        response.setData(campTypeResponse);
+
+        return response;
     }
 
     @Override
-    public List<CampType> findByCampSiteId(int campSiteId) {
-        return campTypeRepository.findByCampSiteId(campSiteId);
+    public BaseResponse findByCampSiteId(int campSiteId) {
+        BaseResponse response = new BaseResponse();
+
+        List<CampType> campTypeList = campTypeRepository.findByCampSiteId(campSiteId);
+
+        if (campTypeList.isEmpty()) {
+            response.setStatusCode(HttpStatus.NOT_FOUND.value());
+            response.setMessage("No CampTypes found for this CampSite");
+            response.setData(Collections.emptyList());
+            return response;
+        }
+
+        List<CampTypeResponse> campTypeResponses = campTypeList.stream().map(campType ->
+                CampTypeResponse.builder()
+                        .id(campType.getId())
+                        .type(campType.getType())
+                        .capacity(campType.getCapacity())
+                        .price(campType.getPrice())
+                        .weekendRate(campType.getWeekendRate())
+                        .holidayRate(campType.getHolidayRate())
+                        .quantity(campType.getQuantity())
+                        .status(campType.isStatus())
+                        .build()
+        ).toList();
+
+        response.setStatusCode(HttpStatus.OK.value());
+        response.setMessage("Retrieved CampTypes successfully");
+        response.setData(campTypeResponses);
+        return response;
     }
 
 
-    //DELETE
+
     @Override
-    public Map<String, Object> softDeleteCampType(int campTypeId) {
+    public BaseResponse softDeleteCampType(int campTypeId) {
         Optional<CampType> campTypeOpt = campTypeRepository.findById(campTypeId);
-        Map<String, Object> response = new HashMap<>();
+        BaseResponse response = new BaseResponse();
 
         if (campTypeOpt.isPresent()) {
             CampType campType = campTypeOpt.get();
@@ -119,15 +199,14 @@ public class CampTypeServiceImpl implements ICampTypeService {
             campTypeResponse.setQuantity(campType.getQuantity());
             campTypeResponse.setStatus(campType.isStatus());
 
-            response.put("statusCode", 200);
-            response.put("mess", "Camp Type status updated to NOT_AVAILABLE");
-            response.put("data", campTypeResponse);
+            response.setStatusCode(200);
+            response.setMessage("Camp Type status updated to NOT_AVAILABLE");
+            response.setData(campTypeResponse);
         } else {
-            response.put("statusCode", 404);
-            response.put("mess", "Camp Type not found");
-            response.put("data", null);
+            response.setStatusCode(404);
+            response.setMessage("Camp Type not found");
+            response.setData(null);
         }
         return response;
     }
 }
-

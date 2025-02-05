@@ -24,8 +24,10 @@ public class SecurityConfig {
 
     private final String[] WHITE_LIST = {
             "/api-docs/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/api/docs/**",
+            "/api/camp_types/**",
             /*    For testing, delete later */
-            "/api/v1/auth/**", "/api/campsites/**", "/api/bookings/**", "/api/camps/**"
+            "/api/v1/auth/**", "/api/campsites/**", "/api/bookings/**"
+
 
 
     };
@@ -42,7 +44,6 @@ public class SecurityConfig {
                             req.requestMatchers("/api/demo/**", "/api/campsites/**").hasRole("USER");
                         }
                 )
-
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
