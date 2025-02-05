@@ -36,9 +36,6 @@ public class CampSite {
     @Column(name = "created_at")
     private LocalDateTime createdTime;
 
-    @Column(name = "quantity")
-    private int quantity;
-
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private CampSiteStatus status;
@@ -64,6 +61,6 @@ public class CampSite {
     @OneToMany(mappedBy = "campSite")
     private List<CampSiteUtility> campSiteUtilityList;
     @OneToMany(mappedBy = "campSite", cascade = CascadeType.ALL)
-    private List<CampType> campTypeList;
+    private List<CampType> campTypes;
 
 }
