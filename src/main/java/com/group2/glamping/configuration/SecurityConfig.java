@@ -5,6 +5,7 @@ import com.group2.glamping.auth.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -23,8 +24,9 @@ public class SecurityConfig {
 
     private final String[] WHITE_LIST = {
             "/api-docs/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/api/docs/**",
+            "/api/camps/**",
             /*    For testing, delete later */
-            "/api/v1/auth/**", "/api/campsites/**", "/api/bookings/**"
+            "/api/v1/auth/**", "/api/campsites/**", "/api/bookings/**",
 
 
     };
@@ -37,6 +39,7 @@ public class SecurityConfig {
                         sessionManagementCustomizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
                             req.requestMatchers(WHITE_LIST).permitAll();
+                            req.requestMatchers(HttpMethod.POST, "/api/camps/**").permitAll();
                             req.requestMatchers("/api/demo/**", "/api/campsites/**").hasRole("USER");
                         }
                 )

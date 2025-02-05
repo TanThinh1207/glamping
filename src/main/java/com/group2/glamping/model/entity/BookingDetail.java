@@ -13,8 +13,9 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "booking_detail")
 @Builder
+@Entity
+@Table(name = "booking_detail")
 public class BookingDetail {
 
     @Id

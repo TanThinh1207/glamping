@@ -2,6 +2,7 @@ package com.group2.glamping.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +12,9 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "camp_type")
+@Builder
+@Entity
+@Table(name = "camp_type")
 public class CampType {
 
     @Id
