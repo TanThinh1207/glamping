@@ -178,6 +178,13 @@ CREATE TABLE camp_site_place_type(
 	PRIMARY KEY (`id_camp_site`, `id_place_type`)
 );
 
+CREATE TABLE camp_site_service(
+	`id_camp_site` int,
+	`id_service` int,
+	
+	PRIMARY KEY (`id_camp_site`, `id_service`)
+);
+
 
 
 ALTER TABLE `booking`
@@ -242,6 +249,12 @@ ALTER TABLE `camp_site_place_type`
 
 ALTER TABLE `camp_site_place_type`
 	ADD FOREIGN KEY (`id_place_type`) REFERENCES `place_type` (`id`);
+
+ALTER TABLE `camp_site_service`
+	ADD FOREIGN KEY (`id_camp_site`) REFERENCES `camp_site` (`id`);
+
+ALTER TABLE `camp_site_service` 
+	ADD FOREIGN KEY (`id_service`) REFERENCES `service` (`id`);
 
 -- Insert Data into `user` Table
 INSERT INTO `user` (`id`, `email`, `password`, `first_name`, `last_name`, `phone_number`, `address`, `role`, `created_at`, `status`)
@@ -377,6 +390,23 @@ INSERT INTO `camp_site_utility` (`id_camp_site`, `id_utility`)
 VALUES
 (1, 1), (1, 2), (1, 3),  -- Mountain Base Camp
 (2, 1), (2, 2), (2, 3);  -- Lake Side Glamping
+
+INSERT INTO `service` (`name`, `description`, `price`, `image`, `status`, `updated_at`)
+VALUES
+    ('Kayak Rental', 'Rent a kayak for exploring the nearby river. Includes safety gear.', 25.00, 'kayak.jpg', TRUE, NOW()),
+    ('BBQ Setup', 'BBQ grill setup with charcoal, utensils, and seating for a great outdoor meal.', 30.00, 'bbq.jpg', TRUE, NOW()),
+    ('Guided Hiking Tour', 'Join our expert guides on a scenic hike through the mountains.', 50.00, 'hiking.jpg', TRUE, NOW()),
+    ('Fishing Gear Rental', 'Includes fishing rod, bait, and accessories for a great fishing experience.', 15.00, 'fishing.jpg', TRUE, NOW()),
+    ('Bonfire Setup', 'Cozy bonfire setup with firewood, seating, and marshmallows.', 20.00, 'bonfire.jpg', TRUE, NOW()),
+    ('Mountain Biking Rental', 'Rent a mountain bike to explore the rugged trails.', 35.00, 'bike.jpg', TRUE, NOW()),
+    ('Canoe Rental', 'Rent a canoe for a relaxing paddle on the lake.', 30.00, 'canoe.jpg', TRUE, NOW()),
+    ('Survival Training', 'Learn essential survival skills from our expert instructors.', 60.00, 'survival.jpg', TRUE, NOW()),
+    ('Photography Tour', 'A guided photography tour to capture the best nature shots.', 55.00, 'photo_tour.jpg', TRUE, NOW());
+
+INSERT INTO `camp_site_service` (`id_camp_site`, `id_service`)
+VALUES
+(1,1), (1,2), (1,3),
+(2,4), (2,5), (2,6);
 
 -- SELECT ct.id AS camp_type_id, c.id AS camp_id, c.name AS camp_name, ct.type AS camp_type, bd.id AS booking_detail_id
 -- FROM camp_type ct

@@ -11,8 +11,8 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "service")
-public class Service {
+@Entity(name = "selection")
+public class Selection {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,6 +36,9 @@ public class Service {
     @Column(name = "updated_at")
     private LocalDateTime updatedTime;
 
-    @OneToMany(mappedBy = "service",cascade = CascadeType.ALL)
-    private List<BookingService> bookingServiceList;
+    @OneToMany(mappedBy = "selection",cascade = CascadeType.ALL)
+    private List<BookingSelection> bookingSelectionList;
+
+    @OneToMany(mappedBy = "selection")
+    private List<CampSiteSelection> campSiteSelectionList;
 }

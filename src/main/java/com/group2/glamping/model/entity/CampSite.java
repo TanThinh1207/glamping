@@ -66,4 +66,7 @@ public class CampSite {
 
     @OneToMany(mappedBy = "campSite")
     private List<CampSitePlaceType> campSitePlaceTypes;
+
+    @OneToMany(mappedBy = "campSite")
+    private List<CampSiteSelection> campSiteSelections;
 }

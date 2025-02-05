@@ -8,11 +8,11 @@ import java.io.Serializable;
 
 @Embeddable
 @Data
-public class IdBookingService implements Serializable {
+public class IdBookingSelection implements Serializable {
 
     @Column(name = "id_booking")
     private int bookingId;
 
-    @Column(name = "id_service")
-    private int serviceId;
+    @Column(name = "id_selection")
+    private int selectionId;
 }

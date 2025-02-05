@@ -5,7 +5,7 @@ import com.group2.glamping.model.entity.Booking;
 
 import java.util.Optional;
 
-public interface BookingService {
+public interface BookingSelectionService {
 
     Optional<Booking> createBooking(BookingRequest booking);
 

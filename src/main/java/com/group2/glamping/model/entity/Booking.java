@@ -42,7 +42,7 @@ public class Booking {
     private double totalAmount;
 
     @OneToMany(mappedBy = "booking")
-    private List<BookingService> bookingServiceList;
+    private List<BookingSelection> bookingSelectionList;
 
     @OneToMany(mappedBy = "booking")
     private List<Payment> paymentList;
