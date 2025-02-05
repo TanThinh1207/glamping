@@ -1,6 +1,7 @@
 package com.group2.glamping.service.impl;
 
 import com.group2.glamping.model.dto.requests.CampTypeCreateRequest;
+import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.CampTypeRemainingResponse;
 import com.group2.glamping.model.dto.response.CampTypeResponse;
@@ -78,6 +79,43 @@ public class CampTypeServiceImpl implements ICampTypeService {
         response.setHolidayRate(campType.getHolidayRate());
         response.setQuantity(campType.getQuantity());
         response.setStatus(campType.isStatus());
+
+        return Optional.of(response);
+    }
+
+    @Override
+    public Optional<CampTypeResponse> updateCampType(int campTypeId, CampTypeUpdateRequest request) {
+        Optional<CampType> campTypeOpt = campTypeRepository.findById(campTypeId);
+
+        if (campTypeOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        CampType campType = campTypeOpt.get();
+
+        //Gán thông tin
+        campType.setType(request.getType());
+        campType.setCapacity(request.getCapacity());
+        campType.setPrice(request.getPrice());
+        campType.setWeekendRate(request.getWeekendRate());
+        campType.setHolidayRate(request.getHolidayRate());
+        campType.setQuantity(request.getQuantity());
+        campType.setStatus(request.isStatus());
+        campType.setUpdatedTime(LocalDateTime.now());
+
+        campTypeRepository.save(campType);
+
+        // Trả về DTO response
+        CampTypeResponse response = CampTypeResponse.builder()
+                .id(campType.getId())
+                .type(campType.getType())
+                .capacity(campType.getCapacity())
+                .price(campType.getPrice())
+                .weekendRate(campType.getWeekendRate())
+                .holidayRate(campType.getHolidayRate())
+                .quantity(campType.getQuantity())
+                .status(campType.isStatus())
+                .build();
 
         return Optional.of(response);
     }

@@ -1,6 +1,7 @@
 package com.group2.glamping.service.interfaces;
 
 import com.group2.glamping.model.dto.requests.CampTypeCreateRequest;
+import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.CampTypeResponse;
 import com.group2.glamping.model.entity.CampType;
@@ -15,4 +16,5 @@ public interface ICampTypeService {
     Optional<CampTypeResponse> saveCampType(CampTypeCreateRequest request);
     List<CampTypeResponse> findByCampSiteId(int campSiteId);
     BaseResponse softDeleteCampType(int campTypeId);
+    Optional<CampTypeResponse> updateCampType(int campTypeId, CampTypeUpdateRequest request);
 }

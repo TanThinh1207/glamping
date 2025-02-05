@@ -2,6 +2,7 @@ package com.group2.glamping.controller;
 
 import com.group2.glamping.model.dto.requests.CampSiteCreateRequest;
 import com.group2.glamping.model.dto.requests.CampTypeCreateRequest;
+import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.CampTypeResponse;
 import com.group2.glamping.model.entity.CampSite;
@@ -23,6 +24,17 @@ public class CampTypeController {
 
     private final CampTypeServiceImpl campTypeService;
 
+
+    @GetMapping("/availableQuantity")
+    public ResponseEntity<Long> getAvailableQuantity(
+            @RequestParam Integer campTypeId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime checkIn,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime checkOut) {
+        Long availableQuantity = campTypeService.findAvailableSlots(campTypeId, checkIn, checkOut);
+        return new ResponseEntity<>(availableQuantity, HttpStatus.OK);
+    }
+
+    //CREATE
     @PostMapping
     public ResponseEntity<BaseResponse> createCampType(@RequestBody CampTypeCreateRequest request) {
         Optional<CampTypeResponse> campType = campTypeService.saveCampType(request);
@@ -42,6 +54,29 @@ public class CampTypeController {
         }
     }
 
+    @PostMapping("/update/{campTypeId}")
+    public ResponseEntity<BaseResponse> updateCampType(
+            @PathVariable int campTypeId,
+            @RequestBody CampTypeUpdateRequest request) {
+
+        Optional<CampTypeResponse> updatedCampType = campTypeService.updateCampType(campTypeId, request);
+
+        BaseResponse response = new BaseResponse();
+
+        if (updatedCampType.isPresent()) {
+            response.setStatusCode(HttpStatus.OK.value());
+            response.setMessage("CampType updated successfully");
+            response.setData(updatedCampType.get());
+            return ResponseEntity.ok(response);
+        } else {
+            response.setStatusCode(HttpStatus.NOT_FOUND.value());
+            response.setMessage("CampType not found");
+            response.setData(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+    }
+
+    //RETRIEVE
     @GetMapping("/findCampType/{campSiteId}")
     public ResponseEntity<BaseResponse> getCampTypesByCampSite(@PathVariable int campSiteId) {
         List<CampTypeResponse> campTypes = campTypeService.findByCampSiteId(campSiteId);
@@ -60,15 +95,7 @@ public class CampTypeController {
         }
     }
 
-    @GetMapping("/availableQuantity")
-    public ResponseEntity<Long> getAvailableQuantity(
-            @RequestParam Integer campTypeId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime checkIn,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime checkOut) {
-        Long availableQuantity = campTypeService.findAvailableSlots(campTypeId, checkIn, checkOut);
-        return new ResponseEntity<>(availableQuantity, HttpStatus.OK);
-    }
-
+    //DELETE
     @DeleteMapping("/delete/{campTypeId}")
     public ResponseEntity<BaseResponse> deleteCampType(@PathVariable int campTypeId) {
         BaseResponse response = campTypeService.softDeleteCampType(campTypeId);
