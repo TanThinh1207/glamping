@@ -11,13 +11,13 @@ import java.time.LocalDateTime;
 
 @Repository
 public interface CampTypeRepository extends JpaRepository<CampType, Integer> {
-    @Query("""
+    @Query(value = """
                 SELECT (ct.quantity - COUNT(bd.id)) FROM CampType ct
                 LEFT JOIN BookingDetail bd ON bd.campType.id = ct.id
                 AND ((bd.checkInAt < :checkOutDate AND bd.checkOutAt > :checkInDate))
                 WHERE ct.id = :campTypeId
                 GROUP BY ct.id
-            """)
+            """, nativeQuery = true)
     Integer countAvailableCamps(
             @Param("campTypeId") Integer campTypeId,
             @Param("checkInDate") LocalDateTime checkInDate,
