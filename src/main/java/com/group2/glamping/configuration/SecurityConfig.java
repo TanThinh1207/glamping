@@ -39,11 +39,9 @@ public class SecurityConfig {
                         sessionManagementCustomizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
                             req.requestMatchers(WHITE_LIST).permitAll();
-                            req.requestMatchers(HttpMethod.POST, "/api/camps/**").permitAll();
                             req.requestMatchers("/api/demo/**", "/api/campsites/**").hasRole("USER");
                         }
                 )
-
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
