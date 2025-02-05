@@ -2,6 +2,7 @@ package com.group2.glamping.controller;
 
 import com.group2.glamping.model.dto.requests.CampSiteCreateRequest;
 import com.group2.glamping.model.dto.requests.CampSiteUpdateRequest;
+import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.CampSiteResponse;
 import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.model.enums.CampSiteStatus;
@@ -22,55 +23,53 @@ public class CampSiteController {
     private final CampSiteService campSiteService;
 
     @GetMapping
-    public ResponseEntity<List<CampSiteResponse>> getAllCampSites() {
+    public ResponseEntity<BaseResponse> getAllCampSites() {
         List<CampSiteResponse> campsites = campSiteService.getCampSites();
-        return ResponseEntity.ok(campsites);
+        return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Camp sites retrieved successfully", campsites));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CampSite> getCampSiteById(@PathVariable int id) {
+    public ResponseEntity<BaseResponse> getCampSiteById(@PathVariable int id) {
         Optional<CampSite> campsite = campSiteService.findCampSiteById(id);
-        return campsite.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return campsite.map(site -> ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Camp site found", site)))
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(new BaseResponse(HttpStatus.NOT_FOUND.value(), "Camp site not found", null)));
     }
 
     @PostMapping
-    public ResponseEntity<Void> createCampSite(@RequestBody CampSiteCreateRequest request) {
+    public ResponseEntity<BaseResponse> createCampSite(@RequestBody CampSiteCreateRequest request) {
         Optional<CampSite> campSite = campSiteService.saveCampSite(request);
-        if (campSite.isPresent()) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+        return campSite.map(site -> ResponseEntity.status(HttpStatus.CREATED)
+                .body(new BaseResponse(HttpStatus.CREATED.value(), "Camp site created successfully", site))).orElseGet(() -> ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new BaseResponse(HttpStatus.BAD_REQUEST.value(), "Failed to create camp site", null)));
     }
 
-
     @PutMapping("/{id}")
-    public ResponseEntity<CampSiteResponse> updateCampSite(@PathVariable int id, @RequestBody CampSiteUpdateRequest updatedCampSite) {
+    public ResponseEntity<BaseResponse> updateCampSite(@PathVariable int id, @RequestBody CampSiteUpdateRequest updatedCampSite) {
         Optional<CampSite> existingCampSite = campSiteService.findCampSiteById(id);
         if (existingCampSite.isPresent()) {
-            existingCampSite.get().setName(updatedCampSite.getName());
-            existingCampSite.get().setAddress(updatedCampSite.getAddress());
-            existingCampSite.get().setLatitude(updatedCampSite.getLatitude());
-            existingCampSite.get().setLongitude(updatedCampSite.getLongitude());
-            campSiteService.updateCampSite(existingCampSite.get());
+            CampSite campSite = existingCampSite.get();
+            campSite.setName(updatedCampSite.getName());
+            campSite.setAddress(updatedCampSite.getAddress());
+            campSite.setLatitude(updatedCampSite.getLatitude());
+            campSite.setLongitude(updatedCampSite.getLongitude());
+            campSiteService.updateCampSite(campSite);
 
+            Optional<CampSiteResponse> updatedResponse = campSiteService.getCampSiteBasicDetail(id);
+            return updatedResponse.map(response -> ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Camp site updated successfully", response)))
+                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(new BaseResponse(HttpStatus.NOT_FOUND.value(), "Camp site not found after update", null)));
         }
-        if (campSiteService.getCampSiteBasicDetail(id).isPresent()) {
-            return ResponseEntity.ok(campSiteService.getCampSiteBasicDetail(id).get());
-        }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new BaseResponse(HttpStatus.NOT_FOUND.value(), "Camp site not found", null));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCampSite(@PathVariable int id) {
+    public ResponseEntity<BaseResponse> deleteCampSite(@PathVariable int id) {
         Optional<CampSite> campsite = campSiteService.findCampSiteById(id);
         if (campsite.isPresent()) {
             CampSite campSite = campsite.get();
             campSite.setStatus(CampSiteStatus.Not_Available);
             campSiteService.updateCampSite(campSite);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Camp site deleted successfully", null));
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new BaseResponse(HttpStatus.NOT_FOUND.value(), "Camp site not found", null));
     }
 }
