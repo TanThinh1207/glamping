@@ -1,12 +1,8 @@
 package com.group2.glamping.controller;
 
-import com.group2.glamping.model.dto.requests.CampSiteCreateRequest;
 import com.group2.glamping.model.dto.requests.CampTypeCreateRequest;
 import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
-import com.group2.glamping.model.dto.response.CampTypeResponse;
-import com.group2.glamping.model.entity.CampSite;
-import com.group2.glamping.model.entity.CampType;
 import com.group2.glamping.service.impl.CampTypeServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -15,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -37,62 +32,25 @@ public class CampTypeController {
     //CREATE
     @PostMapping
     public ResponseEntity<BaseResponse> createCampType(@RequestBody CampTypeCreateRequest request) {
-        Optional<CampTypeResponse> campType = campTypeService.saveCampType(request);
-
-        BaseResponse response = new BaseResponse();
-
-        if (campType.isPresent()) {
-            response.setStatusCode(HttpStatus.OK.value());
-            response.setMessage("CampType created successfully");
-            response.setData(campType.get());
-            return ResponseEntity.ok(response);
-        } else {
-            response.setStatusCode(HttpStatus.BAD_REQUEST.value());
-            response.setMessage("Failed to create CampType");
-            response.setData(null);
-            return ResponseEntity.badRequest().body(response);
-        }
-    }
-
-    @PostMapping("/update/{campTypeId}")
-    public ResponseEntity<BaseResponse> updateCampType(
-            @PathVariable int campTypeId,
-            @RequestBody CampTypeUpdateRequest request) {
-
-        Optional<CampTypeResponse> updatedCampType = campTypeService.updateCampType(campTypeId, request);
-
-        BaseResponse response = new BaseResponse();
-
-        if (updatedCampType.isPresent()) {
-            response.setStatusCode(HttpStatus.OK.value());
-            response.setMessage("CampType updated successfully");
-            response.setData(updatedCampType.get());
-            return ResponseEntity.ok(response);
-        } else {
-            response.setStatusCode(HttpStatus.NOT_FOUND.value());
-            response.setMessage("CampType not found");
-            response.setData(null);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }
+        BaseResponse response = campTypeService.saveCampType(request);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     //RETRIEVE
     @GetMapping("/findCampType/{campSiteId}")
     public ResponseEntity<BaseResponse> getCampTypesByCampSite(@PathVariable int campSiteId) {
-        List<CampTypeResponse> campTypes = campTypeService.findByCampSiteId(campSiteId);
+        BaseResponse response = campTypeService.findByCampSiteId(campSiteId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
 
-        BaseResponse response = new BaseResponse();
-        if (!campTypes.isEmpty()) {
-            response.setStatusCode(HttpStatus.OK.value());
-            response.setMessage("Retrieved CampTypes successfully");
-            response.setData(campTypes);
-            return ResponseEntity.ok(response);
-        } else {
-            response.setStatusCode(HttpStatus.NOT_FOUND.value());
-            response.setMessage("No CampTypes found for this CampSite");
-            response.setData(Collections.emptyList());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }
+    //UPDATE
+    @PutMapping("/{campTypeId}")
+    public ResponseEntity<BaseResponse> updateCampType(
+            @PathVariable int campTypeId,
+            @RequestBody CampTypeUpdateRequest request) {
+
+        BaseResponse response = campTypeService.updateCampType(campTypeId, request);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     //DELETE
