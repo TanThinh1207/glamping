@@ -5,6 +5,7 @@ import com.group2.glamping.model.dto.response.CampSiteResponse;
 import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.model.entity.CampType;
 import com.group2.glamping.model.enums.CampSiteStatus;
+import com.group2.glamping.model.mapper.CampSiteMapper;
 import com.group2.glamping.repository.CampSiteRepository;
 import com.group2.glamping.repository.UserRepository;
 import com.group2.glamping.service.interfaces.CampSiteService;
@@ -13,9 +14,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,21 +26,12 @@ public class CampSiteServiceImpl implements CampSiteService {
     private final CampSiteRepository campSiteRepository;
     private final UserRepository userService;
 
+
     @Override
     public List<CampSiteResponse> getCampSites() {
-        List<CampSite> campSites = campSiteRepository.findAll();
-        List<CampSiteResponse> response = new ArrayList<>();
-        for (CampSite campSite : campSites) {
-            CampSiteResponse campSiteListResponse = new CampSiteResponse();
-            campSiteListResponse.setId(campSite.getId());
-            campSiteListResponse.setName(campSite.getName());
-            campSiteListResponse.setAddress(campSite.getAddress());
-            campSiteListResponse.setImageList(campSite.getImageList());
-            campSiteListResponse.setCreatedTime(campSite.getCreatedTime());
-            campSiteListResponse.setStatus(campSite.getStatus());
-            response.add(campSiteListResponse);
-        }
-        return response;
+        return campSiteRepository.findAll().stream()
+                .map(CampSiteMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -54,12 +46,12 @@ public class CampSiteServiceImpl implements CampSiteService {
                     .user(userService.findById(request.getUserId()).get())
                     .imageList(request.getImageList())
                     .status(CampSiteStatus.Pending)
-                    .campTypeList(request.getCampTypeList())
+                    .campTypes(request.getCampTypeList())
                     .build();
 
             campSiteRepository.save(campSite);
-            if (campSite.getCampTypeList() != null) {
-                for (CampType campType : campSite.getCampTypeList()) {
+            if (campSite.getCampTypes() != null) {
+                for (CampType campType : campSite.getCampTypes()) {
                     campType.setCampSite(campSite);
                     campType.setUpdatedTime(LocalDateTime.now());
                     campType.setStatus(true);
@@ -76,23 +68,13 @@ public class CampSiteServiceImpl implements CampSiteService {
         return campSiteRepository.findById(id);
     }
 
+
     @Override
     public Optional<CampSiteResponse> getCampSiteBasicDetail(int id) {
-        Optional<CampSite> campSite = campSiteRepository.findById(id);
-        if (campSite.isPresent()) {
-            CampSiteResponse campSiteResponse = CampSiteResponse.builder()
-                    .id(id)
-                    .name(campSite.get().getName())
-                    .address(campSite.get().getAddress())
-                    .longitude(campSite.get().getLongitude())
-                    .latitude(campSite.get().getLatitude())
-                    .imageList(campSite.get().getImageList())
-                    .build();
-            return Optional.of(campSiteResponse);
-        }
-
-        return Optional.empty();
+        return campSiteRepository.findById(id)
+                .map(CampSiteMapper::toDto);
     }
+
 
     @Override
     public void updateCampSite(CampSite campSite) {
