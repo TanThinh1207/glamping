@@ -12,7 +12,7 @@ CREATE TABLE `user` (
     `address` VARCHAR(255),
     `role` ENUM('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_USER', 'ROLE_STAFF'),
     `created_at` DATETIME,
-    `status` BOOLEAN
+    `status` BOOLEAN DEFAULT TRUE
 );
 
 CREATE TABLE `booking` (
@@ -20,7 +20,7 @@ CREATE TABLE `booking` (
     `id_user` INT,
     `id_camp_site` INT,
     `created_at` DATETIME,
-    `status` ENUM('Pending', 'Deposit', 'Accepted', 'Paid', 'Completed', 'Cancelled', 'Denied', 'Refund'),
+    `status` ENUM('Pending', 'Deposit', 'Accepted', 'Completed', 'Cancelled', 'Denied', 'Refund'),
     `total_amount` DECIMAL(10,2)
 );
 
@@ -28,6 +28,7 @@ CREATE TABLE `camp_site` (
     `id` INT PRIMARY KEY AUTO_INCREMENT,
     `name` VARCHAR(255),
     `address` VARCHAR(255),
+    `city` varchar(255),
     `latitude` DECIMAL(9,6),
     `longitude` DECIMAL(9,6),
     `created_at` DATETIME,
@@ -39,7 +40,7 @@ CREATE TABLE `camp` (
     `id` INT PRIMARY KEY AUTO_INCREMENT,
     `name` VARCHAR(255),
     `created_at` DATETIME,
-    `status` enum("Unavailable", "Not_Assigned", "Assigned") default ("Not_Assigned"),
+    `status` enum("Unavailable", "Not_Assigned", "Assigned") DEFAULT "Not_Assigned",
     `updated_at` DATETIME,
     `id_camp_type` INT
 );
@@ -54,22 +55,22 @@ CREATE TABLE `payment` (
     `completed_at` DATETIME
 );
 
-CREATE TABLE `service` (
+CREATE TABLE `selection` (
     `id` INT PRIMARY KEY AUTO_INCREMENT,
     `name` VARCHAR(255),
     `description` TEXT,
     `price` DECIMAL(10,2),
     `image` VARCHAR(255) DEFAULT '',
-    `status` BOOLEAN,
+    `status` BOOLEAN DEFAULT TRUE,
     `updated_at` DATETIME
 );
 
-CREATE TABLE `booking_service` (
+CREATE TABLE `booking_selection` (
     `id_booking` INT,
-    `id_service` INT,
+    `id_selection` INT,
     `name` VARCHAR(255),
     `quantity` DECIMAL(10,2),
-    PRIMARY KEY (`id_booking`, `id_service`)
+    PRIMARY KEY (`id_booking`, `id_selection`)
 );
 
 CREATE TABLE `facility` (
@@ -97,7 +98,7 @@ CREATE TABLE `report` (
     `id` INT PRIMARY KEY AUTO_INCREMENT,
     `id_camp_site` INT,
     `id_user` INT,
-    `status` VARCHAR(255),
+    `status` enum('Pending', 'Resolved', 'Denied') DEFAULT 'PENDING',
     `created_at` DATETIME,
     `message` TEXT,
     `report_type` VARCHAR(255)
@@ -107,6 +108,7 @@ CREATE TABLE `booking_detail` (
     `id` INT PRIMARY KEY AUTO_INCREMENT,
     `id_booking` INT,
     `id_camp_type` INT,
+    `id_camp` INT,
     `check_in_at` DATETIME,
     `check_out_at` DATETIME,
     `amount` DECIMAL(10,2),
@@ -114,7 +116,7 @@ CREATE TABLE `booking_detail` (
     `rating` INT,
     `created_at` DATETIME,
     `add_on` DECIMAL(10,2),
-    `status` ENUM('Waiting', 'Check_In', 'Check_Out')
+    `status` ENUM('Waiting', 'Check_In', 'Check_Out') DEFAULT 'WAITING'
 );
 
 CREATE TABLE `camp_type` (
@@ -127,14 +129,14 @@ CREATE TABLE `camp_type` (
     `updated_at` DATETIME,
     `id_camp_site` INT,
     `quantity` INT,
-    `status` BOOLEAN
+    `status` BOOLEAN DEFAULT TRUE
 );
 
 CREATE TABLE `order` (
     `id` INT PRIMARY KEY AUTO_INCREMENT,
     `name` VARCHAR(255),
     `price` DECIMAL(10,2),
-    `status` BOOLEAN,
+    `status` BOOLEAN DEFAULT TRUE,
     `updated_at` DATETIME
 );
 
@@ -160,6 +162,31 @@ CREATE TABLE `camp_site_utility` (
     PRIMARY KEY (`id_camp_site`, `id_utility`)
 );
 
+CREATE TABLE place_type(
+	`id` int AUTO_INCREMENT,
+	`name` varchar(255),
+	`status` boolean DEFAULT true,
+	`image` varchar(255) DEFAULT '',
+	
+	PRIMARY KEY (`id`)
+);
+
+CREATE TABLE camp_site_place_type(
+	`id_camp_site` int,
+	`id_place_type` int,
+	
+	PRIMARY KEY (`id_camp_site`, `id_place_type`)
+);
+
+CREATE TABLE camp_site_selection(
+	`id_camp_site` int,
+	`id_selection` int,
+	
+	PRIMARY KEY (`id_camp_site`, `id_selection`)
+);
+
+
+
 ALTER TABLE `booking`
     ADD FOREIGN KEY (`id_user`) REFERENCES `user` (`id`);
 
@@ -172,11 +199,11 @@ ALTER TABLE `camp_site`
 ALTER TABLE `payment`
     ADD FOREIGN KEY (`id_booking`) REFERENCES `booking` (`id`);
 
-ALTER TABLE `booking_service`
+ALTER TABLE `booking_selection`
     ADD FOREIGN KEY (`id_booking`) REFERENCES `booking` (`id`);
 
-ALTER TABLE `booking_service`
-    ADD FOREIGN KEY (`id_service`) REFERENCES `service` (`id`);
+ALTER TABLE `booking_selection`
+    ADD FOREIGN KEY (`id_selection`) REFERENCES `selection` (`id`);
 
 ALTER TABLE `camp_type_facility`
     ADD FOREIGN KEY (`id_camp_type`) REFERENCES `camp_type` (`id`);
@@ -217,6 +244,17 @@ ALTER TABLE `camp_site_utility`
 ALTER TABLE `camp`
     ADD FOREIGN KEY (`id_camp_type`) REFERENCES `camp_type` (`id`);
 
+ALTER TABLE `camp_site_place_type`
+	ADD FOREIGN KEY (`id_camp_site`) REFERENCES `camp_site` (`id`);
+
+ALTER TABLE `camp_site_place_type`
+	ADD FOREIGN KEY (`id_place_type`) REFERENCES `place_type` (`id`);
+
+ALTER TABLE `camp_site_selection`
+	ADD FOREIGN KEY (`id_camp_site`) REFERENCES `camp_site` (`id`);
+
+ALTER TABLE `camp_site_selection` 
+	ADD FOREIGN KEY (`id_selection`) REFERENCES `selection` (`id`);
 
 -- Insert Data into `user` Table
 INSERT INTO `user` (`id`, `email`, `password`, `first_name`, `last_name`, `phone_number`, `address`, `role`, `created_at`, `status`)
@@ -277,7 +315,7 @@ VALUES
 -- Insert Data into `booking` Table
 INSERT INTO `booking` (`id`, `id_user`, `id_camp_site`, `created_at`, `status`, `total_amount`)
 VALUES
-    (1, 3, 1, NOW(), 'Paid', 300.00),
+    (1, 3, 1, NOW(), 'Pending', 300.00),
     (2, 4, 2, NOW(), 'Accepted', 500.00),
     (3, 2, 3, NOW(), 'Pending', 180.00),
     (4, 1, 4, NOW(), 'Completed', 240.00),
@@ -353,6 +391,23 @@ VALUES
 (1, 1), (1, 2), (1, 3),  -- Mountain Base Camp
 (2, 1), (2, 2), (2, 3);  -- Lake Side Glamping
 
+INSERT INTO `selection` (`name`, `description`, `price`, `image`, `status`, `updated_at`)
+VALUES
+    ('Kayak Rental', 'Rent a kayak for exploring the nearby river. Includes safety gear.', 25.00, 'kayak.jpg', TRUE, NOW()),
+    ('BBQ Setup', 'BBQ grill setup with charcoal, utensils, and seating for a great outdoor meal.', 30.00, 'bbq.jpg', TRUE, NOW()),
+    ('Guided Hiking Tour', 'Join our expert guides on a scenic hike through the mountains.', 50.00, 'hiking.jpg', TRUE, NOW()),
+    ('Fishing Gear Rental', 'Includes fishing rod, bait, and accessories for a great fishing experience.', 15.00, 'fishing.jpg', TRUE, NOW()),
+    ('Bonfire Setup', 'Cozy bonfire setup with firewood, seating, and marshmallows.', 20.00, 'bonfire.jpg', TRUE, NOW()),
+    ('Mountain Biking Rental', 'Rent a mountain bike to explore the rugged trails.', 35.00, 'bike.jpg', TRUE, NOW()),
+    ('Canoe Rental', 'Rent a canoe for a relaxing paddle on the lake.', 30.00, 'canoe.jpg', TRUE, NOW()),
+    ('Survival Training', 'Learn essential survival skills from our expert instructors.', 60.00, 'survival.jpg', TRUE, NOW()),
+    ('Photography Tour', 'A guided photography tour to capture the best nature shots.', 55.00, 'photo_tour.jpg', TRUE, NOW());
+
+INSERT INTO `camp_site_selection` (`id_camp_site`, `id_selection`)
+VALUES
+(1,1), (1,2), (1,3),
+(2,4), (2,5), (2,6);
+
 -- SELECT ct.id AS camp_type_id, c.id AS camp_id, c.name AS camp_name, ct.type AS camp_type, bd.id AS booking_detail_id
 -- FROM camp_type ct
 -- JOIN camp c ON c.id_camp_type = ct.id
@@ -364,11 +419,12 @@ VALUES
 -- AND (bd.id IS NULL)
 -- ORDER BY c.id;
 
-SELECT *
+SELECT ct.quantity - COUNT(bd.id)
 FROM camp_type ct
 JOIN booking_detail bd 
 ON bd.id_camp_type = ct.id
 AND(
-	(DATE(bd.check_in_at) < '2025-01-23' AND DATE(bd.check_out_at) > '2025-01-22')
+	(DATE(bd.check_in_at) < '2025-02-05' AND DATE(bd.check_out_at) > '2025-02-06')
 )
 WHERE ct.id = 1
+GROUP BY ct.id

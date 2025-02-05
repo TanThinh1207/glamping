@@ -23,8 +23,9 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private final String[] WHITE_LIST = {
-            "/api-docs/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**",
-            "/api/v1/auth/**", "/api/campsites/**", "/api/camps/**"
+            "/api-docs/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/api/docs/**",
+            /*    For testing, delete later */
+            "/api/v1/auth/**", "/api/campsites/**", "/api/bookings/**", "/api/camps/**"
 
 
     };

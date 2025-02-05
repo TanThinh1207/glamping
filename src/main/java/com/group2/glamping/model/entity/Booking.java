@@ -1,15 +1,17 @@
 package com.group2.glamping.model.entity;
 
-import com.group2.glamping.model.entity.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.group2.glamping.model.enums.BookingStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,6 +26,7 @@ public class Booking {
     @JoinColumn(name = "id_user")
     private User user;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id_camp_site")
     private CampSite campSite;
@@ -39,7 +42,7 @@ public class Booking {
     private double totalAmount;
 
     @OneToMany(mappedBy = "booking")
-    private List<BookingService> bookingServiceList;
+    private List<BookingSelection> bookingSelectionList;
 
     @OneToMany(mappedBy = "booking")
     private List<Payment> paymentList;

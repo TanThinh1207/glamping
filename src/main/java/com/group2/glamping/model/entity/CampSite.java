@@ -27,6 +27,9 @@ public class CampSite {
     @Column(name = "address")
     private String address;
 
+    @Column(name = "city")
+    private String city;
+
     @Column(name = "latitude")
     private double latitude;
 
@@ -56,11 +59,14 @@ public class CampSite {
 
 
     @OneToMany(mappedBy = "campSite")
-    private List<CampType> campTypeList;
-
-    @OneToMany(mappedBy = "campSite")
     private List<CampSiteUtility> campSiteUtilityList;
+
     @OneToMany(mappedBy = "campSite", cascade = CascadeType.ALL)
     private List<CampType> campTypes;
 
+    @OneToMany(mappedBy = "campSite")
+    private List<CampSitePlaceType> campSitePlaceTypes;
+
+    @OneToMany(mappedBy = "campSite")
+    private List<CampSiteSelection> campSiteSelections;
 }

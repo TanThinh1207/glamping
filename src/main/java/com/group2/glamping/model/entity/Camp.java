@@ -1,5 +1,6 @@
 package com.group2.glamping.model.entity;
 
+import com.group2.glamping.model.enums.CampStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,9 +12,9 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "service")
-public class Service {
-
+@Entity
+@Table(name = "camp")
+public class Camp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -21,21 +22,20 @@ public class Service {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "description")
-    private String description;
-
-    @Column(name = "price")
-    private double price;
-
-    @Column(name = "image")
-    private String imageUrl;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
     @Column(name = "status")
-    private boolean status;
+    @Enumerated(EnumType.STRING)
+    private CampStatus status;
 
     @Column(name = "updated_at")
-    private LocalDateTime updatedTime;
+    private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "service",cascade = CascadeType.ALL)
-    private List<BookingService> bookingServiceList;
+    @ManyToOne
+    @JoinColumn(name = "id_camp_type")
+    private CampType campType;
+
+    @OneToMany(mappedBy = "camp")
+    private List<BookingDetail> bookingDetailList;
 }

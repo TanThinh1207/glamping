@@ -3,6 +3,7 @@ package com.group2.glamping.model.entity;
 import com.group2.glamping.model.enums.BookingDetailStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "booking_detail")
+@Builder
 public class BookingDetail {
 
     @Id
@@ -27,6 +29,10 @@ public class BookingDetail {
     @ManyToOne
     @JoinColumn(name = "id_camp_type")
     private CampType campType;
+
+    @ManyToOne
+    @JoinColumn(name = "id_camp")
+    private Camp camp;
 
     @Column(name = "check_in_at")
     private LocalDateTime checkInTime;
