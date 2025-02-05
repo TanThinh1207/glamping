@@ -1,5 +1,6 @@
 package com.group2.glamping.model.dto.requests;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,3 +20,4 @@ public class CampTypeUpdateRequest {
     int campSiteId;
     boolean status;
 }
+

@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -36,6 +37,7 @@ public class CampTypeServiceImpl implements ICampTypeService {
             String type = (String) result[1];
             Integer capacity = (Integer) result[2];
             Long remainingQuantity = (Long) result[3];
+
 
             CampTypeRemainingResponse response = new CampTypeRemainingResponse();
             response.setCampTypeId(campTypeId);
@@ -67,7 +69,8 @@ public class CampTypeServiceImpl implements ICampTypeService {
             response.setMessage("CampSite not found");
             return response;
         }
-
+      
+      
         CampType campType = CampType.builder()
                 .type(request.getType())
                 .capacity(request.getCapacity())

@@ -10,9 +10,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @Entity
 @Table(name = "camp_type")
 public class CampType {
@@ -47,7 +47,7 @@ public class CampType {
     private int quantity;
 
     @Column(name = "status")
-    private boolean status;
+    private boolean status = true;
 
     @OneToMany(mappedBy = "campType")
     private List<CampTypeFacility> campTypeFacilityList;

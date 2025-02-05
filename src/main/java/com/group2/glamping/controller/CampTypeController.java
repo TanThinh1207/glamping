@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/camp_types")
 public class CampTypeController {
 
     private final CampTypeServiceImpl campTypeService;
-
 
     @GetMapping("/availableQuantity")
     public ResponseEntity<Long> getAvailableQuantity(
@@ -28,6 +28,7 @@ public class CampTypeController {
         Long availableQuantity = campTypeService.findAvailableSlots(campTypeId, checkIn, checkOut);
         return new ResponseEntity<>(availableQuantity, HttpStatus.OK);
     }
+
 
     //CREATE
     @PostMapping
