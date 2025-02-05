@@ -25,12 +25,16 @@ public class CampSiteController {
     @GetMapping
     public ResponseEntity<BaseResponse> getAllCampSites() {
         List<CampSiteResponse> campsites = campSiteService.getCampSites();
-        return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Camp sites retrieved successfully", campsites));
+
+        return ResponseEntity.ok(
+                new BaseResponse(HttpStatus.OK.value(), "Camp sites retrieved successfully", campsites)
+        );
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<BaseResponse> getCampSiteById(@PathVariable int id) {
-        Optional<CampSite> campsite = campSiteService.findCampSiteById(id);
+        Optional<CampSiteResponse> campsite = campSiteService.getCampSiteBasicDetail(id);
         return campsite.map(site -> ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Camp site found", site)))
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(new BaseResponse(HttpStatus.NOT_FOUND.value(), "Camp site not found", null)));
     }

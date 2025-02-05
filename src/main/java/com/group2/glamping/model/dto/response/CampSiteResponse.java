@@ -1,6 +1,5 @@
 package com.group2.glamping.model.dto.response;
 
-import com.group2.glamping.model.entity.Image;
 import com.group2.glamping.model.enums.CampSiteStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +22,7 @@ public class CampSiteResponse {
     private double longitude;
     private LocalDateTime createdTime;
     private CampSiteStatus status;
-    private List<Image> imageList;
+    private List<ImageResponse> imageList;
+    private List<CampSiteSelectionResponse> campSiteSelectionsList;
 
 }
