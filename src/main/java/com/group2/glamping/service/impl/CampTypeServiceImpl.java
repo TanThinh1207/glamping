@@ -1,6 +1,7 @@
 package com.group2.glamping.service.impl;
 
 import com.group2.glamping.model.dto.requests.CampTypeCreateRequest;
+import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.CampTypeRemainingResponse;
 import com.group2.glamping.model.dto.response.CampTypeResponse;
 import com.group2.glamping.model.entity.CampType;
@@ -82,14 +83,30 @@ public class CampTypeServiceImpl implements ICampTypeService {
     }
 
     @Override
-    public List<CampType> findByCampSiteId(int campSiteId) {
-        return campTypeRepository.findByCampSiteId(campSiteId);
+    public List<CampTypeResponse> findByCampSiteId(int campSiteId) {
+        List<CampType> campTypeList = campTypeRepository.findByCampSiteId(campSiteId);
+
+        if (campTypeList.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return campTypeList.stream().map(campType -> CampTypeResponse.builder()
+                .id(campType.getId())
+                .type(campType.getType())
+                .capacity(campType.getCapacity())
+                .price(campType.getPrice())
+                .weekendRate(campType.getWeekendRate())
+                .holidayRate(campType.getHolidayRate())
+                .quantity(campType.getQuantity())
+                .status(campType.isStatus())
+                .build()).toList();
     }
 
+
     @Override
-    public Map<String, Object> softDeleteCampType(int campTypeId) {
+    public BaseResponse softDeleteCampType(int campTypeId) {
         Optional<CampType> campTypeOpt = campTypeRepository.findById(campTypeId);
-        Map<String, Object> response = new HashMap<>();
+        BaseResponse response = new BaseResponse();
 
         if (campTypeOpt.isPresent()) {
             CampType campType = campTypeOpt.get();
@@ -106,13 +123,13 @@ public class CampTypeServiceImpl implements ICampTypeService {
             campTypeResponse.setQuantity(campType.getQuantity());
             campTypeResponse.setStatus(campType.isStatus());
 
-            response.put("statusCode", 200);
-            response.put("message", "Camp Type status updated to NOT_AVAILABLE");
-            response.put("data", campTypeResponse);
+            response.setStatusCode(200);
+            response.setMessage("Camp Type status updated to NOT_AVAILABLE");
+            response.setData(campTypeResponse);
         } else {
-            response.put("statusCode", 404);
-            response.put("message", "Camp Type not found");
-            response.put("data", null);
+            response.setStatusCode(404);
+            response.setMessage("Camp Type not found");
+            response.setData(null);
         }
         return response;
     }

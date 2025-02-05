@@ -2,6 +2,7 @@ package com.group2.glamping.controller;
 
 import com.group2.glamping.model.dto.requests.CampSiteCreateRequest;
 import com.group2.glamping.model.dto.requests.CampTypeCreateRequest;
+import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.CampTypeResponse;
 import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.model.entity.CampType;
@@ -23,38 +24,38 @@ public class CampTypeController {
     private final CampTypeServiceImpl campTypeService;
 
     @PostMapping
-    public ResponseEntity<Map<String, Object>> createCampType(@RequestBody CampTypeCreateRequest request) {
+    public ResponseEntity<BaseResponse> createCampType(@RequestBody CampTypeCreateRequest request) {
         Optional<CampTypeResponse> campType = campTypeService.saveCampType(request);
 
-        Map<String, Object> response = new HashMap<>();
+        BaseResponse response = new BaseResponse();
 
         if (campType.isPresent()) {
-            response.put("statusCode", HttpStatus.OK.value());
-            response.put("mess", "CampType created successfully");
-            response.put("data", campType.get());
+            response.setStatusCode(HttpStatus.OK.value());
+            response.setMessage("CampType created successfully");
+            response.setData(campType.get());
             return ResponseEntity.ok(response);
         } else {
-            response.put("statusCode", HttpStatus.BAD_REQUEST.value());
-            response.put("mess", "Failed to create CampType");
-            response.put("data", null);
+            response.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            response.setMessage("Failed to create CampType");
+            response.setData(null);
             return ResponseEntity.badRequest().body(response);
         }
     }
 
     @GetMapping("/findCampType/{campSiteId}")
-    public ResponseEntity<Map<String, Object>> getCampTypesByCampSite(@PathVariable int campSiteId) {
-        List<CampType> campTypes = campTypeService.findByCampSiteId(campSiteId);
+    public ResponseEntity<BaseResponse> getCampTypesByCampSite(@PathVariable int campSiteId) {
+        List<CampTypeResponse> campTypes = campTypeService.findByCampSiteId(campSiteId);
 
-        Map<String, Object> response = new HashMap<>();
+        BaseResponse response = new BaseResponse();
         if (!campTypes.isEmpty()) {
-            response.put("statusCode", HttpStatus.OK.value());
-            response.put("mess", "Retrieved CampTypes successfully");
-            response.put("data", campTypes);
+            response.setStatusCode(HttpStatus.OK.value());
+            response.setMessage("Retrieved CampTypes successfully");
+            response.setData(campTypes);
             return ResponseEntity.ok(response);
         } else {
-            response.put("statusCode", HttpStatus.NOT_FOUND.value());
-            response.put("mess", "No CampTypes found for this CampSite");
-            response.put("data", Collections.emptyList());
+            response.setStatusCode(HttpStatus.NOT_FOUND.value());
+            response.setMessage("No CampTypes found for this CampSite");
+            response.setData(Collections.emptyList());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
@@ -68,10 +69,10 @@ public class CampTypeController {
         return new ResponseEntity<>(availableQuantity, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{campTypeId}")
-    public ResponseEntity<Map<String, Object>> deleteCampType(@PathVariable int campTypeId) {
-        Map<String, Object> response = campTypeService.softDeleteCampType(campTypeId);
-        return ResponseEntity.status((int) response.get("statusCode")).body(response);
+    @DeleteMapping("/delete/{campTypeId}")
+    public ResponseEntity<BaseResponse> deleteCampType(@PathVariable int campTypeId) {
+        BaseResponse response = campTypeService.softDeleteCampType(campTypeId);
+        return ResponseEntity.status((int) response.getStatusCode()).body(response);
     }
 }
 
