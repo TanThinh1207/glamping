@@ -2,7 +2,7 @@ package com.group2.glamping.controller;
 
 
 import com.group2.glamping.model.dto.requests.BookingRequest;
-import com.group2.glamping.model.dto.response.BookingResponse;
+import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.entity.Booking;
 import com.group2.glamping.service.interfaces.BookingSelectionService;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class BookingController {
     ResponseEntity<?> addBooking(@RequestBody BookingRequest bookingRequest) {
         Optional<Booking> booking = bookingSelectionService.createBooking(bookingRequest);
         if (booking.isPresent()) {
-            return ResponseEntity.ok(BookingResponse.builder()
+            return ResponseEntity.ok(BaseResponse.builder()
                     .statusCode(HttpStatus.OK.value())
                     .data(booking)
                     .message("OK")
