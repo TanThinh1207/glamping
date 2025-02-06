@@ -74,10 +74,15 @@ public class CampSite {
     @JoinTable(
             name = "camp_site_place_type",
             joinColumns = @JoinColumn(name = "id_camp_site", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "id_role", referencedColumnName = "id")
+            inverseJoinColumns = @JoinColumn(name = "id_place_type", referencedColumnName = "id")
     )
     private List<PlaceType> placeTypes;
 
-    @OneToMany(mappedBy = "campSite", cascade = CascadeType.ALL)
-    private List<CampSiteSelection> campSiteSelections;
+    @ManyToMany
+    @JoinTable(
+            name = "camp_site_selection",
+            joinColumns = @JoinColumn(name = "id_camp_site", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "id_selection", referencedColumnName = "id")
+    )
+    private List<Selection> selections;
 }

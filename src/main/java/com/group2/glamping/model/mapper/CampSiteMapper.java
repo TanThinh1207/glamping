@@ -21,9 +21,6 @@ public class CampSiteMapper {
                 .imageList(campSite.getImageList().stream()
                         .map(image -> new ImageResponse(image.getId(), image.getPath()))
                         .collect(Collectors.toList()))
-                .campSiteSelectionsList(campSite.getCampSiteSelections().stream()
-                        .map(selection -> new CampSiteSelectionResponse(selection.getCampSite().getId(), selection.getSelection().getName(), selection.getSelection().getDescription(), selection.getSelection().getPrice(), selection.getSelection().isStatus()))
-                        .collect(Collectors.toList()))
                 .build();
     }
 }

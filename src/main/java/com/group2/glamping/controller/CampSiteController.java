@@ -57,7 +57,6 @@ public class CampSiteController {
             campSite.setAddress(updatedCampSite.getAddress());
             campSite.setLatitude(updatedCampSite.getLatitude());
             campSite.setLongitude(updatedCampSite.getLongitude());
-            campSite.setCampSiteSelections(new ArrayList<>());
             campSiteService.updateCampSite(campSite);
 
 

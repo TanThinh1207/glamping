@@ -39,6 +39,6 @@ public class Selection {
     @OneToMany(mappedBy = "selection",cascade = CascadeType.ALL)
     private List<BookingSelection> bookingSelectionList;
 
-    @OneToMany(mappedBy = "selection")
-    private List<CampSiteSelection> campSiteSelectionList;
+    @ManyToMany(mappedBy = "selections")
+    private List<CampSite> campSiteList;
 }
