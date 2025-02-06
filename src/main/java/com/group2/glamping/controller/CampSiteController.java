@@ -76,4 +76,11 @@ public class CampSiteController {
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new BaseResponse(HttpStatus.NOT_FOUND.value(), "Camp site not found", null));
     }
+
+    //FILTER BY NAME OR CITY
+    @GetMapping("/filterbynameorcity/{filterCondition}")
+    public ResponseEntity<BaseResponse> deleteCampType(@PathVariable String filterCondition) {
+        BaseResponse response = campSiteService.searchCampSiteByNameOrCity(filterCondition);
+        return ResponseEntity.status((int) response.getStatusCode()).body(response);
+    }
 }
