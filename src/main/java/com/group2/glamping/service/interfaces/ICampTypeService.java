@@ -10,8 +10,13 @@ import java.util.Optional;
 
 public interface ICampTypeService {
     Long findAvailableSlots(Integer campTypeId, LocalDateTime checkInDate, LocalDateTime checkOutDate);
+
     BaseResponse saveCampType(CampTypeCreateRequest request);
+
     BaseResponse findByCampSiteId(int campSiteId);
+
     BaseResponse updateCampType(int campTypeId, CampTypeUpdateRequest request);
+
     BaseResponse softDeleteCampType(int campTypeId);
+
 }
