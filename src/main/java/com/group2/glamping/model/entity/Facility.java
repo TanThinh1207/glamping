@@ -30,6 +30,6 @@ public class Facility {
     @Column(name = "status")
     private boolean status;
 
-    @OneToMany(mappedBy = "facility")
-    private List<CampTypeFacility> campTypeFacilityList;
+    @ManyToMany(mappedBy = "facilities")
+    private List<CampType> campTypes;
 }

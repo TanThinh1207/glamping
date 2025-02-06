@@ -26,6 +26,6 @@ public class PlaceType {
     @Column(name = "image")
     private String image;
 
-    @OneToMany(mappedBy = "placeType")
-    private List<CampSitePlaceType> campSitePlaceTypes;
+    @ManyToMany(mappedBy = "placeTypes")
+    private List<CampSite> campSites;
 }

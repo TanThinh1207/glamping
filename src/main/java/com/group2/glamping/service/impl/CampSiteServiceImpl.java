@@ -53,14 +53,14 @@ public class CampSiteServiceImpl implements CampSiteService {
                     .campTypes(request.getCampTypeList())
                     .build();
 
-            campSiteRepository.save(campSite);
-            if (campSite.getCampTypes() != null) {
-                for (CampType campType : campSite.getCampTypes()) {
-                    campType.setCampSite(campSite);
-                    campType.setUpdatedTime(LocalDateTime.now());
-                    campType.setStatus(true);
-                }
-            }
+//            campSiteRepository.save(campSite);
+//            if (campSite.getCampTypes() != null) {
+//                for (CampType campType : campSite.getCampTypes()) {
+//                    campType.setCampSite(campSite);
+//                    campType.setUpdatedTime(LocalDateTime.now());
+//                    campType.setStatus(true);
+//                }
+//            }
             campSiteRepository.save(campSite);
             return Optional.of(campSite);
         }

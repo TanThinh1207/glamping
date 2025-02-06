@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,7 +57,10 @@ public class CampSiteController {
             campSite.setAddress(updatedCampSite.getAddress());
             campSite.setLatitude(updatedCampSite.getLatitude());
             campSite.setLongitude(updatedCampSite.getLongitude());
+            campSite.setCampSiteSelections(new ArrayList<>());
             campSiteService.updateCampSite(campSite);
+
+
 
             Optional<CampSiteResponse> updatedResponse = campSiteService.getCampSiteBasicDetail(id);
             return updatedResponse.map(response -> ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Camp site updated successfully", response)))

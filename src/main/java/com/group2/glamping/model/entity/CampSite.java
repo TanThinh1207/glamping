@@ -58,15 +58,26 @@ public class CampSite {
     private List<Report> reportList;
 
 
-    @OneToMany(mappedBy = "campSite")
-    private List<CampSiteUtility> campSiteUtilityList;
+    @ManyToMany
+    @JoinTable(
+            name = "camp_site_utility",
+            joinColumns = @JoinColumn(name = "id_camp_site", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "id_utility", referencedColumnName = "id")
+    )
+    private List<Utility> utilities;
 
     @OneToMany(mappedBy = "campSite", cascade = CascadeType.ALL)
     private List<CampType> campTypes;
 
-    @OneToMany(mappedBy = "campSite")
-    private List<CampSitePlaceType> campSitePlaceTypes;
 
-    @OneToMany(mappedBy = "campSite")
+    @ManyToMany
+    @JoinTable(
+            name = "camp_site_place_type",
+            joinColumns = @JoinColumn(name = "id_camp_site", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "id_role", referencedColumnName = "id")
+    )
+    private List<PlaceType> placeTypes;
+
+    @OneToMany(mappedBy = "campSite", cascade = CascadeType.ALL)
     private List<CampSiteSelection> campSiteSelections;
 }

@@ -26,6 +26,6 @@ public class Utility {
     @Column(name = "status")
     private boolean status;
 
-    @OneToMany(mappedBy = "utility")
-    private List<CampSiteUtility> campSiteUtilityList;
+    @ManyToMany(mappedBy = "utilities")
+    private List<CampSite> campSites;
 }

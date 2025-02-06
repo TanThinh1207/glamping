@@ -49,8 +49,13 @@ public class CampType {
     @Column(name = "status")
     private boolean status = true;
 
-    @OneToMany(mappedBy = "campType")
-    private List<CampTypeFacility> campTypeFacilityList;
+    @ManyToMany
+    @JoinTable(
+            name = "camp_type_facility",
+            joinColumns = @JoinColumn(name = "id_camp_type", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "id_facility", referencedColumnName = "id")
+    )
+    private List<Facility> facilities;
 
     @OneToMany(mappedBy = "campType")
     private List<BookingDetail> bookingDetailList;
