@@ -40,7 +40,6 @@ public class SecurityConfig {
                         sessionManagementCustomizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
                             req.requestMatchers(WHITE_LIST).permitAll();
-                            req.requestMatchers(HttpMethod.DELETE, "/api/camps/**").permitAll(); // Cho phép DELETE
                             req.requestMatchers("/api/demo/**", "/api/campsites/**").hasRole("USER");
                         }
                 )
