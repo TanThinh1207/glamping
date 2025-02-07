@@ -39,6 +39,8 @@ public class Selection {
     @OneToMany(mappedBy = "selection",cascade = CascadeType.ALL)
     private List<BookingSelection> bookingSelectionList;
 
-    @ManyToMany(mappedBy = "selections")
-    private List<CampSite> campSiteList;
+    @ManyToOne
+    @JoinColumn(name = "id_camp_site")
+    private CampSite campSite;
+
 }
