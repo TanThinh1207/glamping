@@ -16,6 +16,7 @@ public enum ErrorCode {
     UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),
     WRONG_PASSWORD(1008, "Wrong password", HttpStatus.BAD_REQUEST),
     INVALID_DOB(1009, "Your age must be at least 16", HttpStatus.BAD_REQUEST),
+    CAMP_SITE_NOT_FOUND(10010, "Camp site not found", HttpStatus.NOT_FOUND),
 
     ;
 

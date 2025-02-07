@@ -36,7 +36,7 @@ public class Selection {
     @Column(name = "updated_at")
     private LocalDateTime updatedTime;
 
-    @OneToMany(mappedBy = "selection",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "selection", cascade = CascadeType.ALL)
     private List<BookingSelection> bookingSelectionList;
 
     @ManyToMany(mappedBy = "selections")
