@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class CampSiteMapper {
+public class CampSiteMapper2 {
 
-    public static CampSiteResponse toDto(CampSite campSite) {
+    public static CampSiteResponse toDto(CampSite campSite, boolean includeSelections) {
         if (campSite == null) {
             return null;
         }
@@ -25,12 +25,13 @@ public class CampSiteMapper {
                 .createdTime(campSite.getCreatedTime())
                 .status(campSite.getStatus())
                 .imageList(mapImages(campSite))
-                .campSiteSelectionsList(mapSelections(campSite))
+                .campSiteSelectionsList(includeSelections ? mapSelections(campSite) : null) // Chỉ ánh xạ nếu cần
                 .campSiteUtilityList(mapUtilities(campSite))
                 .campSitePlaceTypeList(mapPlaceTypes(campSite))
                 .campSiteCampTypeList(mapCampType(campSite))
                 .build();
     }
+
 
     private static List<ImageResponse> mapImages(CampSite campSite) {
         return (campSite.getImageList() != null) ?
@@ -51,7 +52,7 @@ public class CampSiteMapper {
                                         selection.getDescription(),
                                         selection.getPrice(),
                                         selection.getImageUrl(),
-                                        toDto(selection.getCampSite())
+                                        toDto(selection.getCampSite(), false) // Không ánh xạ selections để tránh vòng lặp
                                 );
                             }
                             return null;
@@ -60,6 +61,7 @@ public class CampSiteMapper {
                         .collect(Collectors.toList()) :
                 Collections.emptyList();
     }
+
 
 
     private static List<UtilityResponse> mapUtilities(CampSite campSite) {

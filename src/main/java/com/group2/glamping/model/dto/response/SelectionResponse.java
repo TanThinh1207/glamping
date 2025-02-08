@@ -1,5 +1,6 @@
 package com.group2.glamping.model.dto.response;
 
+import com.group2.glamping.model.entity.CampSite;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,6 +16,6 @@ public class SelectionResponse {
     private String name;
     private String description;
     private double price;
-    private boolean status;
-
+    private String image;
+    private CampSiteResponse campSiteResponse;
 }

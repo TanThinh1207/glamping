@@ -6,14 +6,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface SelectionRepository extends JpaRepository<Selection, Integer> {
     Optional<Selection> findByName(String name);
 
-    @Query("SELECT s FROM selection s JOIN s.campSiteList cs WHERE s.name = :name AND cs.id = :campSiteId")
-    Optional<Selection> findByNameAndCampSiteId(@Param("name") String name, @Param("campSiteId") int campSiteId);
+//    @Query("SELECT s FROM selection s JOIN s.campSiteList cs WHERE s.name = :name AND cs.id = :campSiteId")
+    Optional<Selection> findByNameAndCampSite_Id(@Param("name") String name, @Param("campSiteId") Integer campSiteId);
+
+    List<Selection> findByNameContainingIgnoreCase(String name);
 }
 
 
