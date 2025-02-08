@@ -23,6 +23,8 @@ public class CampSiteResponse {
     private LocalDateTime createdTime;
     private CampSiteStatus status;
     private List<ImageResponse> imageList;
-    private List<CampSiteSelectionResponse> campSiteSelectionsList;
-
+    private List<SelectionResponse> campSiteSelectionsList;
+    private List<PlaceTypeResponse> campSitePlaceTypeList;
+    private List<UtilityResponse> campSiteUtilityList;
+    private List<CampTypeResponse> campSiteCampTypeList;
 }

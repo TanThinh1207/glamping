@@ -9,13 +9,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CampSiteSelectionResponse {
+public class SelectionResponse {
 
     private int id;
     private String name;
     private String description;
     private double price;
-    //private ImageResponse imageResponse;
     private boolean status;
 
 }

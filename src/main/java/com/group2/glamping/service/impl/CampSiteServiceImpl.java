@@ -1,16 +1,16 @@
 package com.group2.glamping.service.impl;
 
-import com.group2.glamping.model.dto.requests.CampSiteCreateRequest;
+import com.group2.glamping.exception.AppException;
+import com.group2.glamping.exception.ErrorCode;
+import com.group2.glamping.model.dto.requests.*;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.CampSiteResponse;
 import com.group2.glamping.model.dto.response.CampSiteResponseDTO;
 import com.group2.glamping.model.dto.response.ImageResponse;
-import com.group2.glamping.model.entity.CampSite;
-import com.group2.glamping.model.entity.CampType;
+import com.group2.glamping.model.entity.*;
 import com.group2.glamping.model.enums.CampSiteStatus;
 import com.group2.glamping.model.mapper.CampSiteMapper;
-import com.group2.glamping.repository.CampSiteRepository;
-import com.group2.glamping.repository.UserRepository;
+import com.group2.glamping.repository.*;
 import com.group2.glamping.service.interfaces.CampSiteService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +29,10 @@ public class CampSiteServiceImpl implements CampSiteService {
 
     private final CampSiteRepository campSiteRepository;
     private final UserRepository userService;
+    private final SelectionRepository selectionRepository;
+    private final UtilityRepository utilityRepository;
+    private final PlaceTypeRepository placeTypeRepository;
+    private final CampTypeRepository campTypeRepository;
 
 
     @Override
@@ -39,33 +43,126 @@ public class CampSiteServiceImpl implements CampSiteService {
     }
 
     @Override
-    public Optional<CampSite> saveCampSite(CampSiteCreateRequest request) {
-        if (userService.findById(request.getUserId()).isPresent()) {
-            CampSite campSite = CampSite.builder()
-                    .name(request.getName())
-                    .address(request.getAddress())
-                    .latitude(request.getLatitude())
-                    .longitude(request.getLongitude())
-                    .createdTime(LocalDateTime.now())
-                    .user(userService.findById(request.getUserId()).get())
-                    .imageList(request.getImageList())
-                    .status(CampSiteStatus.Pending)
-                    .campTypes(request.getCampTypeList())
-                    .build();
-
-//            campSiteRepository.save(campSite);
-//            if (campSite.getCampTypes() != null) {
-//                for (CampType campType : campSite.getCampTypes()) {
-//                    campType.setCampSite(campSite);
-//                    campType.setUpdatedTime(LocalDateTime.now());
-//                    campType.setStatus(true);
-//                }
-//            }
-            campSiteRepository.save(campSite);
-            return Optional.of(campSite);
+    public Optional<CampSiteResponse> saveCampSite(CampSiteRequest campSiteUpdateRequest) {
+        if (campSiteUpdateRequest == null) {
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
-        return Optional.empty();
+
+        CampSite campSite = new CampSite();
+        return getCampSiteResponse(campSite, campSiteUpdateRequest.getName(), campSiteUpdateRequest.getAddress(), campSiteUpdateRequest.getLatitude(), campSiteUpdateRequest.getLongitude(), campSiteUpdateRequest.getCampSiteSelections(), campSiteUpdateRequest.getCampSiteUtilities(), campSiteUpdateRequest.getCampSitePlaceTypes(), campSiteUpdateRequest.getCampTypeList(), campSiteUpdateRequest);
     }
+
+    //
+
+    private Optional<CampSiteResponse> getCampSiteResponse(CampSite campSite, String name, String address, double latitude, double longitude, List<SelectionRequest> campSiteSelections, List<UtilityRequest> campSiteUtilities, List<PlaceTypeRequest> campSitePlaceTypes, List<CampTypeUpdateRequest> campTypeList, CampSiteRequest campSiteUpdateRequest) {
+
+        if (userService.findById(campSiteUpdateRequest.getHostId()).isPresent()) {
+            campSite.setUser(userService.findById(campSiteUpdateRequest.getHostId()).get());
+        } else {
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        }
+
+        campSite.setName(name);
+        campSite.setAddress(address);
+        campSite.setLatitude(latitude);
+        campSite.setLongitude(longitude);
+        campSite.setStatus(CampSiteStatus.Pending);
+        campSite.setCreatedTime(LocalDateTime.now());
+
+        List<Selection> selections = campSiteSelections.stream()
+                .map(request -> selectionRepository.findByNameAndCampSiteId(request.getName(), campSite.getId())
+                        .map(existingSelection -> {
+                            existingSelection.setDescription(request.getDescription());
+                            existingSelection.setPrice(request.getPrice());
+                            existingSelection.setImageUrl(request.getImageUrl());
+                            existingSelection.setStatus(request.isStatus());
+                            return selectionRepository.save(existingSelection);
+                        })
+                        .orElseGet(() -> {
+                            Selection newSelection = new Selection();
+                            newSelection.setName(request.getName());
+                            newSelection.setDescription(request.getDescription());
+                            newSelection.setPrice(request.getPrice());
+                            newSelection.setImageUrl(request.getImageUrl());
+                            newSelection.setStatus(request.isStatus());
+                            //newSelection.setCampSit(campSite);
+                            return selectionRepository.save(newSelection);
+                        })
+                )
+                .collect(Collectors.toList());
+        campSite.setSelections(selections);
+
+        List<Utility> utilities = campSiteUtilities.stream()
+                .map(request -> utilityRepository.findById(request.getId())
+                        .map(existingUtility -> {
+                            existingUtility.setImageUrl(request.getImagePath());
+                            existingUtility.setStatus(request.isStatus());
+                            return utilityRepository.save(existingUtility);
+                        })
+                        .orElseGet(() -> {
+                            Utility newUtility = new Utility();
+                            newUtility.setName(request.getName());
+                            newUtility.setImageUrl(request.getImagePath());
+                            newUtility.setStatus(request.isStatus());
+                            //newUtility.setCampSite(campSite);
+                            return utilityRepository.save(newUtility);
+                        })
+                )
+                .collect(Collectors.toList());
+        campSite.setUtilities(utilities);
+
+        List<PlaceType> placeTypes = campSitePlaceTypes.stream()
+                .map(request -> placeTypeRepository.findById(request.getId())
+                        .map(existingPlaceType -> {
+                            existingPlaceType.setImage(request.getImagePath());
+                            existingPlaceType.setStatus(request.isStatus());
+                            return placeTypeRepository.save(existingPlaceType);
+                        })
+                        .orElseGet(() -> {
+                            PlaceType newPlaceType = new PlaceType();
+                            newPlaceType.setName(request.getName());
+                            newPlaceType.setImage(request.getImagePath());
+                            newPlaceType.setStatus(request.isStatus());
+                            //newPlaceType.setCampSite(campSite);
+                            return placeTypeRepository.save(newPlaceType);
+                        })
+                )
+                .collect(Collectors.toList());
+        campSite.setPlaceTypes(placeTypes);
+
+        List<CampType> campTypes = campTypeList.stream()
+                .map(request -> campTypeRepository.findByTypeAndCampSiteId(request.getType(), campSite.getId())
+                        .map(existingCampType -> {
+                            existingCampType.setCapacity(request.getCapacity());
+                            existingCampType.setPrice(request.getPrice());
+                            existingCampType.setWeekendRate(request.getWeekendRate());
+                            existingCampType.setHolidayRate(request.getHolidayRate());
+                            existingCampType.setUpdatedTime(LocalDateTime.now());
+                            existingCampType.setQuantity(request.getQuantity());
+                            existingCampType.setStatus(request.isStatus());
+                            return campTypeRepository.save(existingCampType);
+                        })
+                        .orElseGet(() -> {
+                            CampType newCampType = CampType.builder()
+                                    .type(request.getType())
+                                    .capacity(request.getCapacity())
+                                    .price(request.getPrice())
+                                    .weekendRate(request.getWeekendRate())
+                                    .holidayRate(request.getHolidayRate())
+                                    .updatedTime(LocalDateTime.now())
+                                    .quantity(request.getQuantity())
+                                    .status(request.isStatus())
+                                    .campSite(campSite)
+                                    .build();
+                            return campTypeRepository.save(newCampType);
+                        })
+                )
+                .collect(Collectors.toList());
+        campSite.setCampTypes(campTypes);
+
+        return Optional.of(CampSiteMapper.toDto(campSiteRepository.save(campSite)));
+    }
+
 
     @Override
     public Optional<CampSite> findCampSiteById(int id) {
@@ -81,15 +178,28 @@ public class CampSiteServiceImpl implements CampSiteService {
 
 
     @Override
-    public void updateCampSite(CampSite campSite) {
-        campSiteRepository.save(campSite);
+    public Optional<CampSiteResponse> updateCampSite(int id, CampSiteRequest campSiteUpdateRequest) {
+        CampSite campSite = campSiteRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.CAMP_SITE_NOT_FOUND));
+
+        return getCampSiteResponse(campSite, campSiteUpdateRequest.getName(), campSiteUpdateRequest.getAddress(), campSiteUpdateRequest.getLatitude(), campSiteUpdateRequest.getLongitude(), campSiteUpdateRequest.getCampSiteSelections(), campSiteUpdateRequest.getCampSiteUtilities(), campSiteUpdateRequest.getCampSitePlaceTypes(), campSiteUpdateRequest.getCampTypeList(), campSiteUpdateRequest);
     }
 
+
     @Override
-    public void deleteCampSite(CampSite campSite) {
-        campSite.setStatus(CampSiteStatus.Not_Available);
-        campSiteRepository.save(campSite);
+    public Optional<CampSite> deleteCampSite(int id) {
+        Optional<CampSite> existingCampSite = campSiteRepository.findById(id);
+
+        if (existingCampSite.isPresent()) {
+            CampSite campSite = existingCampSite.get();
+            campSite.setStatus(CampSiteStatus.Not_Available);
+            campSiteRepository.save(campSite);
+            return Optional.of(campSite);
+        } else {
+            throw new AppException(ErrorCode.CAMP_SITE_NOT_FOUND);
+        }
     }
+
 
     @Override
     public BaseResponse searchCampSiteByNameOrCity(String str) {
@@ -140,3 +250,4 @@ public class CampSiteServiceImpl implements CampSiteService {
     }
 
 }
+
