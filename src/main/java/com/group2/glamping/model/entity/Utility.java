@@ -24,7 +24,7 @@ public class Utility {
     private String imageUrl;
 
     @Column(name = "status")
-    private boolean status;
+    private boolean status = true;
 
     @OneToMany(mappedBy = "utility")
     private List<CampSiteUtility> campSiteUtilityList;
