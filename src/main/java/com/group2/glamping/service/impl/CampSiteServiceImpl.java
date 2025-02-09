@@ -171,10 +171,10 @@ public class CampSiteServiceImpl implements CampSiteService {
     }
 
 
-    @Override
-    public Optional<CampSite> findCampSiteById(int id) {
-        return campSiteRepository.findById(id);
-    }
+//    @Override
+//    public Optional<CampSite> findCampSiteById(int id) {
+//        return campSiteRepository.findById(id);
+//    }
 
 
     @Override
