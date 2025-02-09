@@ -14,4 +14,5 @@ public class FacilityResponse {
     private String name;
     private String description;
     private String image;
+    private boolean status;
 }

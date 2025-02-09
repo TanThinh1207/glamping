@@ -17,4 +17,5 @@ public class SelectionResponse {
     private String description;
     private double price;
     private String image;
+    private boolean status;
 }

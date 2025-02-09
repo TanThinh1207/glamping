@@ -8,6 +8,9 @@ import java.util.List;
 
 @Repository
 public interface FacilityRepository extends JpaRepository<Facility, Integer> {
+
     List<Facility> findByNameContainingIgnoreCase(String name);
+
+    List<Facility> findByStatus(boolean status);
 
 }

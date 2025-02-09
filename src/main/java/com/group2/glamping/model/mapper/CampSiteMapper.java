@@ -50,7 +50,8 @@ public class CampSiteMapper {
                                         selection.getName(),
                                         selection.getDescription(),
                                         selection.getPrice(),
-                                        selection.getImageUrl()
+                                        selection.getImageUrl(),
+                                        selection.isStatus()
                                 );
                             }
                             return null;

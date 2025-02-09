@@ -11,9 +11,10 @@ import java.util.Optional;
 
 @Repository
 public interface SelectionRepository extends JpaRepository<Selection, Integer> {
-    Optional<Selection> findByName(String name);
 
     List<Selection> findByNameContainingIgnoreCase(String name);
+
+    List<Selection> findByStatus(boolean status);
 }
 
 

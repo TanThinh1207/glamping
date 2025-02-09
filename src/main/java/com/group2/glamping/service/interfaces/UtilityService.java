@@ -7,7 +7,9 @@ import com.group2.glamping.model.entity.Utility;
 import java.util.List;
 
 public interface UtilityService {
-    UtilityResponse saveOrUpdateUtility(UtilityRequest request);
+    UtilityResponse createUtility(UtilityRequest request);
+
+    UtilityResponse updateUtility(UtilityRequest request);
 
     Utility getUtilityById(int id);
 
@@ -15,6 +17,8 @@ public interface UtilityService {
 
     List<UtilityResponse> getUtilitiesByName(String name);
 
-    void softDeleteUtility(int id);
+    List<UtilityResponse> getUtilitiesByStatus(Boolean status);
+
+    UtilityResponse softDeleteUtility(int id);
 
 }
