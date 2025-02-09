@@ -13,9 +13,6 @@ import java.util.Optional;
 public interface SelectionRepository extends JpaRepository<Selection, Integer> {
     Optional<Selection> findByName(String name);
 
-//    @Query("SELECT s FROM selection s JOIN s.campSiteList cs WHERE s.name = :name AND cs.id = :campSiteId")
-    Optional<Selection> findByNameAndCampSite_Id(@Param("name") String name, @Param("campSiteId") Integer campSiteId);
-
     List<Selection> findByNameContainingIgnoreCase(String name);
 }
 
