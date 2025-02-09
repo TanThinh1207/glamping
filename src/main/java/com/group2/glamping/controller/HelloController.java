@@ -30,6 +30,12 @@ public class HelloController {
         return new ResponseEntity<>("Hello World!", HttpStatus.OK);
     }
 
+    @GetMapping("/secured")
+    public String secured() {
+        return "Hello from secured endpoint!";
+    }
+
+
     @GetMapping("/hello/request")
     @Operation(
             summary = "Return Hello World with request",
@@ -38,7 +44,7 @@ public class HelloController {
                     @ApiResponse(responseCode = "200", description = "Return Successfully")
             }
     )
-    public ResponseEntity<?> helloWithRequest(@Valid HelloRequest helloRequest){
+    public ResponseEntity<?> helloWithRequest(@Valid HelloRequest helloRequest) {
         return new ResponseEntity<>("Hello World! " + helloRequest.getMessage(), HttpStatus.OK);
     }
 
@@ -53,7 +59,7 @@ public class HelloController {
     public ResponseEntity<?> helloWithParameter(
             @Parameter(description = "name of user", example = "thinh")
             @RequestParam String name
-    ){
+    ) {
         return new ResponseEntity<>("Hello World! " + name, HttpStatus.OK);
     }
 }

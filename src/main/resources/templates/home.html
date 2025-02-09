@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Chủ</title>
+    <script>
+        // Lấy token từ URL (nếu có)
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Chuyển hướng hoặc hiển thị thông tin token
+        window.onload = function() {
+            const token = getQueryParam("token");
+            if (token) {
+                localStorage.setItem("jwt_token", token); // Lưu token vào localStorage
+                document.getElementById("token-display").innerText = token;
+            } else {
+                document.getElementById("token-display").innerText = "Không có token.";
+            }
+        };
+
+        function logout() {
+            localStorage.removeItem("jwt_token");
+            window.location.href = "/login"; // Chuyển hướng về trang đăng nhập
+        }
+    </script>
+</head>
+<body>
+<h1>Chào mừng bạn đến với Trang Chủ!</h1>
+<p>Token của bạn:</p>
+<pre id="token-display">Đang tải...</pre>
+<button onclick="logout()">Đăng xuất</button>
+</body>
+</html>
