@@ -16,7 +16,7 @@ public interface CampSiteService {
 
     Optional<CampSiteResponse> saveCampSite(CampSiteRequest request);
 
-    Optional<CampSite> findCampSiteById(int id);
+//    Optional<CampSite> findCampSiteById(int id);
 
     Optional<CampSiteResponse> getCampSiteBasicDetail(int id);
 

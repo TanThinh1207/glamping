@@ -85,7 +85,7 @@ public class CampSiteController {
     @GetMapping("/filterbynameorcity/{filterCondition}")
     public ResponseEntity<BaseResponse> deleteCampType(@PathVariable String filterCondition) {
         BaseResponse response = campSiteService.searchCampSiteByNameOrCity(filterCondition);
-        return ResponseEntity.status((int) response.getStatusCode()).body(response);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }
 
