@@ -30,6 +30,12 @@ public class HelloController {
         return new ResponseEntity<>("Hello World!", HttpStatus.OK);
     }
 
+    @GetMapping("/secured")
+    public String secured() {
+        return "Hello from secured endpoint!";
+    }
+
+
     @GetMapping("/hello/request")
     @Operation(
             summary = "Return Hello World with request",
