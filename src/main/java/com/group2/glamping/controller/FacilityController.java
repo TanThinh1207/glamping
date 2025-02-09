@@ -43,8 +43,8 @@ public class FacilityController {
 
 
     @PostMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteFacility(@PathVariable Integer id) {
+    public ResponseEntity<BaseResponse> deleteFacility(@PathVariable Integer id) {
         facilityService.deleteFacility(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Facility deleted successfully", null));
     }
 }

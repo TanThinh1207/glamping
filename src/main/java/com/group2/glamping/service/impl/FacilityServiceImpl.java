@@ -7,7 +7,6 @@ import com.group2.glamping.repository.FacilityRepository;
 import com.group2.glamping.service.interfaces.FacilityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,10 +42,16 @@ public class FacilityServiceImpl implements FacilityService {
     }
 
     @Override
-    public FacilityResponse getFacilityByName(String name) {
-        Facility facility = facilityRepository.findByName(name)
-                .orElseThrow(() -> new RuntimeException("Facility not found"));
-        return convertToResponse(facility);
+    public List<FacilityResponse> getFacilityByName(String name) {
+        List<Facility> facilities = facilityRepository.findByNameContainingIgnoreCase(name);
+
+        if (facilities.isEmpty()) {
+            throw new RuntimeException("No facilities found with name: " + name);
+        }
+
+        return facilities.stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
     @Override

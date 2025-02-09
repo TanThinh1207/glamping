@@ -17,5 +17,4 @@ public class SelectionResponse {
     private String description;
     private double price;
     private String image;
-    private CampSiteResponse campSiteResponse;
 }

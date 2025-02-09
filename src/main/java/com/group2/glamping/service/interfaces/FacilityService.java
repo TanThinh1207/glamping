@@ -8,7 +8,10 @@ import java.util.List;
 
 public interface FacilityService {
     FacilityResponse createOrUpdateFacility(FacilityRequest request);
+
     List<FacilityResponse> getAllFacilities();
-    FacilityResponse getFacilityByName(String name);
+
+    List<FacilityResponse> getFacilityByName(String name);
+
     Void deleteFacility(Integer id);
 }

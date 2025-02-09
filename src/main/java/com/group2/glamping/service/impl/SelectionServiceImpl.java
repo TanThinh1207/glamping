@@ -1,12 +1,9 @@
 package com.group2.glamping.service.impl;
 
 import com.group2.glamping.model.dto.requests.SelectionRequest;
-import com.group2.glamping.model.dto.response.CampSiteResponse;
 import com.group2.glamping.model.dto.response.SelectionResponse;
 import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.model.entity.Selection;
-import com.group2.glamping.model.mapper.CampSiteMapper;
-import com.group2.glamping.model.mapper.CampSiteMapper2;
 import com.group2.glamping.repository.CampSiteRepository;
 import com.group2.glamping.repository.SelectionRepository;
 import com.group2.glamping.service.interfaces.SelectionService;
@@ -90,15 +87,6 @@ public class SelectionServiceImpl implements SelectionService {
         response.setDescription(selection.getDescription());
         response.setPrice(selection.getPrice());
         response.setImage(selection.getImageUrl());
-
-        // Kiểm tra nếu campSite không null trước khi ánh xạ
-        CampSite campSite = selection.getCampSite();
-        if (campSite != null) {
-            response.setCampSiteResponse(CampSiteMapper2.toDto(selection.getCampSite(), true));
-        } else {
-            response.setCampSiteResponse(null);
-        }
-
         return response;
     }
 }

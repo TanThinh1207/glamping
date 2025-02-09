@@ -50,8 +50,7 @@ public class CampSiteMapper {
                                         selection.getName(),
                                         selection.getDescription(),
                                         selection.getPrice(),
-                                        selection.getImageUrl(),
-                                        toDto(selection.getCampSite())
+                                        selection.getImageUrl()
                                 );
                             }
                             return null;
