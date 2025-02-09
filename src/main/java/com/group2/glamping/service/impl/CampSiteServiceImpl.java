@@ -109,17 +109,15 @@ public class CampSiteServiceImpl implements CampSiteService {
         campSite.setUtilities(utilities);
 
         List<PlaceType> placeTypes = campSitePlaceTypes.stream()
-                .map(request -> placeTypeRepository.findById(request.getId())
+                .map(request -> placeTypeRepository.findById(request.id())
                         .map(existingPlaceType -> {
-                            existingPlaceType.setImage(request.getImagePath());
-                            existingPlaceType.setStatus(request.isStatus());
+                            existingPlaceType.setImage(request.imagePath().getOriginalFilename());
                             return placeTypeRepository.save(existingPlaceType);
                         })
                         .orElseGet(() -> {
                             PlaceType newPlaceType = new PlaceType();
-                            newPlaceType.setName(request.getName());
-                            newPlaceType.setImage(request.getImagePath());
-                            newPlaceType.setStatus(request.isStatus());
+                            newPlaceType.setName(request.name());
+                            newPlaceType.setImage(request.imagePath().getOriginalFilename());
                             //newPlaceType.setCampSite(campSite);
                             return placeTypeRepository.save(newPlaceType);
                         })
