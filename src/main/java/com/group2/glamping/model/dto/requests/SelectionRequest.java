@@ -4,17 +4,18 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class SelectionRequest {
-
-    private String name;
-    private String description;
-    private double price;
-    private String imageUrl;
-    private boolean status;
-
+//@Data
+//@Builder
+//@AllArgsConstructor
+//@NoArgsConstructor
+public record SelectionRequest(
+        Integer id,
+        String name,
+        String description,
+        double price,
+        MultipartFile image,
+        Integer campSiteId
+) {
 }

@@ -1,6 +1,5 @@
 package com.group2.glamping.model.dto.response;
 
-import com.group2.glamping.model.entity.CampSite;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,11 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SelectionResponse {
-
+public class FacilityResponse {
     private int id;
     private String name;
     private String description;
-    private double price;
     private String image;
 }

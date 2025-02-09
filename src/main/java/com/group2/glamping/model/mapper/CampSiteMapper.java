@@ -50,7 +50,7 @@ public class CampSiteMapper {
                                         selection.getName(),
                                         selection.getDescription(),
                                         selection.getPrice(),
-                                        selection.isStatus()
+                                        selection.getImageUrl()
                                 );
                             }
                             return null;
@@ -59,6 +59,7 @@ public class CampSiteMapper {
                         .collect(Collectors.toList()) :
                 Collections.emptyList();
     }
+
 
     private static List<UtilityResponse> mapUtilities(CampSite campSite) {
         return (campSite.getUtilities() != null) ?

@@ -70,21 +70,21 @@ public class CampSiteServiceImpl implements CampSiteService {
         campSite.setCreatedTime(LocalDateTime.now());
 
         List<Selection> selections = campSiteSelections.stream()
-                .map(request -> selectionRepository.findByNameAndCampSiteId(request.getName(), campSite.getId())
+                .map(request -> selectionRepository.findByNameAndCampSite_Id(request.name(), campSite.getId())
                         .map(existingSelection -> {
-                            existingSelection.setDescription(request.getDescription());
-                            existingSelection.setPrice(request.getPrice());
-                            existingSelection.setImageUrl(request.getImageUrl());
-                            existingSelection.setStatus(request.isStatus());
+                            existingSelection.setDescription(request.description());
+                            existingSelection.setPrice(request.price());
+                            existingSelection.setImageUrl(request.image().getOriginalFilename());
+//                          //  existingSelection.setStatus(request.isStatus());
                             return selectionRepository.save(existingSelection);
                         })
                         .orElseGet(() -> {
                             Selection newSelection = new Selection();
-                            newSelection.setName(request.getName());
-                            newSelection.setDescription(request.getDescription());
-                            newSelection.setPrice(request.getPrice());
-                            newSelection.setImageUrl(request.getImageUrl());
-                            newSelection.setStatus(request.isStatus());
+                            newSelection.setName(request.name());
+                            newSelection.setDescription(request.description());
+                            newSelection.setPrice(request.price());
+                            newSelection.setImageUrl(request.image().getOriginalFilename());
+//                            newSelection.setStatus(request.isStatus());
                             //newSelection.setCampSit(campSite);
                             return selectionRepository.save(newSelection);
                         })
@@ -93,17 +93,17 @@ public class CampSiteServiceImpl implements CampSiteService {
         campSite.setSelections(selections);
 
         List<Utility> utilities = campSiteUtilities.stream()
-                .map(request -> utilityRepository.findById(request.getId())
+                .map(request -> utilityRepository.findById(request.id())
                         .map(existingUtility -> {
-                            existingUtility.setImageUrl(request.getImagePath());
-                            existingUtility.setStatus(request.isStatus());
+                            existingUtility.setImageUrl(request.name());
+//                            existingUtility.setStatus(request.isStatus());
                             return utilityRepository.save(existingUtility);
                         })
                         .orElseGet(() -> {
                             Utility newUtility = new Utility();
-                            newUtility.setName(request.getName());
-                            newUtility.setImageUrl(request.getImagePath());
-                            newUtility.setStatus(request.isStatus());
+                            newUtility.setName(request.name());
+                            newUtility.setImageUrl(request.imagePath().getOriginalFilename());
+//                            newUtility.setStatus(request.isStatus());
                             //newUtility.setCampSite(campSite);
                             return utilityRepository.save(newUtility);
                         })
