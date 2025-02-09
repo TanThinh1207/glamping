@@ -11,7 +11,7 @@ public class BookingRequest {
     int userId;
     int campSiteId;
     double totalAmount;
-    List<BookingServiceRequest> bookingServiceList;
+    List<BookingSelectionRequest> bookingSelectionRequestList;
 
 
 }

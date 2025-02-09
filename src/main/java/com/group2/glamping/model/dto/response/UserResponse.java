@@ -10,14 +10,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserResponseDTO {
+public class UserResponse {
     private int id;
     private String email;
     private String firstname;
     private String lastname;
 
 
-    public UserResponseDTO(User user) {
+    public UserResponse(User user) {
         this.id = user.getId();
         this.email = user.getEmail();
         this.firstname = user.getFirstname();

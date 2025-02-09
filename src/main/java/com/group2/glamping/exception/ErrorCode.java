@@ -17,6 +17,10 @@ public enum ErrorCode {
     WRONG_PASSWORD(1008, "Wrong password", HttpStatus.BAD_REQUEST),
     INVALID_DOB(1009, "Your age must be at least 16", HttpStatus.BAD_REQUEST),
     CAMP_SITE_NOT_FOUND(10010, "Camp site not found", HttpStatus.NOT_FOUND),
+    SELECTION_NOT_FOUND(10011, "Selection not found", HttpStatus.NOT_FOUND),
+    UTILITY_NOT_FOUND(10012, "Utility not found", HttpStatus.NOT_FOUND),
+    CAMP_TYPE_NOT_FOUND(10013, "Camp type not found", HttpStatus.NOT_FOUND),
+    BOOKING_NOT_FOUND(10014, "Booking not found", HttpStatus.NOT_FOUND),
 
     ;
 

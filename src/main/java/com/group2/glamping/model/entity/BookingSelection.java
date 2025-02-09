@@ -3,6 +3,7 @@ package com.group2.glamping.model.entity;
 import com.group2.glamping.model.entity.id.IdBookingSelection;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity(name = "booking_selection")
+@Builder
 public class BookingSelection {
 
     @EmbeddedId

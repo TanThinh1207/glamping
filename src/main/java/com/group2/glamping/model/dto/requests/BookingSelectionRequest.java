@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Builder
 @Data
-public class BookingServiceRequest {
+public class BookingSelectionRequest {
     int id_service;
     int quantity;
 }
