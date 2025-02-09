@@ -1,5 +1,6 @@
 package com.group2.glamping.model.dto.response;
 
+import com.group2.glamping.model.entity.CampType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,13 +23,21 @@ public class CampTypeResponse {
     int quantity;
     boolean status;
 
-//  "id": 0,
-//          "type": "sea",
-//          "capacity": 0,
-//          "price": 0,
-//          "weekendRate": 0,
-//          "holidayRate": 0,
-//          "updatedTime": "2025-01-22T06:48:04.885Z",
-//          "quantity": 0,
-//          "status": true
+    public static CampTypeResponse fromEntity(CampType campType) {
+        if (campType == null) {
+            return null;
+        }
+
+        return CampTypeResponse.builder()
+                .id(campType.getId())
+                .type(campType.getType())
+                .capacity(campType.getCapacity())
+                .price(campType.getPrice())
+                .weekendRate(campType.getWeekendRate())
+                .holidayRate(campType.getHolidayRate())
+                .updatedAt(campType.getUpdatedTime())
+                .quantity(campType.getQuantity())
+                .status(campType.isStatus())
+                .build();
+    }
 }
