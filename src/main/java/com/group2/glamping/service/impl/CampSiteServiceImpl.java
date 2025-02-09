@@ -89,7 +89,6 @@ public class CampSiteServiceImpl implements CampSiteService {
 
         campSite.setSelections(selections);
 
-
         List<Utility> utilities = campSiteUtilities.stream()
                 .map(request -> utilityRepository.findById(request.id())
                                 .map(existingUtility -> {

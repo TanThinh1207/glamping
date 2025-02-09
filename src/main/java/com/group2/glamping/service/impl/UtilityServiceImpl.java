@@ -18,15 +18,35 @@ public class UtilityServiceImpl implements UtilityService {
     private final UtilityRepository utilityRepository;
 
     @Override
-    public UtilityResponse saveOrUpdateUtility(UtilityRequest request) {
-        // Mapping request to entity
+    public UtilityResponse createUtility(UtilityRequest request) {
+        UtilityResponse.builder()
+                .name(request.name())
+                .imagePath(request.imagePath() != null ? request.imagePath().getOriginalFilename() : null)
+                .status(true)
+                .build();
         Utility utility = mapRequestToEntity(request);
-
-        utility = utilityRepository.save(utility);
-
-        // Mapping to utility entity and return
+        utility.setStatus(true);
+        utilityRepository.save(utility);
         return mapEntityToResponse(utility);
     }
+
+    @Override
+    public UtilityResponse updateUtility(UtilityRequest request) {
+        Utility existingUtility = getUtilityById(request.id());
+
+        if (request.name() != null) {
+            existingUtility.setName(request.name());
+        }
+
+        if (request.imagePath() != null && !request.imagePath().isEmpty()) {
+            existingUtility.setImageUrl(request.imagePath().getOriginalFilename());
+        }
+
+        utilityRepository.save(existingUtility);
+
+        return mapEntityToResponse(existingUtility);
+    }
+
 
     @Override
     public Utility getUtilityById(int id) {
@@ -49,43 +69,54 @@ public class UtilityServiceImpl implements UtilityService {
                 .collect(Collectors.toList());
     }
 
+    //Get Utilities by status
     @Override
-    public void softDeleteUtility(int id) {
+    public List<UtilityResponse> getUtilitiesByStatus(Boolean status) {
+        List<Utility> utilities = utilityRepository.findByStatus(status);
+        return utilities.stream()
+                .map(this::mapEntityToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public UtilityResponse softDeleteUtility(int id) {
         Utility utility = getUtilityById(id);
         utility.setStatus(false);
         utilityRepository.save(utility);
+        return mapEntityToResponse(utility);
     }
+
+
 
     // Mapping request to entity
     private Utility mapRequestToEntity(UtilityRequest request) {
-        Utility utility;
+        Utility.UtilityBuilder utilityBuilder = Utility.builder();
 
         if (request.id() != null) {
-            utility = utilityRepository.findById(request.id()).orElse(new Utility());
-        } else {
-            utility = new Utility();
+            Utility existingUtility = utilityRepository.findById(request.id()).orElse(new Utility());
+            utilityBuilder.id(existingUtility.getId())
+                    .imageUrl(existingUtility.getImageUrl());
         }
 
-        utility.setName(request.name());
+        utilityBuilder.name(request.name());
 
         if (request.imagePath() != null && !request.imagePath().isEmpty()) {
             String filename = request.imagePath().getOriginalFilename();
-            utility.setImageUrl(filename);
-        } else if (request.id() != null) {  // Nếu không có ảnh mới, giữ ảnh cũ
-            Utility existingUtility = getUtilityById(request.id());
-            utility.setImageUrl(existingUtility.getImageUrl());
+            utilityBuilder.imageUrl(filename);
         }
 
-        return utility;
+        return utilityBuilder.build();
     }
+
 
 
     // Mapping to entity to entityResponse
     private UtilityResponse mapEntityToResponse(Utility utility) {
-        UtilityResponse response = new UtilityResponse();
-        response.setId(utility.getId());
-        response.setName(utility.getName());
-        response.setImagePath(utility.getImageUrl());
-        return response;
+        return UtilityResponse.builder()
+                .id(utility.getId())
+                .name(utility.getName())
+                .imagePath(utility.getImageUrl())
+                .status(utility.isStatus())
+                .build();
     }
 }

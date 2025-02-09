@@ -1,14 +1,14 @@
 package com.group2.glamping.controller;
 
 import com.group2.glamping.model.dto.requests.FacilityRequest;
-import com.group2.glamping.model.dto.requests.UtilityRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.FacilityResponse;
-import com.group2.glamping.model.dto.response.UtilityResponse;
 import com.group2.glamping.service.interfaces.FacilityService;
-import com.group2.glamping.service.interfaces.UtilityService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.apache.bcel.classfile.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -20,31 +20,166 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/facilities")
+@Tag(name = "Facility API", description = "API for managing facilities in the Glamping system")
 @RequiredArgsConstructor
 public class FacilityController {
+
     private final FacilityService facilityService;
+    private static final Logger logger = LoggerFactory.getLogger(FacilityController.class);
 
-    @PostMapping("/save")
-    public ResponseEntity<FacilityResponse> createOrUpdateFacility(
-            @RequestParam(required = false) Integer id,
+    // Create Facility
+    @PostMapping("/create")
+    @Operation(
+            summary = "Create a new facility",
+            description = "Creates a new facility with the provided name, description, and optional image.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Facility created successfully"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<BaseResponse> createFacility(
+            @Parameter(description = "Name of the facility", required = true)
             @RequestParam String name,
+            @Parameter(description = "Description of the facility", required = true)
             @RequestParam String description,
-            @RequestParam(required = false) MultipartFile image) {
-        return ResponseEntity.ok(facilityService.createOrUpdateFacility( new FacilityRequest(id, name, description, image)));
-    }
-
-    @GetMapping
-    public ResponseEntity<?> getFacilities(@RequestParam(value = "name", required = false) String name) {
-        if (name != null) {
-            return ResponseEntity.ok(facilityService.getFacilityByName(name));
+            @Parameter(description = "Image file for the facility (optional)")
+            @RequestParam(required = false) MultipartFile image
+    ) {
+        try {
+            FacilityRequest request = new FacilityRequest(null, name, description, image);
+            FacilityResponse response = facilityService.createFacility(request);
+            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Facility created successfully", response));
+        } catch (Exception e) {
+            logger.error("Error while creating facility: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
         }
-        return ResponseEntity.ok(facilityService.getAllFacilities());
     }
 
+    // Update Facility
+    @PostMapping("/update")
+    @Operation(
+            summary = "Update an existing facility",
+            description = "Updates an existing facility with the provided id, name, description, and optional image.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Facility updated successfully"),
+                    @ApiResponse(responseCode = "404", description = "Facility not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<BaseResponse> updateFacility(
+            @Parameter(description = "ID of the facility to update", required = true)
+            @RequestParam Integer id,
+            @Parameter(description = "Updated name of the facility", required = true)
+            @RequestParam String name,
+            @Parameter(description = "Updated description of the facility", required = true)
+            @RequestParam String description,
+            @Parameter(description = "Updated image file for the facility (optional)")
+            @RequestParam(required = false) MultipartFile image
+    ) {
+        try {
+            FacilityRequest request = new FacilityRequest(id, name, description, image);
+            FacilityResponse response = facilityService.updateFacility(request);
+            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Facility updated successfully", response));
+        } catch (Exception e) {
+            logger.error("Error while updating facility: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
+        }
+    }
 
+    // Retrieve All Facilities
+    @GetMapping("/getAll")
+    @Operation(
+            summary = "Retrieve all facilities",
+            description = "Retrieves all facilities.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Facilities retrieved successfully"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<BaseResponse> getAllFacilities() {
+        try {
+            List<FacilityResponse> facilities = facilityService.getAllFacilities();
+            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Facilities retrieved successfully", facilities));
+        } catch (Exception e) {
+            logger.error("Error while retrieving all facilities", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
+        }
+    }
+
+    // Retrieve Facilities by Name
+    @GetMapping("/getByName")
+    @Operation(
+            summary = "Retrieve facilities by name",
+            description = "Retrieves facilities filtered by the provided name.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Facilities retrieved successfully"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<BaseResponse> getFacilitiesByName(
+            @Parameter(description = "Name of the facility", example = "Gym", required = true)
+            @RequestParam(required = false) String name
+    ) {
+        try {
+            List<FacilityResponse> responses = (name == null || name.trim().isEmpty())
+                    ? facilityService.getAllFacilities()
+                    : facilityService.getFacilityByName(name);
+            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Facilities retrieved successfully", responses));
+        } catch (Exception e) {
+            logger.error("Error while retrieving facilities by name", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
+        }
+    }
+
+    // Retrieve Facilities by Status
+    @GetMapping("/getByStatus")
+    @Operation(
+            summary = "Retrieve facilities by status",
+            description = "Retrieves facilities filtered by status (true for active, false for inactive).",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Facilities retrieved successfully"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<BaseResponse> getFacilitiesByStatus(
+            @Parameter(description = "Status of the facility", example = "true", required = true)
+            @RequestParam(required = false) Boolean status
+    ) {
+        try {
+            List<FacilityResponse> facilities = facilityService.getFacilitiesByStatus(status);
+            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Facilities retrieved successfully", facilities));
+        } catch (Exception e) {
+            logger.error("Error while retrieving facilities by status", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
+        }
+    }
+
+    // Delete Facility (Soft Delete)
     @PostMapping("/delete/{id}")
-    public ResponseEntity<BaseResponse> deleteFacility(@PathVariable Integer id) {
-        facilityService.deleteFacility(id);
-        return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Facility deleted successfully", null));
+    @Operation(
+            summary = "Soft delete a facility",
+            description = "Marks a facility as deleted (inactive) instead of removing it from the database.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Facility deleted successfully"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<BaseResponse> deleteFacility(
+            @Parameter(description = "ID of the facility to delete", example = "3")
+            @PathVariable Integer id
+    ) {
+        try {
+            FacilityResponse response = facilityService.deleteFacility(id);
+            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Facility deleted successfully", response));
+        } catch (Exception e) {
+            logger.error("Error while deleting facility", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
+        }
     }
 }

@@ -11,11 +11,9 @@ import java.util.Optional;
 
 @Repository
 public interface UtilityRepository extends JpaRepository<Utility, Integer> {
-    Optional<Utility> findByName(String name);
 
-//    @Query("SELECT u FROM utility u JOIN u.campSites cs WHERE u.name = :name AND cs.id = :campSiteId")
-//    Optional<Utility> findByNameAndCampSite_Id(@Param("name") String name, @Param("campSiteId") Integer  campSiteId);
     List<Utility> findByNameContainingIgnoreCase(String name);
 
+    List<Utility> findByStatus(Boolean status);
 }
 
