@@ -21,8 +21,17 @@ public class CampSiteController {
     private final CampSiteService campSiteService;
 
     @GetMapping
-    public ResponseEntity<BaseResponse> getAllCampSites() {
-        List<CampSiteResponse> campsites = campSiteService.getCampSites();
+    public ResponseEntity<BaseResponse> getAllAvailableCampSites() {
+        List<CampSiteResponse> campsites = campSiteService.getAvailableCampSites();
+
+        return ResponseEntity.ok(
+                new BaseResponse(HttpStatus.OK.value(), "Camp sites retrieved successfully", campsites)
+        );
+    }
+
+    @GetMapping("/pending")
+    public ResponseEntity<BaseResponse> getAllPendingCampSites() {
+        List<CampSiteResponse> campsites = campSiteService.getPendingCampSites();
 
         return ResponseEntity.ok(
                 new BaseResponse(HttpStatus.OK.value(), "Camp sites retrieved successfully", campsites)

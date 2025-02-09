@@ -10,7 +10,9 @@ import java.util.Optional;
 
 public interface CampSiteService {
 
-    List<CampSiteResponse> getCampSites();
+    List<CampSiteResponse> getAvailableCampSites();
+
+    List<CampSiteResponse> getPendingCampSites();
 
     Optional<CampSiteResponse> saveCampSite(CampSiteRequest request);
 

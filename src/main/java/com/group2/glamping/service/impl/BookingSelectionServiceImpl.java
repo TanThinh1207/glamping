@@ -9,7 +9,7 @@ import com.group2.glamping.model.enums.BookingDetailStatus;
 import com.group2.glamping.model.enums.BookingStatus;
 import com.group2.glamping.repository.*;
 
-import com.group2.glamping.service.interfaces.BookingSelectionService;
+import com.group2.glamping.service.interfaces.BookingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class BookingSelectionServiceImpl implements BookingSelectionService {
+public class BookingSelectionServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
     private final BookingDetailRepository bookingDetailRepository;

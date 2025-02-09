@@ -1,13 +1,9 @@
 package com.group2.glamping.service.interfaces;
 
-import com.group2.glamping.model.dto.requests.BookingRequest;
-import com.group2.glamping.model.entity.Booking;
+import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 
 public interface BookingSelectionService {
-
-    Optional<Booking> createBooking(BookingRequest booking);
 
 
 }

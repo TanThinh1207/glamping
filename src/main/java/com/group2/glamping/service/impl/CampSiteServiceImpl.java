@@ -36,8 +36,15 @@ public class CampSiteServiceImpl implements CampSiteService {
 
 
     @Override
-    public List<CampSiteResponse> getCampSites() {
-        return campSiteRepository.findAll().stream()
+    public List<CampSiteResponse> getAvailableCampSites() {
+        return campSiteRepository.findAllByStatus(CampSiteStatus.Available).stream()
+                .map(CampSiteMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CampSiteResponse> getPendingCampSites() {
+        return campSiteRepository.findAllByStatus(CampSiteStatus.Pending).stream()
                 .map(CampSiteMapper::toDto)
                 .collect(Collectors.toList());
     }
