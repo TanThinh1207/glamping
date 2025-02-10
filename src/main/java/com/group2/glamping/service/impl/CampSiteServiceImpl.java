@@ -108,22 +108,22 @@ public class CampSiteServiceImpl implements CampSiteService {
                 .collect(Collectors.toList());
         campSite.setUtilities(utilities);
 
-        List<PlaceType> placeTypes = campSitePlaceTypes.stream()
-                .map(request -> placeTypeRepository.findById(request.id())
-                        .map(existingPlaceType -> {
-                            existingPlaceType.setImage(request.imagePath().getOriginalFilename());
-                            return placeTypeRepository.save(existingPlaceType);
-                        })
-                        .orElseGet(() -> {
-                            PlaceType newPlaceType = new PlaceType();
-                            newPlaceType.setName(request.name());
-                            newPlaceType.setImage(request.imagePath().getOriginalFilename());
-                            //newPlaceType.setCampSite(campSite);
-                            return placeTypeRepository.save(newPlaceType);
-                        })
-                )
-                .collect(Collectors.toList());
-        campSite.setPlaceTypes(placeTypes);
+//        List<PlaceType> placeTypes = campSitePlaceTypes.stream()
+//                .map(request -> placeTypeRepository.findById(request.id())
+//                        .map(existingPlaceType -> {
+//                            existingPlaceType.setImage(request.imagePath().getOriginalFilename());
+//                            return placeTypeRepository.save(existingPlaceType);
+//                        })
+//                        .orElseGet(() -> {
+//                            PlaceType newPlaceType = new PlaceType();
+//                            newPlaceType.setName(request.name());
+//                            newPlaceType.setImage(request.imagePath().getOriginalFilename());
+//                            //newPlaceType.setCampSite(campSite);
+//                            return placeTypeRepository.save(newPlaceType);
+//                        })
+//                )
+//                .collect(Collectors.toList());
+//        campSite.setPlaceTypes(placeTypes);
 
         List<CampType> campTypes = campTypeList.stream()
                 .map(request -> campTypeRepository.findByTypeAndCampSiteId(request.getType(), campSite.getId())

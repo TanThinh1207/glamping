@@ -7,6 +7,7 @@ import com.group2.glamping.repository.PlaceTypeRepository;
 import com.group2.glamping.service.interfaces.PlaceTypeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,24 +28,24 @@ public class PlaceTypeServiceImpl implements PlaceTypeService {
                 .name(request.name())
                 .status(true)
                 .build();
-        if (request.imagePath() != null && !request.imagePath().isEmpty()) {
-            String filename = request.imagePath().getOriginalFilename();
-            placeType.setImage(filename);
-        }
+//        if (request.imagePath() != null && !request.imagePath().isEmpty()) {
+//            String filename = request.imagePath().getOriginalFilename();
+//            placeType.setImage(filename);
+//        }
         placeTypeRepository.save(placeType);
         return convertToResponse(placeType);
     }
 
     @Override
-    public PlaceTypeResponse updatePlaceType(PlaceTypeRequest request) {
+    public PlaceTypeResponse updatePlaceType(PlaceTypeRequest request, MultipartFile image) {
         if (request.id() == null) {
             throw new RuntimeException("ID is required for update");
         }
         PlaceType placeType = placeTypeRepository.findById(request.id())
                 .orElseThrow(() -> new RuntimeException("Place type not found"));
         placeType.setName(request.name());
-        if (request.imagePath() != null && !request.imagePath().isEmpty()) {
-            String filename = request.imagePath().getOriginalFilename();
+        if (image != null && !image.isEmpty()) {
+            String filename = image.getOriginalFilename();
             placeType.setImage(filename);
         }
         placeTypeRepository.save(placeType);
