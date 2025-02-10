@@ -244,5 +244,16 @@ public class CampSiteServiceImpl implements CampSiteService {
         return response;
     }
 
+    @Override
+    public Optional<CampSiteResponse> enableCampSite(int id){
+        Optional<CampSite> existingCampSite = campSiteRepository.findById(id);
+        if(existingCampSite.isPresent() && existingCampSite.get().getStatus() == CampSiteStatus.Not_Available){
+            CampSite campSite = existingCampSite.get();
+            campSite.setStatus(CampSiteStatus.Available);
+            return Optional.of(CampSiteMapper.toDto(campSiteRepository.save(campSite)));
+        }
+        return Optional.empty();
+    }
+
 }
 

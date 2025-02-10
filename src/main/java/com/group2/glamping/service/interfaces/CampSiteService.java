@@ -25,4 +25,5 @@ public interface CampSiteService {
 
     BaseResponse searchCampSiteByNameOrCity(String str);
 
+    Optional<CampSiteResponse> enableCampSite(int id);
 }

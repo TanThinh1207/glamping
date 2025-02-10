@@ -117,6 +117,31 @@ public class CampSiteController {
     }
 
     @Operation(
+            summary = "Enable a campsite",
+            description = "Set status of a campsite from NOT AVAILABLE to AVAILABLE by ID",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Camp site enabled successfully"),
+                    @ApiResponse(responseCode = "404", description = "Camp site not found")
+            }
+    )
+    @PutMapping("/enableCampSite/{id}")
+    public ResponseEntity<BaseResponse> enableCampSite(
+            @Parameter(description = "ID of the campsite", example = "1") @PathVariable int id) {
+        try {
+                Optional<CampSiteResponse> response = campSiteService.enableCampSite(id);
+            return response.map(campSiteResponse -> ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(),
+                    "Camp site enabled successfully", campSiteResponse)))
+                    .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(new BaseResponse(HttpStatus.NOT_FOUND.value(),
+                    "No Camp Site found with ID: " + id + " has status Not Available.",
+                    null)));
+        } catch (AppException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new BaseResponse(HttpStatus.NOT_FOUND.value(),
+                    "Camp site not found",
+                    null));
+        }
+    }
+
+    @Operation(
             summary = "Delete a campsite",
             description = "Remove a campsite by its ID",
             responses = {
