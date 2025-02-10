@@ -20,6 +20,7 @@ public class BookingMapper {
         }
 
         return BookingResponse.builder()
+                .id(booking.getId())
                 .user(new UserResponse(booking.getUser()))
                 .campSite(CampSiteMapper.toDto(booking.getCampSite()))
                 .created_at(booking.getCreatedTime())

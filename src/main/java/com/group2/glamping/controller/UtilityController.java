@@ -43,7 +43,7 @@ public class UtilityController {
             @Parameter(description = "Image file for the utility (optional)")
             @RequestParam(required = false) MultipartFile image) {
         try {
-            UtilityRequest request = new UtilityRequest(null, name, image);
+            UtilityRequest request = new UtilityRequest(null, name);
             UtilityResponse response = utilityService.createUtility(request);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Utility created successfully", response));
         } catch (Exception e) {
@@ -72,7 +72,7 @@ public class UtilityController {
             @Parameter(description = "New image file for the utility (optional)")
             @RequestParam(required = false) MultipartFile image) {
         try {
-            UtilityRequest request = new UtilityRequest(id, name, image);
+            UtilityRequest request = new UtilityRequest(id, name);
             UtilityResponse response = utilityService.updateUtility(request);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Utility updated successfully", response));
         } catch (RuntimeException e) {

@@ -15,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class BookingResponse {
 
+    int id;
     UserResponse user;
     CampSiteResponse campSite;
     LocalDateTime created_at;

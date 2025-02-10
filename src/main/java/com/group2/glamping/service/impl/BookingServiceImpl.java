@@ -4,11 +4,14 @@ import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.BookingRequest;
 import com.group2.glamping.model.dto.response.BookingResponse;
+import com.group2.glamping.model.dto.response.PlaceTypeResponse;
+import com.group2.glamping.model.dto.response.UserResponse;
 import com.group2.glamping.model.entity.*;
 import com.group2.glamping.model.entity.id.IdBookingSelection;
 import com.group2.glamping.model.enums.BookingDetailStatus;
 import com.group2.glamping.model.enums.BookingStatus;
 import com.group2.glamping.model.mapper.BookingMapper;
+import com.group2.glamping.model.mapper.CampSiteMapper;
 import com.group2.glamping.repository.*;
 import com.group2.glamping.service.interfaces.BookingService;
 import jakarta.transaction.Transactional;
@@ -16,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,6 +37,7 @@ public class BookingServiceImpl implements BookingService {
     private final CampSiteRepository campSiteRepository;
     private final UserRepository userRepository;
     private final SelectionRepository selectionRepository;
+    private final CampSiteMapper campSiteMapper;
 
     @Override
     public Optional<BookingResponse> createBooking(BookingRequest bookingRequest) {
@@ -97,6 +102,36 @@ public class BookingServiceImpl implements BookingService {
         resp.setBookingSelectionList(bookingSelectionRepository.findBookingSelections(bookingDb.getId()));
 
         return Optional.of(BookingMapper.toDto(resp));
+    }
+
+    //Retrieve Pending Bookings
+    @Override
+    public List<BookingResponse> getPendingBookingsByCampSiteId(Integer campSiteId) {
+        List<Booking> bookings = bookingRepository.findPendingBookingsByCampSiteId(campSiteId);
+
+        // Nếu danh sách booking trống, trả về danh sách rỗng
+        if (bookings.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return bookings.stream()
+                .map(BookingMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    //Retrieve Completed Bookings
+    @Override
+    public List<BookingResponse> getCompletedBookingsByCampSiteId(Integer campSiteId) {
+        List<Booking> bookings = bookingRepository.findCompletedBookingsByCampSiteId(campSiteId);
+
+        // Nếu danh sách booking trống, trả về danh sách rỗng
+        if (bookings.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return bookings.stream()
+                .map(BookingMapper::toDto)
+                .collect(Collectors.toList());
     }
 
 }

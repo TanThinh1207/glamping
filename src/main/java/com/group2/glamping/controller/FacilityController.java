@@ -46,7 +46,7 @@ public class FacilityController {
             @RequestParam(required = false) MultipartFile image
     ) {
         try {
-            FacilityRequest request = new FacilityRequest(null, name, description, image);
+            FacilityRequest request = new FacilityRequest(null, name, description);
             FacilityResponse response = facilityService.createFacility(request);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Facility created successfully", response));
         } catch (Exception e) {
@@ -78,7 +78,7 @@ public class FacilityController {
             @RequestParam(required = false) MultipartFile image
     ) {
         try {
-            FacilityRequest request = new FacilityRequest(id, name, description, image);
+            FacilityRequest request = new FacilityRequest(id, name, description);
             FacilityResponse response = facilityService.updateFacility(request);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Facility updated successfully", response));
         } catch (Exception e) {

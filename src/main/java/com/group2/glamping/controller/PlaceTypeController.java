@@ -8,15 +8,20 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/placeTypes")
@@ -47,7 +52,7 @@ public class PlaceTypeController {
             PlaceTypeRequest request = PlaceTypeRequest.builder()
                     .id(null)
                     .name(name)
-                    .imagePath(image)
+//                    .imagePath(image)
                     .build();
             PlaceTypeResponse response = placeTypeService.createPlaceType(request);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Place type created successfully", response));
@@ -71,19 +76,27 @@ public class PlaceTypeController {
     )
     public ResponseEntity<BaseResponse> updatePlaceType(
             @Parameter(description = "ID of the place type to update", required = true)
-            @RequestParam Integer id,
-            @Parameter(description = "Updated name of the place type", required = true)
-            @RequestParam String name,
+            @Valid @ModelAttribute PlaceTypeRequest request,
+            BindingResult bindingResult,
             @Parameter(description = "Updated image file for the place type (optional)")
             @RequestParam(required = false) MultipartFile image
+
     ) {
+        if (bindingResult.hasErrors()) {
+            List<Map<String, Object>> errors = bindingResult.getFieldErrors().stream().map(error -> {
+                Map<String, Object> errorMap = new HashMap<>();
+                errorMap.put("field", error.getField());
+                errorMap.put("rejectedValue", error.getRejectedValue());
+                errorMap.put("message", error.getDefaultMessage());
+                return errorMap;
+            }).collect(Collectors.toList());
+
+            return ResponseEntity.badRequest().body(
+                    new BaseResponse(HttpStatus.BAD_REQUEST.value(), "Validation errors", errors)
+            );
+        }
         try {
-            PlaceTypeRequest request = PlaceTypeRequest.builder()
-                    .id(id)
-                    .name(name)
-                    .imagePath(image)
-                    .build();
-            PlaceTypeResponse response = placeTypeService.updatePlaceType(request);
+            PlaceTypeResponse response = placeTypeService.updatePlaceType(request, image);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Place type updated successfully", response));
         } catch (Exception e) {
             logger.error("Error while updating place type: {}", e.getMessage(), e);

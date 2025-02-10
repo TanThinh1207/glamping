@@ -81,7 +81,7 @@ public class CampSiteServiceImpl implements CampSiteService {
                         .name(request.name())
                         .description(request.description())
                         .price(request.price())
-                        .imageUrl(request.image().getOriginalFilename())
+//                        .imageUrl(request.image().getOriginalFilename())
                         .campSite(campSite)  // Gán CampSite vào Selection
                         .build()
                 )
@@ -99,7 +99,7 @@ public class CampSiteServiceImpl implements CampSiteService {
                                 .orElseGet(() -> {
                                     Utility newUtility = new Utility();
                                     newUtility.setName(request.name());
-                                    newUtility.setImageUrl(request.imagePath().getOriginalFilename());
+//                                    newUtility.setImageUrl(request.imagePath().getOriginalFilename());
 //                            newUtility.setStatus(request.isStatus());
                                     //newUtility.setCampSite(campSite);
                                     return utilityRepository.save(newUtility);
@@ -108,22 +108,22 @@ public class CampSiteServiceImpl implements CampSiteService {
                 .collect(Collectors.toList());
         campSite.setUtilities(utilities);
 
-        List<PlaceType> placeTypes = campSitePlaceTypes.stream()
-                .map(request -> placeTypeRepository.findById(request.id())
-                        .map(existingPlaceType -> {
-                            existingPlaceType.setImage(request.imagePath().getOriginalFilename());
-                            return placeTypeRepository.save(existingPlaceType);
-                        })
-                        .orElseGet(() -> {
-                            PlaceType newPlaceType = new PlaceType();
-                            newPlaceType.setName(request.name());
-                            newPlaceType.setImage(request.imagePath().getOriginalFilename());
-                            //newPlaceType.setCampSite(campSite);
-                            return placeTypeRepository.save(newPlaceType);
-                        })
-                )
-                .collect(Collectors.toList());
-        campSite.setPlaceTypes(placeTypes);
+//        List<PlaceType> placeTypes = campSitePlaceTypes.stream()
+//                .map(request -> placeTypeRepository.findById(request.id())
+//                        .map(existingPlaceType -> {
+//                            existingPlaceType.setImage(request.imagePath().getOriginalFilename());
+//                            return placeTypeRepository.save(existingPlaceType);
+//                        })
+//                        .orElseGet(() -> {
+//                            PlaceType newPlaceType = new PlaceType();
+//                            newPlaceType.setName(request.name());
+//                            newPlaceType.setImage(request.imagePath().getOriginalFilename());
+//                            //newPlaceType.setCampSite(campSite);
+//                            return placeTypeRepository.save(newPlaceType);
+//                        })
+//                )
+//                .collect(Collectors.toList());
+//        campSite.setPlaceTypes(placeTypes);
 
         List<CampType> campTypes = campTypeList.stream()
                 .map(request -> campTypeRepository.findByTypeAndCampSiteId(request.getType(), campSite.getId())
@@ -242,6 +242,17 @@ public class CampSiteServiceImpl implements CampSiteService {
         response.setData(campSiteResponseList);
 
         return response;
+    }
+
+    @Override
+    public Optional<CampSiteResponse> enableCampSite(int id){
+        Optional<CampSite> existingCampSite = campSiteRepository.findById(id);
+        if(existingCampSite.isPresent() && existingCampSite.get().getStatus() == CampSiteStatus.Not_Available){
+            CampSite campSite = existingCampSite.get();
+            campSite.setStatus(CampSiteStatus.Available);
+            return Optional.of(CampSiteMapper.toDto(campSiteRepository.save(campSite)));
+        }
+        return Optional.empty();
     }
 
 }

@@ -50,7 +50,7 @@ public class SelectionController {
             @RequestParam Integer campSiteId
     ) {
         try {
-            SelectionRequest request = new SelectionRequest(null, name, description, price, image, campSiteId);
+            SelectionRequest request = new SelectionRequest(null, name, description, price, campSiteId);
             SelectionResponse response = selectionService.createSelection(request);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Selection created successfully", response));
         } catch (Exception e) {
@@ -86,7 +86,7 @@ public class SelectionController {
             @RequestParam Integer campSiteId
     ) {
         try {
-            SelectionRequest request = new SelectionRequest(id, name, description, price, image, campSiteId);
+            SelectionRequest request = new SelectionRequest(id, name, description, price, campSiteId);
             SelectionResponse response = selectionService.updateSelection(request);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Selection updated successfully", response));
         } catch (Exception e) {

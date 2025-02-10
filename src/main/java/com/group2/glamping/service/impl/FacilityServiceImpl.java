@@ -24,9 +24,9 @@ public class FacilityServiceImpl implements FacilityService {
         Facility facility = new Facility();
         facility.setName(request.name());
         facility.setDescription(request.description());
-        if (request.image() != null && !request.image().isEmpty()) {
-            facility.setImageUrl(request.image().getOriginalFilename());
-        }
+//        if (request.image() != null && !request.image().isEmpty()) {
+//            facility.setImageUrl(request.image().getOriginalFilename());
+//        }
         facility.setStatus(true);
         facilityRepository.save(facility);
         return convertToResponse(facility);
@@ -41,9 +41,9 @@ public class FacilityServiceImpl implements FacilityService {
                 .orElseThrow(() -> new RuntimeException("Facility not found"));
         facility.setName(request.name());
         facility.setDescription(request.description());
-        if (request.image() != null && !request.image().isEmpty()) {
-            facility.setImageUrl(request.image().getOriginalFilename());
-        }
+//        if (request.image() != null && !request.image().isEmpty()) {
+//            facility.setImageUrl(request.image().getOriginalFilename());
+//        }
         facilityRepository.save(facility);
         return convertToResponse(facility);
     }
