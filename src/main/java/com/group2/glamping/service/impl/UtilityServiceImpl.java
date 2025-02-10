@@ -21,7 +21,7 @@ public class UtilityServiceImpl implements UtilityService {
     public UtilityResponse createUtility(UtilityRequest request) {
         UtilityResponse.builder()
                 .name(request.name())
-                .imagePath(request.imagePath() != null ? request.imagePath().getOriginalFilename() : null)
+//                .imagePath(request.imagePath() != null ? request.imagePath().getOriginalFilename() : null)
                 .status(true)
                 .build();
         Utility utility = mapRequestToEntity(request);
@@ -38,9 +38,9 @@ public class UtilityServiceImpl implements UtilityService {
             existingUtility.setName(request.name());
         }
 
-        if (request.imagePath() != null && !request.imagePath().isEmpty()) {
-            existingUtility.setImageUrl(request.imagePath().getOriginalFilename());
-        }
+//        if (request.imagePath() != null && !request.imagePath().isEmpty()) {
+//            existingUtility.setImageUrl(request.imagePath().getOriginalFilename());
+//        }
 
         utilityRepository.save(existingUtility);
 
@@ -100,10 +100,10 @@ public class UtilityServiceImpl implements UtilityService {
 
         utilityBuilder.name(request.name());
 
-        if (request.imagePath() != null && !request.imagePath().isEmpty()) {
-            String filename = request.imagePath().getOriginalFilename();
-            utilityBuilder.imageUrl(filename);
-        }
+//        if (request.imagePath() != null && !request.imagePath().isEmpty()) {
+//            String filename = request.imagePath().getOriginalFilename();
+//            utilityBuilder.imageUrl(filename);
+//        }
 
         return utilityBuilder.build();
     }

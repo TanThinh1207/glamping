@@ -81,7 +81,7 @@ public class CampSiteServiceImpl implements CampSiteService {
                         .name(request.name())
                         .description(request.description())
                         .price(request.price())
-                        .imageUrl(request.image().getOriginalFilename())
+//                        .imageUrl(request.image().getOriginalFilename())
                         .campSite(campSite)  // Gán CampSite vào Selection
                         .build()
                 )
@@ -99,7 +99,7 @@ public class CampSiteServiceImpl implements CampSiteService {
                                 .orElseGet(() -> {
                                     Utility newUtility = new Utility();
                                     newUtility.setName(request.name());
-                                    newUtility.setImageUrl(request.imagePath().getOriginalFilename());
+//                                    newUtility.setImageUrl(request.imagePath().getOriginalFilename());
 //                            newUtility.setStatus(request.isStatus());
                                     //newUtility.setCampSite(campSite);
                                     return utilityRepository.save(newUtility);

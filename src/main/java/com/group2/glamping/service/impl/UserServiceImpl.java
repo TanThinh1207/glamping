@@ -27,4 +27,5 @@ public class UserServiceImpl implements UserService {
     public Optional<User> getUserByEmail(String email) {
         return Optional.of(userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
     }
+
 }
