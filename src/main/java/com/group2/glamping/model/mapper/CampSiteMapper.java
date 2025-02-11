@@ -78,7 +78,7 @@ public class CampSiteMapper {
                                 return new UtilityResponse(
                                         utility.getId(),
                                         utility.getName(),
-                                        s3Service.generatePresignedUrl(utility.getImageUrl()),
+                                        utility.getImageUrl(), //s3Service.generatePresignedUrl(utility.getImageUrl()) khi nào có data của Utility sẽ sử dụng được
                                         utility.isStatus()
                                 );
                             }

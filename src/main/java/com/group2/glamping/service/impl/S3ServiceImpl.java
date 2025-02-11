@@ -1,8 +1,5 @@
 package com.group2.glamping.service.impl;
 
-import com.amazonaws.HttpMethod;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.*;
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.service.interfaces.S3Service;
@@ -11,12 +8,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Date;
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,7 +25,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class S3ServiceImpl implements S3Service {
 
-    private final AmazonS3 amazonS3;
+    private final S3Client s3Client;
+    private final S3Presigner s3Presigner;
 
     @Value("${aws.s3.bucketName}")
     private String bucketName;
@@ -34,11 +36,12 @@ public class S3ServiceImpl implements S3Service {
         try {
             String fileName = folderName + "/" + prefix + "_" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentLength(file.getSize());
-            metadata.setContentType(file.getContentType());
-
-            amazonS3.putObject(new PutObjectRequest(bucketName, fileName, file.getInputStream(), metadata));
+            s3Client.putObject(PutObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(fileName)
+                            .contentType(file.getContentType())
+                            .build(),
+                    RequestBody.fromBytes(file.getBytes()));
 
             return fileName;
         } catch (IOException e) {
@@ -48,62 +51,64 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public InputStreamResource downloadFile(String fileName) {
-        if (!amazonS3.doesObjectExist(bucketName, fileName)) {
-            throw new RuntimeException("File not found: " + fileName);
-        }
-        S3Object s3Object = amazonS3.getObject(bucketName, fileName);
-        InputStream inputStream = s3Object.getObjectContent();
-        return new InputStreamResource(inputStream);
+        ResponseInputStream<GetObjectResponse> s3Object = s3Client.getObject(GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(fileName)
+                .build());
+
+        return new InputStreamResource(s3Object);
     }
+
 
     @Override
     public String deleteFile(String fileName) {
-        if (!amazonS3.doesObjectExist(bucketName, fileName)) {
+        try {
+            s3Client.deleteObject(DeleteObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(fileName)
+                    .build());
+            return fileName + " removed successfully.";
+        } catch (S3Exception e) {
             throw new AppException(ErrorCode.FILE_NOT_FOUND);
         }
-        amazonS3.deleteObject(bucketName, fileName);
-        return fileName + " removed successfully.";
     }
 
     @Override
     public List<String> listFiles(String folderName) {
-        ObjectListing objectListing = amazonS3.listObjects(bucketName, folderName + "/");
-        return objectListing.getObjectSummaries().stream()
-                .map(S3ObjectSummary::getKey)
+        ListObjectsV2Response listResponse = s3Client.listObjectsV2(ListObjectsV2Request.builder()
+                .bucket(bucketName)
+                .prefix(folderName + "/")
+                .build());
+
+        return listResponse.contents().stream()
+                .map(S3Object::key)
                 .collect(Collectors.toList());
     }
 
-
     @Override
     public String generatePresignedUrl(String fileName) {
+        if (fileName == null || fileName.trim().isEmpty()) {
+            throw new IllegalArgumentException("File name cannot be empty or null");
+        }
 
-        Date expiration = new Date();
-        long expTimeMillis = expiration.getTime();
-        expTimeMillis += 1000 * 60 * 60; // 1 giờ
-        expiration.setTime(expTimeMillis);
+        try { 
+            GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                    .signatureDuration(Duration.ofHours(1)) // URL hết hạn sau 1 giờ
+                    .getObjectRequest(req -> req.bucket(bucketName).key(fileName))
+                    .build();
 
-        GeneratePresignedUrlRequest generatePresignedUrlRequest =
-                new GeneratePresignedUrlRequest(bucketName, fileName)
-                        .withExpiration(expiration);
-
-        URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
-        return url.toString();
+            PresignedGetObjectRequest presignedRequest = s3Presigner.presignGetObject(presignRequest);
+            return presignedRequest.url().toString();
+        } catch (S3Exception e) {
+            throw new AppException(ErrorCode.S3_ERROR);
+        }
     }
+
 
     @Override
     public List<String> generatePresignedUrls(List<String> fileKeys) {
-        List<String> urls = new ArrayList<>();
-        for (String fileKey : fileKeys) {
-            Date expiration = new Date();
-            expiration.setTime(expiration.getTime() + 1000 * 60 * 60);  // 1 giờ hết hạn
-
-            GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, fileKey)
-                    .withMethod(HttpMethod.GET)
-                    .withExpiration(expiration);
-
-            urls.add(amazonS3.generatePresignedUrl(request).toString());
-        }
-        return urls;
+        return fileKeys.stream()
+                .map(this::generatePresignedUrl)
+                .collect(Collectors.toList());
     }
-
 }
