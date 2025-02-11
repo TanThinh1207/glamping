@@ -23,8 +23,9 @@ public enum ErrorCode {
     UTILITY_NOT_FOUND(10012, "Utility not found", HttpStatus.NOT_FOUND),
     CAMP_TYPE_NOT_FOUND(10013, "Camp type not found", HttpStatus.NOT_FOUND),
     BOOKING_NOT_FOUND(10014, "Booking not found", HttpStatus.NOT_FOUND),
-
-    ;
+    FILE_NOT_FOUND(10015, "File not found", HttpStatus.NOT_FOUND),
+    S3_ERROR(10016, "S3 error", HttpStatus.INTERNAL_SERVER_ERROR),
+    PLACE_TYPE_NOT_FOUND(10016, "Place type not found", HttpStatus.NOT_FOUND);
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;

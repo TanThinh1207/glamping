@@ -7,17 +7,19 @@ import com.group2.glamping.model.dto.response.CampTypeRemainingResponse;
 import com.group2.glamping.model.dto.response.CampTypeResponse;
 import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.model.entity.CampType;
-import com.group2.glamping.repository.CampTypeRepository;
 import com.group2.glamping.repository.CampSiteRepository;
+import com.group2.glamping.repository.CampTypeRepository;
 import com.group2.glamping.service.interfaces.ICampTypeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -69,8 +71,8 @@ public class CampTypeServiceImpl implements ICampTypeService {
             response.setMessage("CampSite not found");
             return response;
         }
-      
-      
+
+
         CampType campType = CampType.builder()
                 .type(request.getType())
                 .capacity(request.getCapacity())
@@ -116,13 +118,13 @@ public class CampTypeServiceImpl implements ICampTypeService {
 
         CampType campType = campTypeOpt.get();
 
-        if (request.getType() != null) campType.setType(request.getType());
-        if (request.getCapacity() > 0) campType.setCapacity(request.getCapacity());
-        if (request.getPrice() > 0) campType.setPrice(request.getPrice());
-        if (request.getWeekendRate() > 0) campType.setWeekendRate(request.getWeekendRate());
-        if (request.getHolidayRate() > 0) campType.setHolidayRate(request.getHolidayRate());
-        if (request.getQuantity() >= 0) campType.setQuantity(request.getQuantity());
-        campType.setStatus(request.isStatus());
+        if (request.type() != null) campType.setType(request.type());
+        campType.setCapacity(request.capacity());
+        if (request.price() > 0) campType.setPrice(request.price());
+        if (request.weekendRate() > 0) campType.setWeekendRate(request.weekendRate());
+        if (request.weekendRate() > 0) campType.setHolidayRate(request.holidayRate());
+        campType.setQuantity(request.quantity());
+        campType.setStatus(request.status());
 
         campType.setUpdatedTime(LocalDateTime.now());
         campTypeRepository.save(campType);
@@ -176,7 +178,6 @@ public class CampTypeServiceImpl implements ICampTypeService {
         response.setData(campTypeResponses);
         return response;
     }
-
 
 
     @Override

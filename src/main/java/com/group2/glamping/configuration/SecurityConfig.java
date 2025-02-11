@@ -35,7 +35,7 @@ public class SecurityConfig {
 
             /*    For testing, delete later */
             "/api/v1/auth/**", "/api/campsites/**", "/api/bookings/**",
-            "/home/**", "/home"
+            "/home/**", "/home", "/api/s3/**"
 
     };
 
