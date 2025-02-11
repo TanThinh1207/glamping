@@ -2,7 +2,9 @@ package com.group2.glamping.service.impl;
 
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
-import com.group2.glamping.model.dto.requests.*;
+import com.group2.glamping.model.dto.requests.CampSiteRequest;
+import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
+import com.group2.glamping.model.dto.requests.SelectionRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.CampSiteResponse;
 import com.group2.glamping.model.dto.response.CampSiteResponseDTO;
@@ -12,11 +14,14 @@ import com.group2.glamping.model.enums.CampSiteStatus;
 import com.group2.glamping.model.mapper.CampSiteMapper;
 import com.group2.glamping.repository.*;
 import com.group2.glamping.service.interfaces.CampSiteService;
+import com.group2.glamping.service.interfaces.S3Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -29,156 +34,205 @@ public class CampSiteServiceImpl implements CampSiteService {
 
     private final CampSiteRepository campSiteRepository;
     private final UserRepository userService;
-    private final SelectionRepository selectionRepository;
     private final UtilityRepository utilityRepository;
     private final PlaceTypeRepository placeTypeRepository;
     private final CampTypeRepository campTypeRepository;
+    private final S3Service s3Service;
+    private final CampSiteMapper campSiteMapper;
+    private final ImageRepository imageRepository;
 
 
     @Override
     public List<CampSiteResponse> getAvailableCampSites() {
         return campSiteRepository.findAllByStatus(CampSiteStatus.Available).stream()
-                .map(CampSiteMapper::toDto)
+                .map(campSiteMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<CampSiteResponse> getPendingCampSites() {
         return campSiteRepository.findAllByStatus(CampSiteStatus.Pending).stream()
-                .map(CampSiteMapper::toDto)
+                .map(campSiteMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<CampSiteResponse> saveCampSite(CampSiteRequest campSiteUpdateRequest) {
+    public Optional<CampSiteResponse> saveCampSite(CampSiteRequest campSiteUpdateRequest,
+                                                   List<MultipartFile> files,
+                                                   MultipartFile selectionFile,
+                                                   MultipartFile campTypeFile) {
         if (campSiteUpdateRequest == null) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
 
         CampSite campSite = new CampSite();
-        return getCampSiteResponse(campSite, campSiteUpdateRequest.getName(), campSiteUpdateRequest.getAddress(), campSiteUpdateRequest.getLatitude(), campSiteUpdateRequest.getLongitude(), campSiteUpdateRequest.getCampSiteSelections(), campSiteUpdateRequest.getCampSiteUtilities(), campSiteUpdateRequest.getCampSitePlaceTypes(), campSiteUpdateRequest.getCampTypeList(), campSiteUpdateRequest);
+        return getCampSiteResponse(campSite,
+                campSiteUpdateRequest.hostId(),
+                campSiteUpdateRequest.name(),
+                campSiteUpdateRequest.address(),
+                campSiteUpdateRequest.city(),
+                files,
+                campSiteUpdateRequest.latitude(),
+                campSiteUpdateRequest.longitude(),
+                campSiteUpdateRequest.campSiteSelections(),
+                campSiteUpdateRequest.campSiteUtilities(),
+                campSiteUpdateRequest.campSitePlaceTypes(),
+                campSiteUpdateRequest.campTypeList(),
+                selectionFile,
+                campTypeFile);
     }
+
 
     //
 
-    private Optional<CampSiteResponse> getCampSiteResponse(CampSite campSite, String name, String address, double latitude, double longitude, List<SelectionRequest> campSiteSelections, List<UtilityRequest> campSiteUtilities, List<PlaceTypeRequest> campSitePlaceTypes, List<CampTypeUpdateRequest> campTypeList, CampSiteRequest campSiteUpdateRequest) {
+    private Optional<CampSiteResponse> getCampSiteResponse(CampSite campSite,
+                                                           int hostId,
+                                                           String name,
+                                                           String address,
+                                                           String city,
+                                                           List<MultipartFile> files,
+                                                           double latitude,
+                                                           double longitude,
+                                                           List<SelectionRequest> campSiteSelections,
+                                                           List<Integer> campSiteUtilities,
+                                                           List<Integer> campSitePlaceTypes,
+                                                           List<CampTypeUpdateRequest> campTypeList,
+                                                           MultipartFile selectionFile,
+                                                           MultipartFile campTypeFile) {
 
-        if (userService.findById(campSiteUpdateRequest.getHostId()).isPresent()) {
-            campSite.setUser(userService.findById(campSiteUpdateRequest.getHostId()).get());
-        } else {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
-        }
+        // Check Host
+        campSite.setUser(userService.findById(hostId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
 
+        // Set basic in4
         campSite.setName(name);
         campSite.setAddress(address);
         campSite.setLatitude(latitude);
         campSite.setLongitude(longitude);
         campSite.setStatus(CampSiteStatus.Pending);
         campSite.setCreatedTime(LocalDateTime.now());
+        campSite.setCity(city);
+
+        List<Image> imageEntities;
+
+        // CampSite Image
+        if (files != null && !files.isEmpty()) {
+            imageEntities = files.stream()
+                    .map(file -> {
+                        String imageUrl = s3Service.uploadFile(file, "CampSite/" + campSite.getName(), "CAMP_SITE");
+                        return new Image(0, imageUrl, campSite);
+                    })
+                    .collect(Collectors.toList());
+            campSite.setImageList(imageEntities);
+
+        } else {
+            System.out.println("File is empty");
+        }
+
+        // Selection
+        String selectionImageUrl = selectionFile != null
+                ? s3Service.uploadFile(selectionFile, "CampSite/" + campSite.getName(), "SELECTION")
+                : null;
 
         List<Selection> selections = campSiteSelections.stream()
                 .map(request -> Selection.builder()
                         .name(request.name())
                         .description(request.description())
                         .price(request.price())
-//                        .imageUrl(request.image().getOriginalFilename())
-                        .campSite(campSite)  // Gán CampSite vào Selection
-                        .build()
-                )
+                        .campSite(campSite)
+                        .imageUrl(selectionImageUrl)
+                        .build())
                 .collect(Collectors.toList());
 
         campSite.setSelections(selections);
 
-        List<Utility> utilities = campSiteUtilities.stream()
-                .map(request -> utilityRepository.findById(request.id())
-                                .map(existingUtility -> {
-                                    existingUtility.setImageUrl(request.name());
-//                            existingUtility.setStatus(request.isStatus());
-                                    return utilityRepository.save(existingUtility);
-                                })
-                                .orElseGet(() -> {
-                                    Utility newUtility = new Utility();
-                                    newUtility.setName(request.name());
-//                                    newUtility.setImageUrl(request.imagePath().getOriginalFilename());
-//                            newUtility.setStatus(request.isStatus());
-                                    //newUtility.setCampSite(campSite);
-                                    return utilityRepository.save(newUtility);
-                                })
-                )
-                .collect(Collectors.toList());
-        campSite.setUtilities(utilities);
-
-//        List<PlaceType> placeTypes = campSitePlaceTypes.stream()
-//                .map(request -> placeTypeRepository.findById(request.id())
-//                        .map(existingPlaceType -> {
-//                            existingPlaceType.setImage(request.imagePath().getOriginalFilename());
-//                            return placeTypeRepository.save(existingPlaceType);
-//                        })
-//                        .orElseGet(() -> {
-//                            PlaceType newPlaceType = new PlaceType();
-//                            newPlaceType.setName(request.name());
-//                            newPlaceType.setImage(request.imagePath().getOriginalFilename());
-//                            //newPlaceType.setCampSite(campSite);
-//                            return placeTypeRepository.save(newPlaceType);
-//                        })
-//                )
-//                .collect(Collectors.toList());
-//        campSite.setPlaceTypes(placeTypes);
+        // CampType
+        String campTypeImageUrl = campTypeFile != null
+                ? s3Service.uploadFile(campTypeFile, "CampSite/" + campSite.getName(), "CAMP_TYPE")
+                : null;
 
         List<CampType> campTypes = campTypeList.stream()
-                .map(request -> campTypeRepository.findByTypeAndCampSiteId(request.getType(), campSite.getId())
+                .map(request -> campTypeRepository.findByTypeAndCampSiteId(request.type(), campSite.getId())
                         .map(existingCampType -> {
-                            existingCampType.setCapacity(request.getCapacity());
-                            existingCampType.setPrice(request.getPrice());
-                            existingCampType.setWeekendRate(request.getWeekendRate());
-                            existingCampType.setHolidayRate(request.getHolidayRate());
+                            existingCampType.setCapacity(request.capacity());
+                            existingCampType.setPrice(request.price());
+                            existingCampType.setWeekendRate(request.weekendRate());
+                            existingCampType.setHolidayRate(request.holidayRate());
                             existingCampType.setUpdatedTime(LocalDateTime.now());
-                            existingCampType.setQuantity(request.getQuantity());
-                            existingCampType.setStatus(request.isStatus());
+                            existingCampType.setQuantity(request.quantity());
+                            existingCampType.setStatus(request.status());
+
+                            if (campTypeImageUrl != null) {
+                                existingCampType.setImage(campTypeImageUrl);
+                            }
+
                             return campTypeRepository.save(existingCampType);
                         })
                         .orElseGet(() -> {
                             CampType newCampType = CampType.builder()
-                                    .type(request.getType())
-                                    .capacity(request.getCapacity())
-                                    .price(request.getPrice())
-                                    .weekendRate(request.getWeekendRate())
-                                    .holidayRate(request.getHolidayRate())
+                                    .type(request.type())
+                                    .capacity(request.capacity())
+                                    .price(request.price())
+                                    .weekendRate(request.weekendRate())
+                                    .holidayRate(request.holidayRate())
                                     .updatedTime(LocalDateTime.now())
-                                    .quantity(request.getQuantity())
-                                    .status(request.isStatus())
+                                    .quantity(request.quantity())
+                                    .status(request.status())
                                     .campSite(campSite)
+                                    .image(campTypeImageUrl)
                                     .build();
                             return campTypeRepository.save(newCampType);
-                        })
-                )
+                        }))
                 .collect(Collectors.toList());
+
         campSite.setCampTypes(campTypes);
 
-        return Optional.of(CampSiteMapper.toDto(campSiteRepository.save(campSite)));
+        //  Utilities
+        List<Utility> utilities = campSiteUtilities.stream()
+                .map(request -> utilityRepository.findById(request)
+                        .orElseThrow(() -> new AppException(ErrorCode.UTILITY_NOT_FOUND)))
+                .collect(Collectors.toList());
+        campSite.setUtilities(utilities);
+
+        // PlaceTypes
+        List<PlaceType> placeTypes = campSitePlaceTypes.stream()
+                .map(request -> placeTypeRepository.findById(request)
+                        .orElseThrow(() -> new AppException(ErrorCode.PLACE_TYPE_NOT_FOUND)))
+                .collect(Collectors.toList());
+        campSite.setPlaceTypes(placeTypes);
+
+
+        return Optional.of(campSiteMapper.toDto(campSiteRepository.save(campSite)));
     }
-
-
-//    @Override
-//    public Optional<CampSite> findCampSiteById(int id) {
-//        return campSiteRepository.findById(id);
-//    }
 
 
     @Override
     public Optional<CampSiteResponse> getCampSiteBasicDetail(int id) {
         return campSiteRepository.findById(id)
-                .map(CampSiteMapper::toDto);
+                .map(campSiteMapper::toDto);
     }
 
 
-    @Override
-    public Optional<CampSiteResponse> updateCampSite(int id, CampSiteRequest campSiteUpdateRequest) {
-        CampSite campSite = campSiteRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.CAMP_SITE_NOT_FOUND));
-
-        return getCampSiteResponse(campSite, campSiteUpdateRequest.getName(), campSiteUpdateRequest.getAddress(), campSiteUpdateRequest.getLatitude(), campSiteUpdateRequest.getLongitude(), campSiteUpdateRequest.getCampSiteSelections(), campSiteUpdateRequest.getCampSiteUtilities(), campSiteUpdateRequest.getCampSitePlaceTypes(), campSiteUpdateRequest.getCampTypeList(), campSiteUpdateRequest);
-    }
+//    @Override
+//    public Optional<CampSiteResponse> updateCampSite(int id, CampSiteRequest campSiteUpdateRequest) {
+//        CampSite campSite = campSiteRepository.findById(id)
+//                .orElseThrow(() -> new AppException(ErrorCode.CAMP_SITE_NOT_FOUND));
+//
+//        return getCampSiteResponse(campSite,
+//                campSiteUpdateRequest.hostId(),
+//                campSiteUpdateRequest.name(),
+//                campSiteUpdateRequest.address(),
+//                campSiteUpdateRequest.city(),
+//                files,
+//                campSiteUpdateRequest.latitude(),
+//                campSiteUpdateRequest.longitude(),
+//                campSiteUpdateRequest.campSiteSelections(),
+//                campSiteUpdateRequest.campSiteUtilities(),
+//                campSiteUpdateRequest.campSitePlaceTypes(),
+//                campSiteUpdateRequest.campTypeList(),
+//                selectionFile,
+//                campTypeFile);
+//    }
 
 
     @Override
@@ -245,12 +299,12 @@ public class CampSiteServiceImpl implements CampSiteService {
     }
 
     @Override
-    public Optional<CampSiteResponse> enableCampSite(int id){
+    public Optional<CampSiteResponse> enableCampSite(int id) {
         Optional<CampSite> existingCampSite = campSiteRepository.findById(id);
-        if(existingCampSite.isPresent() && existingCampSite.get().getStatus() == CampSiteStatus.Not_Available){
+        if (existingCampSite.isPresent() && existingCampSite.get().getStatus() == CampSiteStatus.Not_Available) {
             CampSite campSite = existingCampSite.get();
             campSite.setStatus(CampSiteStatus.Available);
-            return Optional.of(CampSiteMapper.toDto(campSiteRepository.save(campSite)));
+            return Optional.of(campSiteMapper.toDto(campSiteRepository.save(campSite)));
         }
         return Optional.empty();
     }

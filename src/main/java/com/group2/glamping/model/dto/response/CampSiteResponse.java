@@ -24,7 +24,6 @@ public class CampSiteResponse {
     private LocalDateTime createdTime;
     private CampSiteStatus status;
     private List<ImageResponse> imageList;
-    @JsonIgnore
     private List<SelectionResponse> campSiteSelectionsList;
     private List<PlaceTypeResponse> campSitePlaceTypeList;
     private List<UtilityResponse> campSiteUtilityList;

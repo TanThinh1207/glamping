@@ -2,6 +2,8 @@ package com.group2.glamping.model.mapper;
 
 import com.group2.glamping.model.dto.response.*;
 import com.group2.glamping.model.entity.CampSite;
+import com.group2.glamping.service.interfaces.S3Service;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -11,9 +13,12 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class CampSiteMapper {
 
-    public static CampSiteResponse toDto(CampSite campSite) {
+    private final S3Service s3Service;
+
+    public CampSiteResponse toDto(CampSite campSite) {
         if (campSite == null) {
             return null;
         }
@@ -34,15 +39,16 @@ public class CampSiteMapper {
                 .build();
     }
 
-    private static List<ImageResponse> mapImages(CampSite campSite) {
+    private List<ImageResponse> mapImages(CampSite campSite) {
         return (campSite.getImageList() != null) ?
                 campSite.getImageList().stream()
-                        .map(image -> new ImageResponse(image.getId(), image.getPath()))
+                        .map(image -> new ImageResponse(image.getId(), s3Service.generatePresignedUrl(image.getPath())))
                         .collect(Collectors.toList()) :
                 Collections.emptyList();
     }
 
-    private static List<SelectionResponse> mapSelections(CampSite campSite) {
+    private List<SelectionResponse> mapSelections(CampSite campSite) {
+
         return (campSite.getSelections() != null) ?
                 campSite.getSelections().stream()
                         .map(selection -> {
@@ -52,7 +58,7 @@ public class CampSiteMapper {
                                         selection.getName(),
                                         selection.getDescription(),
                                         selection.getPrice(),
-                                        selection.getImageUrl(),
+                                        s3Service.generatePresignedUrl(selection.getImageUrl()),
                                         selection.isStatus()
                                 );
                             }
@@ -64,7 +70,7 @@ public class CampSiteMapper {
     }
 
 
-    private static List<UtilityResponse> mapUtilities(CampSite campSite) {
+    private List<UtilityResponse> mapUtilities(CampSite campSite) {
         return (campSite.getUtilities() != null) ?
                 campSite.getUtilities().stream()
                         .map(utility -> {
@@ -72,7 +78,7 @@ public class CampSiteMapper {
                                 return new UtilityResponse(
                                         utility.getId(),
                                         utility.getName(),
-                                        utility.getImageUrl(),
+                                        s3Service.generatePresignedUrl(utility.getImageUrl()),
                                         utility.isStatus()
                                 );
                             }
@@ -83,7 +89,7 @@ public class CampSiteMapper {
                 Collections.emptyList();
     }
 
-    private static List<PlaceTypeResponse> mapPlaceTypes(CampSite campSite) {
+    private List<PlaceTypeResponse> mapPlaceTypes(CampSite campSite) {
         return (campSite.getPlaceTypes() != null) ?
                 campSite.getPlaceTypes().stream()
                         .map(placeType -> {
@@ -91,7 +97,7 @@ public class CampSiteMapper {
                                 return new PlaceTypeResponse(
                                         placeType.getId(),
                                         placeType.getName(),
-                                        placeType.getImage(),
+                                        s3Service.generatePresignedUrl(placeType.getImage()),
                                         placeType.isStatus()
                                 );
                             }
@@ -102,7 +108,7 @@ public class CampSiteMapper {
                 Collections.emptyList();
     }
 
-    private static List<CampTypeResponse> mapCampType(CampSite campSite) {
+    private List<CampTypeResponse> mapCampType(CampSite campSite) {
         return (campSite.getCampTypes() != null) ?
                 campSite.getCampTypes().stream()
                         .map(placeType -> {
