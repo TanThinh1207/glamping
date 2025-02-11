@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -39,7 +38,6 @@ public class CampSiteServiceImpl implements CampSiteService {
     private final CampTypeRepository campTypeRepository;
     private final S3Service s3Service;
     private final CampSiteMapper campSiteMapper;
-    private final ImageRepository imageRepository;
 
 
     @Override

@@ -1,6 +1,5 @@
 package com.group2.glamping.model.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.group2.glamping.model.enums.CampSiteStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

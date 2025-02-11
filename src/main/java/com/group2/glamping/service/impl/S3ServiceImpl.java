@@ -47,7 +47,7 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
-    public InputStreamResource downloadFile(String fileName) throws IOException {
+    public InputStreamResource downloadFile(String fileName) {
         if (!amazonS3.doesObjectExist(bucketName, fileName)) {
             throw new RuntimeException("File not found: " + fileName);
         }
