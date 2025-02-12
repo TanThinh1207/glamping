@@ -41,7 +41,7 @@ public class Booking {
     @Column(name = "check_in_at")
     private LocalDateTime checkinTime;
 
-    @Column(name = "check_in_at")
+    @Column(name = "check_out_at")
     private LocalDateTime checkoutTime;
 
     @Column(name = "total_amount")

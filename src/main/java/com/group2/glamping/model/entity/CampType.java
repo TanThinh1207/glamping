@@ -46,8 +46,11 @@ public class CampType {
     @Column(name = "quantity")
     private int quantity;
 
+    @Column(name = "image")
+    private String image;
+
     @Column(name = "status")
-    private boolean status = true;
+    private boolean status;
 
     @ManyToMany
     @JoinTable(
