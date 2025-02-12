@@ -155,7 +155,6 @@ public class CampSiteServiceImpl implements CampSiteService {
                             existingCampType.setCapacity(request.capacity());
                             existingCampType.setPrice(request.price());
                             existingCampType.setWeekendRate(request.weekendRate());
-                            existingCampType.setHolidayRate(request.holidayRate());
                             existingCampType.setUpdatedTime(LocalDateTime.now());
                             existingCampType.setQuantity(request.quantity());
                             existingCampType.setStatus(request.status());
@@ -172,7 +171,6 @@ public class CampSiteServiceImpl implements CampSiteService {
                                     .capacity(request.capacity())
                                     .price(request.price())
                                     .weekendRate(request.weekendRate())
-                                    .holidayRate(request.holidayRate())
                                     .updatedTime(LocalDateTime.now())
                                     .quantity(request.quantity())
                                     .status(request.status())

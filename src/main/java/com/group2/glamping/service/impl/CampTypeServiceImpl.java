@@ -78,7 +78,6 @@ public class CampTypeServiceImpl implements ICampTypeService {
                 .capacity(request.getCapacity())
                 .price(request.getPrice())
                 .weekendRate(request.getWeekendRate())
-                .holidayRate(request.getHolidayRate())
                 .quantity(request.getQuantity())
                 .campSite(campSiteOpt.get())
                 .status(true)
@@ -93,7 +92,6 @@ public class CampTypeServiceImpl implements ICampTypeService {
                 .capacity(campType.getCapacity())
                 .price(campType.getPrice())
                 .weekendRate(campType.getWeekendRate())
-                .holidayRate(campType.getHolidayRate())
                 .quantity(campType.getQuantity())
                 .status(campType.isStatus())
                 .build();
@@ -122,7 +120,6 @@ public class CampTypeServiceImpl implements ICampTypeService {
         campType.setCapacity(request.capacity());
         if (request.price() > 0) campType.setPrice(request.price());
         if (request.weekendRate() > 0) campType.setWeekendRate(request.weekendRate());
-        if (request.weekendRate() > 0) campType.setHolidayRate(request.holidayRate());
         campType.setQuantity(request.quantity());
         campType.setStatus(request.status());
 
@@ -135,7 +132,6 @@ public class CampTypeServiceImpl implements ICampTypeService {
                 .capacity(campType.getCapacity())
                 .price(campType.getPrice())
                 .weekendRate(campType.getWeekendRate())
-                .holidayRate(campType.getHolidayRate())
                 .quantity(campType.getQuantity())
                 .status(campType.isStatus())
                 .build();
@@ -167,7 +163,6 @@ public class CampTypeServiceImpl implements ICampTypeService {
                         .capacity(campType.getCapacity())
                         .price(campType.getPrice())
                         .weekendRate(campType.getWeekendRate())
-                        .holidayRate(campType.getHolidayRate())
                         .quantity(campType.getQuantity())
                         .status(campType.isStatus())
                         .build()
@@ -196,7 +191,6 @@ public class CampTypeServiceImpl implements ICampTypeService {
             campTypeResponse.setCapacity(campType.getCapacity());
             campTypeResponse.setPrice(campType.getPrice());
             campTypeResponse.setWeekendRate(campType.getWeekendRate());
-            campTypeResponse.setHolidayRate(campType.getHolidayRate());
             campTypeResponse.setQuantity(campType.getQuantity());
             campTypeResponse.setStatus(campType.isStatus());
 

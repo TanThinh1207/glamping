@@ -119,7 +119,6 @@ public class CampSiteMapper {
                                         placeType.getCapacity(),
                                         placeType.getPrice(),
                                         placeType.getWeekendRate(),
-                                        placeType.getHolidayRate(),
                                         LocalDateTime.now(),
                                         placeType.getQuantity(),
                                         placeType.isStatus()
