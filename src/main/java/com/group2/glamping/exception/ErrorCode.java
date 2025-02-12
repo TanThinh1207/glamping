@@ -21,8 +21,11 @@ public enum ErrorCode {
     SELECTION_NOT_FOUND(1012, "Selection not found", HttpStatus.NOT_FOUND),
     UTILITY_NOT_FOUND(1013, "Utility not found", HttpStatus.NOT_FOUND),
     CAMP_TYPE_NOT_FOUND(1014, "Camp type not found", HttpStatus.NOT_FOUND),
-    BOOKING_NOT_FOUND(1015, "Booking not found", HttpStatus.NOT_FOUND);
-
+    BOOKING_NOT_FOUND(1015, "Booking not found", HttpStatus.NOT_FOUND),
+    FILE_NOT_FOUND(10015, "File not found", HttpStatus.NOT_FOUND),
+    S3_ERROR(10016, "S3 error", HttpStatus.INTERNAL_SERVER_ERROR),
+    INVALID_USERNAME(10012, "Username must be at least {min} characters", HttpStatus.BAD_REQUEST),
+    PLACE_TYPE_NOT_FOUND(10016, "Place type not found", HttpStatus.NOT_FOUND);
     private final int code;
     private final String message;
     private final HttpStatusCode statusCode;
@@ -32,4 +35,6 @@ public enum ErrorCode {
         this.message = message;
         this.statusCode = statusCode;
     }
+
+
 }

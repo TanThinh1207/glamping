@@ -50,7 +50,7 @@ public class CampSite {
     @OneToMany(mappedBy = "campSite")
     private List<Booking> bookingList;
 
-    @OneToMany(mappedBy = "campSite")
+    @OneToMany(mappedBy = "campSite", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> imageList;
 
 
