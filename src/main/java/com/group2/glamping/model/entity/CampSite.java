@@ -43,6 +43,12 @@ public class CampSite {
     @Enumerated(EnumType.STRING)
     private CampSiteStatus status;
 
+    @Column(name = "message")
+    private String message;
+
+    @Column(name = "deposit_rate")
+    private double depositRate;
+
     @ManyToOne
     @JoinColumn(name = "id_user")
     private User user;

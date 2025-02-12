@@ -41,6 +41,21 @@ public class Booking {
     @Column(name = "total_amount")
     private double totalAmount;
 
+    @Column(name = "system_fee")
+    private double systemFee;
+
+    @Column(name = "net_amount")
+    private double netAmount;
+
+    @Column(name = "comment")
+    private String comment;
+
+    @Column(name = "rating")
+    private int rating;
+
+    @Column(name = "message")
+    private String message;
+
     @OneToMany(mappedBy = "booking")
     private List<BookingSelection> bookingSelectionList;
 
