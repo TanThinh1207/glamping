@@ -18,7 +18,6 @@ public class CampTypeResponse {
     int capacity;
     double price;
     double weekendRate;
-    double holidayRate;
     LocalDateTime updatedAt;
     int quantity;
     boolean status;
@@ -34,7 +33,6 @@ public class CampTypeResponse {
                 .capacity(campType.getCapacity())
                 .price(campType.getPrice())
                 .weekendRate(campType.getWeekendRate())
-                .holidayRate(campType.getHolidayRate())
                 .updatedAt(campType.getUpdatedTime())
                 .quantity(campType.getQuantity())
                 .status(campType.isStatus())

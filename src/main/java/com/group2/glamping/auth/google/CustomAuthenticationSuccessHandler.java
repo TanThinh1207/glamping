@@ -61,7 +61,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             User newUser = User.builder()
                     .email(email)
                     .status(true)
-                    .created_at(LocalDateTime.now())
+                    .createdTime(LocalDateTime.now())
                     .role(Role.ROLE_USER)
                     .build();
             userRepository.save(newUser);
