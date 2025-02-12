@@ -2,6 +2,8 @@ package com.group2.glamping.configuration;
 
 
 import com.group2.glamping.auth.JwtAuthenticationFilter;
+import com.group2.glamping.auth.google.CustomAccessDeniedHandler;
+import com.group2.glamping.auth.google.CustomAuthenticationEntryPoint;
 import com.group2.glamping.auth.google.CustomAuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +29,8 @@ public class SecurityConfig {
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     private final String[] WHITE_LIST = {
             "/api-docs/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/api/docs/**",
@@ -51,6 +55,9 @@ public class SecurityConfig {
                             req.requestMatchers("/home").authenticated();
                         }
                 )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
