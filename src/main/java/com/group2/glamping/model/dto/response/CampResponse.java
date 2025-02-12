@@ -29,9 +29,9 @@ public class CampResponse {
         return CampResponse.builder()
                 .campId(camp.getId())
                 .campName(camp.getName())
-                .created_at(camp.getCreatedTime())
+                .created_at(camp.getCreatedAt())
                 .status(camp.getStatus())
-                .updated_at(camp.getUpdatedTime())
+                .updated_at(camp.getUpdatedAt())
                 .build();
     }
 }
