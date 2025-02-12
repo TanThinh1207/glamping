@@ -3,6 +3,8 @@ package com.group2.glamping.controller;
 import com.group2.glamping.model.dto.requests.UserUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.service.interfaces.UserService;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,9 +36,10 @@ public class UserController {
     }
 
     @PostMapping("/update/{id}")
+    @Transactional
     public ResponseEntity<?> updateUser(
             @PathVariable int id,
-            @RequestBody UserUpdateRequest request) {
+            @Valid @RequestBody UserUpdateRequest request) {
 
         return new ResponseEntity<>(BaseResponse.builder()
                 .statusCode(HttpStatus.OK.value())

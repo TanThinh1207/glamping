@@ -44,6 +44,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword(userUpdateRequest.phone());
         user.setDob(userUpdateRequest.dob());
         user.setStatus(userUpdateRequest.status());
+        user.setAddress(userUpdateRequest.address());
 
         userRepository.save(user);
         return new UserResponse(user);
