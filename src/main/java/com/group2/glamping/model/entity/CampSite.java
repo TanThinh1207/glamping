@@ -43,9 +43,6 @@ public class CampSite {
     @Enumerated(EnumType.STRING)
     private CampSiteStatus status;
 
-    @Column(name = "message")
-    private String message;
-
     @ManyToOne
     @JoinColumn(name = "id_user")
     private User user;

@@ -23,14 +23,14 @@ public class Camp {
     private String name;
 
     @Column(name = "created_at")
-    private LocalDateTime createdTime;
+    private LocalDateTime createdAt;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private CampStatus status;
 
     @Column(name = "updated_at")
-    private LocalDateTime updatedTime;
+    private LocalDateTime updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "id_camp_type")

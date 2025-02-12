@@ -13,7 +13,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 @Data
@@ -46,9 +45,6 @@ public class User implements UserDetails {
 
     @Column(name = "address")
     private String address;
-
-    @Column(name = "dob")
-    private Date dob;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
