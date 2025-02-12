@@ -43,12 +43,6 @@ public class BookingDetail {
     @Column(name = "amount")
     private double amount;
 
-    @Column(name = "comment")
-    private String comment;
-
-    @Column(name = "rating")
-    private int rating;
-
     @Column(name = "created_at")
     private LocalDateTime createdTime;
 

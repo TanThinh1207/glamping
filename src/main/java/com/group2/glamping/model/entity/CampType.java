@@ -33,9 +33,6 @@ public class CampType {
     @Column(name = "weekend_rate")
     private double weekendRate;
 
-    @Column(name = "holiday_rate")
-    private double holidayRate;
-
     @Column(name = "updated_at")
     private LocalDateTime updatedTime;
 
@@ -46,8 +43,11 @@ public class CampType {
     @Column(name = "quantity")
     private int quantity;
 
+    @Column(name = "image")
+    private String image;
+
     @Column(name = "status")
-    private boolean status = true;
+    private boolean status;
 
     @ManyToMany
     @JoinTable(
@@ -63,6 +63,6 @@ public class CampType {
     @OneToMany(mappedBy = "campType")
     private List<Camp> campList;
 
-    @Column(name = "image")
-    private String image;
+    @OneToMany(mappedBy = "campType")
+    private List<CustomPrice> customPriceList;
 }
