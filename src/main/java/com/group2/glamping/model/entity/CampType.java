@@ -62,4 +62,7 @@ public class CampType {
 
     @OneToMany(mappedBy = "campType")
     private List<Camp> campList;
+
+    @Column(name = "image")
+    private String image;
 }

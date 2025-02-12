@@ -4,14 +4,11 @@ import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.BookingRequest;
 import com.group2.glamping.model.dto.response.BookingResponse;
-import com.group2.glamping.model.dto.response.PlaceTypeResponse;
-import com.group2.glamping.model.dto.response.UserResponse;
 import com.group2.glamping.model.entity.*;
 import com.group2.glamping.model.entity.id.IdBookingSelection;
 import com.group2.glamping.model.enums.BookingDetailStatus;
 import com.group2.glamping.model.enums.BookingStatus;
 import com.group2.glamping.model.mapper.BookingMapper;
-import com.group2.glamping.model.mapper.CampSiteMapper;
 import com.group2.glamping.repository.*;
 import com.group2.glamping.service.interfaces.BookingService;
 import jakarta.transaction.Transactional;
@@ -37,7 +34,7 @@ public class BookingServiceImpl implements BookingService {
     private final CampSiteRepository campSiteRepository;
     private final UserRepository userRepository;
     private final SelectionRepository selectionRepository;
-    private final CampSiteMapper campSiteMapper;
+    private final BookingMapper bookingMapper;
 
     @Override
     public Optional<BookingResponse> createBooking(BookingRequest bookingRequest) {
@@ -61,14 +58,14 @@ public class BookingServiceImpl implements BookingService {
 
         List<BookingSelection> bookingSelections = bookingRequest.getBookingSelectionRequestList().stream()
                 .map(bookingService -> {
-                    Selection service = selectionRepository.findById(bookingService.getId_service())
+                    Selection service = selectionRepository.findById(bookingService.idBooking())
                             .orElseThrow(() -> new AppException(ErrorCode.SELECTION_NOT_FOUND));
 
                     return BookingSelection.builder()
                             .idBookingService(new IdBookingSelection(bookingDb.getId(), service.getId()))
                             .booking(bookingDb)
                             .selection(service)
-                            .quantity(bookingService.getQuantity())
+                            .quantity(bookingService.quantity())
                             .name(service.getName())
                             .build();
                 })
@@ -101,7 +98,7 @@ public class BookingServiceImpl implements BookingService {
         resp.setBookingDetailList(bookingDetailRepository.findBookingDetails(bookingDb.getId()));
         resp.setBookingSelectionList(bookingSelectionRepository.findBookingSelections(bookingDb.getId()));
 
-        return Optional.of(BookingMapper.toDto(resp));
+        return Optional.of(bookingMapper.toDto(resp));
     }
 
     //Retrieve Pending Bookings
@@ -115,7 +112,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         return bookings.stream()
-                .map(BookingMapper::toDto)
+                .map(bookingMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -130,7 +127,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         return bookings.stream()
-                .map(BookingMapper::toDto)
+                .map(bookingMapper::toDto)
                 .collect(Collectors.toList());
     }
 
