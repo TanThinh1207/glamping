@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,6 +18,10 @@ public class UserResponse {
     private String email;
     private String firstname;
     private String lastname;
+    private String address;
+    private String phone;
+    private LocalDate birthday;
+    private boolean status;
 
 
     public UserResponse(User user) {
@@ -22,5 +29,9 @@ public class UserResponse {
         this.email = user.getEmail();
         this.firstname = user.getFirstname();
         this.lastname = user.getLastname();
+        this.address = user.getAddress();
+        this.phone = user.getPhoneNumber();
+        this.birthday = user.getDob().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        this.status = user.isStatus();
     }
 }
