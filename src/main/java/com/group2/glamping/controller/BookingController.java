@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,7 +35,7 @@ public class BookingController {
             summary = "Create a new booking",
             description = "Create a new booking with booking details",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Booking created successfully"),
+                    @ApiResponse(responseCode = "201", description = "Booking created successfully"),
                     @ApiResponse(responseCode = "400", description = "Invalid request data")
             }
     )
@@ -52,64 +53,38 @@ public class BookingController {
                         .build()));
     }
 
-    // Retrieve Booking with Pending Status
-    @GetMapping("/getPendingBooking")
+    @GetMapping
     @Operation(
-            summary = "Retrieve  types with Pending Status and Camp Site Id",
-            description = "Retrieves Bookings types filtered by status (Pending) and Camp Site Id.",
+            summary = "Retrieve bookings by status and Camp Site Id",
+            description = "Retrieves Booking records filtered by status (Pending, Completed, etc.) and Camp Site Id.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Bookings retrieved successfully"),
-                    @ApiResponse(responseCode = "404", description = "No Booking types found"),
+                    @ApiResponse(responseCode = "404", description = "No Bookings found"),
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
-    public ResponseEntity<BaseResponse> getPendingBooking(
-            @RequestParam(required = true) Integer campSiteId
+    public ResponseEntity<BaseResponse> getBookings(
+            @RequestParam Integer campSiteId,
+            @RequestParam(required = false) String status
     ) {
         try {
-            List<BookingResponse> responses = bookingService.getPendingBookingsByCampSiteId(campSiteId);
-
+            List<BookingResponse> responses = new ArrayList<>();
+            if (status.equals("pending")) {
+                responses = bookingService.getPendingBookingsByCampSiteId(campSiteId);
+            } else if (status.equals("completed")) {
+                responses = bookingService.getCompletedBookingsByCampSiteId(campSiteId);
+            }
             if (responses.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new BaseResponse(HttpStatus.NOT_FOUND.value(), "No Pending Bookings found with Camp Site Id: " + campSiteId , responses));
+                        .body(new BaseResponse(HttpStatus.NOT_FOUND.value(),
+                                "No Bookings found with Camp Site Id: " + campSiteId + " and status: " + status, responses));
             }
 
-            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Pending Bookings retrieved successfully", responses));
+            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Bookings retrieved successfully", responses));
         } catch (Exception e) {
-            logger.error("Error while retrieving place types by status: {}", e.getMessage(), e);
+            logger.error("Error while retrieving bookings by status: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
         }
     }
-
-    // Retrieve Booking with Completed Booking
-    @GetMapping("/getCompletedBooking")
-    @Operation(
-            summary = "Retrieve  types with Pending Status and Camp Site Id",
-            description = "Retrieves Bookings types filtered by status (Pending) and Camp Site Id.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Bookings retrieved successfully"),
-                    @ApiResponse(responseCode = "404", description = "No Booking types found"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
-    public ResponseEntity<BaseResponse> getCompletedBooking(
-            @RequestParam(required = true) Integer campSiteId
-    ) {
-        try {
-            List<BookingResponse> responses = bookingService.getCompletedBookingsByCampSiteId(campSiteId);
-
-            if (responses.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new BaseResponse(HttpStatus.NOT_FOUND.value(), "No Completed Bookings found with Camp Site Id: " + campSiteId , responses));
-            }
-
-            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Pending Bookings retrieved successfully", responses));
-        } catch (Exception e) {
-            logger.error("Error while retrieving place types by status: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
-        }
-    }
-
 }

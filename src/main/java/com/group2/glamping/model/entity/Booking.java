@@ -39,19 +39,19 @@ public class Booking {
     private BookingStatus status;
 
     @Column(name = "total_amount")
-    private double totalAmount;
+    private Double totalAmount;
 
-    @Column(name = "system_fee")
-    private double systemFee;
+    @Column(name = "system_fee",columnDefinition = "DOUBLE DEFAULT 0.0", nullable = false)
+    private Double systemFee = 0.0;
 
-    @Column(name = "net_amount")
-    private double netAmount;
+    @Column(name = "net_amount",columnDefinition = "DOUBLE DEFAULT 0.0", nullable = false)
+    private Double netAmount = 0.0;
 
     @Column(name = "comment")
     private String comment;
 
     @Column(name = "rating")
-    private int rating;
+    private Integer rating;
 
     @Column(name = "message")
     private String message;

@@ -176,7 +176,7 @@ public class CampSiteController {
                     @ApiResponse(responseCode = "404", description = "Camp site not found")
             }
     )
-    @PutMapping("/enableCampSite/{id}")
+    @PutMapping("/{id}/enable")
     public ResponseEntity<BaseResponse> enableCampSite(
             @Parameter(description = "ID of the campsite", example = "1") @PathVariable int id) {
         try {
@@ -193,6 +193,7 @@ public class CampSiteController {
         }
     }
 
+    //DELETE
     @Operation(
             summary = "Delete a campsite",
             description = "Remove a campsite by its ID",

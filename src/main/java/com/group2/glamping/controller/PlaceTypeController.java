@@ -33,7 +33,7 @@ public class PlaceTypeController {
     private static final Logger logger = LoggerFactory.getLogger(PlaceTypeController.class);
 
     // Create PlaceType
-    @PostMapping("/create")
+    @PostMapping()
     @Operation(
             summary = "Create a new place type",
             description = "Creates a new place type with the provided name and optional image.",
@@ -64,7 +64,7 @@ public class PlaceTypeController {
     }
 
     // Update PlaceType
-    @PostMapping("/update")
+    @PutMapping()
     @Operation(
             summary = "Update an existing place type",
             description = "Updates an existing place type with the provided id, name, and optional image.",
@@ -106,7 +106,7 @@ public class PlaceTypeController {
     }
 
     // Retrieve All PlaceTypes
-    @GetMapping("/getAll")
+    @GetMapping()
     @Operation(
             summary = "Retrieve all place types",
             description = "Retrieves all place types.",
@@ -134,7 +134,7 @@ public class PlaceTypeController {
     }
 
     // Retrieve PlaceTypes by Name
-    @GetMapping("/getByName")
+    @GetMapping("/name/{name}")
     @Operation(
             summary = "Retrieve place types by name",
             description = "Retrieves place types filtered by the provided name.",
@@ -146,7 +146,7 @@ public class PlaceTypeController {
     )
     public ResponseEntity<BaseResponse> getPlaceTypesByName(
             @Parameter(description = "Name of the place type", example = "Hotel", required = true)
-            @RequestParam(required = false) String name
+            @PathVariable(required = false) String name
     ) {
         try {
             List<PlaceTypeResponse> responses = (name == null || name.trim().isEmpty())
@@ -167,7 +167,7 @@ public class PlaceTypeController {
     }
 
     // Retrieve PlaceTypes by Status
-    @GetMapping("/getByStatus")
+    @GetMapping("/status/{status}")
     @Operation(
             summary = "Retrieve place types by status",
             description = "Retrieves place types filtered by status (true for active, false for inactive).",
@@ -179,7 +179,7 @@ public class PlaceTypeController {
     )
     public ResponseEntity<BaseResponse> getPlaceTypesByStatus(
             @Parameter(description = "Status of the place type", example = "true", required = true)
-            @RequestParam(required = true) Boolean status
+            @PathVariable(required = true) Boolean status
     ) {
         try {
             List<PlaceTypeResponse> responses = placeTypeService.getPlaceTypeByStatus(status);
@@ -199,7 +199,7 @@ public class PlaceTypeController {
 
 
     // Soft Delete PlaceType
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     @Operation(
             summary = "Soft delete a place type",
             description = "Marks a place type as deleted (inactive) instead of removing it from the database.",
