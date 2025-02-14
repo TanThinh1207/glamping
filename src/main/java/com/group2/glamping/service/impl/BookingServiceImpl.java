@@ -149,5 +149,20 @@ public class BookingServiceImpl implements BookingService {
         }
         return bookingMapper.toDto(booking);
     }
+
+    //Accept Bookings
+    @Override
+    public BookingResponse denyBookings(Integer bookingId) {
+        Optional<Booking> existedBooking = bookingRepository.findById(bookingId);
+        Booking booking = new Booking();
+        if (existedBooking.isPresent()) {
+            booking = existedBooking.get();
+            if(booking.getStatus() == BookingStatus.Pending) {
+                booking.setStatus(BookingStatus.Denied);
+            }
+            bookingRepository.save(booking);
+        }
+        return bookingMapper.toDto(booking);
+    }
 }
 
