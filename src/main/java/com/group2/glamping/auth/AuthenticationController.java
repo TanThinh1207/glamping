@@ -32,6 +32,7 @@ public class AuthenticationController {
     )
     public ResponseEntity<BaseResponse> register(@RequestBody RegisterRequest request) {
         try {
+
             return ResponseEntity.ok(BaseResponse.builder()
                     .data(authenticationService.register(request))
                     .message("Register successfully")

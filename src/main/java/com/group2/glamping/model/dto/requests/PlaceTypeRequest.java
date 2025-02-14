@@ -19,7 +19,6 @@ public record PlaceTypeRequest(
         Integer id,
 
         @Schema(description = "Name of the PlaceType", example = "Lake View")
-        @Pattern(regexp = "^[a-zA-Z0-9\\s-_]{3,50}$", message = "Name must be between 3-50 characters and contain only letters, numbers, spaces, '-', or '_'")
         String name
 
 ) {
