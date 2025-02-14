@@ -53,6 +53,7 @@ public class BookingController {
                         .build()));
     }
 
+    //Retrieve by status
     @GetMapping
     @Operation(
             summary = "Retrieve bookings by status and Camp Site Id",
@@ -81,6 +82,36 @@ public class BookingController {
             }
 
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Bookings retrieved successfully", responses));
+        } catch (Exception e) {
+            logger.error("Error while retrieving bookings by status: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
+        }
+    }
+
+    //Accept bookings
+    @GetMapping("/{bookingId}/accept")
+    @Operation(
+            summary = "Retrieve bookings by status and Camp Site Id",
+            description = "Retrieves Booking records filtered by status (Pending, Completed, etc.) and Camp Site Id.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Bookings retrieved successfully"),
+                    @ApiResponse(responseCode = "404", description = "No Bookings found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<BaseResponse> getBookings(
+            @PathVariable Integer bookingId
+    ) {
+        try {
+            BookingResponse responses = bookingService.acceptBookings(bookingId);
+            if (responses == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new BaseResponse(HttpStatus.NOT_FOUND.value(),
+                                "No Bookings found with Id: " + bookingId , null));
+            }
+
+            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Bookings accepted successfully", responses));
         } catch (Exception e) {
             logger.error("Error while retrieving bookings by status: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

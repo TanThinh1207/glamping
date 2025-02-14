@@ -13,4 +13,6 @@ public interface BookingService {
     List<BookingResponse> getPendingBookingsByCampSiteId(Integer campSiteId);
 
     List<BookingResponse> getCompletedBookingsByCampSiteId(Integer campSiteId);
+
+    BookingResponse acceptBookings(Integer campSiteId);
 }
