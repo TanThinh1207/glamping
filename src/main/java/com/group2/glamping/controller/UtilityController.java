@@ -28,7 +28,7 @@ public class UtilityController {
     private static final Logger logger = LoggerFactory.getLogger(UtilityController.class);
 
     // Create Utility
-    @PostMapping("/create")
+    @PostMapping()
     @Operation(
             summary = "Create a new utility",
             description = "Creates a new utility with the provided name and optional image.",
@@ -54,7 +54,7 @@ public class UtilityController {
     }
 
     // Update Utility
-    @PostMapping("/update")
+    @PutMapping
     @Operation(
             summary = "Update an existing utility",
             description = "Updates an existing utility with the provided ID, name, and optional image.",
@@ -87,7 +87,7 @@ public class UtilityController {
 
 
     // Retrieve Utilities
-    @GetMapping("/retrieve/getAll")
+    @GetMapping()
     @Operation(
             summary = "Retrieve utilities",
             description = "Retrieves all utilities.",
@@ -109,7 +109,7 @@ public class UtilityController {
     }
 
     //Get all utilities by name
-    @GetMapping("/retrieve/getByName")
+    @GetMapping("/name/{name}")
     @Operation(
             summary = "Retrieve utilities",
             description = "Retrieves all utilities or filters by name if provided.",
@@ -120,7 +120,7 @@ public class UtilityController {
     )
     public ResponseEntity<BaseResponse> retrieveUtilitiesByName(
             @Parameter(description = "Name of the utility (optional)", example = "WiFi")
-            @RequestParam(required = false) String name // Cho phép null
+            @PathVariable(required = false) String name // Cho phép null
     ) {
         try {
             List<UtilityResponse> responses = (name == null || name.trim().isEmpty())
@@ -137,7 +137,7 @@ public class UtilityController {
 
 
     // Get all utilities by status
-    @GetMapping("/retrieve/getByStatus")
+    @GetMapping("/status/{status}")
     @Operation(
             summary = "Retrieve utilities by status",
             description = "Retrieves all utilities or filters by status if provided.",
@@ -148,7 +148,7 @@ public class UtilityController {
     )
     public ResponseEntity<BaseResponse> retrieveUtilitiesByStatus(
             @Parameter(description = "Status of the utility (optional)", example = "true/false")
-            @RequestParam(required = false) Boolean status) {
+            @PathVariable(required = false) Boolean status) {
         try {
             List<UtilityResponse> responses = (status == null) ?
                     utilityService.getAllUtilities() : utilityService.getUtilitiesByStatus(status);
@@ -163,7 +163,7 @@ public class UtilityController {
 
 
     // Delete Utility (Soft Delete)
-    @PostMapping("/delete")
+    @DeleteMapping("/{id}")
     @Operation(
             summary = "Soft delete a utility",
             description = "Marks a utility as deleted instead of removing it from the database.",
@@ -174,7 +174,7 @@ public class UtilityController {
     )
     public ResponseEntity<BaseResponse> softDeleteUtility(
             @Parameter(description = "ID of the utility to delete", example = "3")
-            @RequestParam int id) {
+            @PathVariable int id) {
         try {
             UtilityResponse response = utilityService.softDeleteUtility(id);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Utility deleted successfully", response));

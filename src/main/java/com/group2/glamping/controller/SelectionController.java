@@ -28,7 +28,7 @@ public class SelectionController {
     private static final Logger logger = LoggerFactory.getLogger(SelectionController.class);
 
     // Create Selection
-    @PostMapping("/create")
+    @PostMapping()
     @Operation(
             summary = "Create a new selection",
             description = "Creates a new selection with the provided name, description, price, image and campsite ID.",
@@ -61,7 +61,7 @@ public class SelectionController {
     }
 
     // Update Selection
-    @PostMapping("/update")
+    @PutMapping()
     @Operation(
             summary = "Update an existing selection",
             description = "Updates an existing selection with the provided ID, name, description, price, image and campsite ID.",
@@ -97,7 +97,7 @@ public class SelectionController {
     }
 
     // Get All Selections
-    @GetMapping("/getAll")
+    @GetMapping()
     @Operation(
             summary = "Retrieve all selections",
             description = "Retrieves all selections.",
@@ -118,7 +118,7 @@ public class SelectionController {
     }
 
     // Get Selections by Name
-    @GetMapping("/getByName")
+    @GetMapping("/name/{name}")
     @Operation(
             summary = "Retrieve selections by name",
             description = "Retrieves selections that match or contain the specified name.",
@@ -129,7 +129,7 @@ public class SelectionController {
     )
     public ResponseEntity<BaseResponse> getSelectionsByName(
             @Parameter(description = "Name of the selection (optional)", example = "WiFi")
-            @RequestParam(required = false) String name
+            @PathVariable(required = false) String name
     ) {
         try {
             List<SelectionResponse> responses = (name == null || name.trim().isEmpty())
@@ -144,7 +144,7 @@ public class SelectionController {
     }
 
     // Get Selections by Status
-    @GetMapping("/getByStatus")
+    @GetMapping("/status/{status}")
     @Operation(
             summary = "Retrieve selections by status",
             description = "Retrieves selections based on their status (true for active, false for inactive).",
@@ -155,7 +155,7 @@ public class SelectionController {
     )
     public ResponseEntity<BaseResponse> getSelectionsByStatus(
             @Parameter(description = "Status of the selection (true for active, false for inactive)", example = "true")
-            @RequestParam(required = false) Boolean status
+            @PathVariable(required = false) Boolean status
     ) {
         try {
             List<SelectionResponse> responses = (status == null)
@@ -170,7 +170,7 @@ public class SelectionController {
     }
 
     // Soft Delete Selection
-    @PostMapping("/delete")
+    @DeleteMapping("/{id}")
     @Operation(
             summary = "Soft delete a selection",
             description = "Marks a selection as inactive without permanently removing it from the database.",
@@ -182,7 +182,7 @@ public class SelectionController {
     )
     public ResponseEntity<BaseResponse> softDeleteSelection(
             @Parameter(description = "ID of the selection to delete", example = "3")
-            @RequestParam int id
+            @PathVariable int id
     ) {
         try {
             SelectionResponse response = selectionService.softDeleteSelection(id);

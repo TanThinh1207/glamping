@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/camp_types")
+@RequestMapping("/api/camp-types")
 public class CampTypeController {
 
     private final CampTypeServiceImpl campTypeService;
@@ -38,7 +38,7 @@ public class CampTypeController {
     }
 
     //RETRIEVE
-    @GetMapping("/findCampType/{campSiteId}")
+    @GetMapping("/{campSiteId}")
     public ResponseEntity<BaseResponse> getCampTypesByCampSite(@PathVariable int campSiteId) {
         BaseResponse response = campTypeService.findByCampSiteId(campSiteId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
@@ -55,7 +55,7 @@ public class CampTypeController {
     }
 
     //DELETE
-    @DeleteMapping("/delete/{campTypeId}")
+    @DeleteMapping("/{campTypeId}")
     public ResponseEntity<BaseResponse> deleteCampType(@PathVariable int campTypeId) {
         BaseResponse response = campTypeService.softDeleteCampType(campTypeId);
         return ResponseEntity.status((int) response.getStatusCode()).body(response);

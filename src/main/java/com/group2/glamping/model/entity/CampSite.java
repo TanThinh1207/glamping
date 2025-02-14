@@ -46,8 +46,8 @@ public class CampSite {
     @Column(name = "message")
     private String message;
 
-    @Column(name = "deposit_rate")
-    private double depositRate;
+    @Column(name = "deposit_rate",columnDefinition = "DOUBLE DEFAULT 0.0", nullable = false)
+    private Double depositRate;
 
     @ManyToOne
     @JoinColumn(name = "id_user")
@@ -86,4 +86,5 @@ public class CampSite {
 
     @OneToMany(mappedBy = "campSite", cascade = CascadeType.ALL)
     private List<Selection> selections;
+
 }

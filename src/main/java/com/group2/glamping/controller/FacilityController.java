@@ -28,7 +28,7 @@ public class FacilityController {
     private static final Logger logger = LoggerFactory.getLogger(FacilityController.class);
 
     // Create Facility
-    @PostMapping("/create")
+    @PostMapping()
     @Operation(
             summary = "Create a new facility",
             description = "Creates a new facility with the provided name, description, and optional image.",
@@ -57,7 +57,7 @@ public class FacilityController {
     }
 
     // Update Facility
-    @PostMapping("/update")
+    @PutMapping()
     @Operation(
             summary = "Update an existing facility",
             description = "Updates an existing facility with the provided id, name, description, and optional image.",
@@ -89,7 +89,7 @@ public class FacilityController {
     }
 
     // Retrieve All Facilities
-    @GetMapping("/getAll")
+    @GetMapping()
     @Operation(
             summary = "Retrieve all facilities",
             description = "Retrieves all facilities.",
@@ -110,7 +110,7 @@ public class FacilityController {
     }
 
     // Retrieve Facilities by Name
-    @GetMapping("/getByName")
+    @GetMapping("/name/{name}")
     @Operation(
             summary = "Retrieve facilities by name",
             description = "Retrieves facilities filtered by the provided name.",
@@ -121,7 +121,7 @@ public class FacilityController {
     )
     public ResponseEntity<BaseResponse> getFacilitiesByName(
             @Parameter(description = "Name of the facility", example = "Gym", required = true)
-            @RequestParam(required = false) String name
+            @PathVariable(required = false) String name
     ) {
         try {
             List<FacilityResponse> responses = (name == null || name.trim().isEmpty())
@@ -136,7 +136,7 @@ public class FacilityController {
     }
 
     // Retrieve Facilities by Status
-    @GetMapping("/getByStatus")
+    @GetMapping("/status/{status}")
     @Operation(
             summary = "Retrieve facilities by status",
             description = "Retrieves facilities filtered by status (true for active, false for inactive).",
@@ -147,7 +147,7 @@ public class FacilityController {
     )
     public ResponseEntity<BaseResponse> getFacilitiesByStatus(
             @Parameter(description = "Status of the facility", example = "true", required = true)
-            @RequestParam(required = false) Boolean status
+            @PathVariable(required = false) Boolean status
     ) {
         try {
             List<FacilityResponse> facilities = facilityService.getFacilitiesByStatus(status);
@@ -160,7 +160,7 @@ public class FacilityController {
     }
 
     // Delete Facility (Soft Delete)
-    @PostMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     @Operation(
             summary = "Soft delete a facility",
             description = "Marks a facility as deleted (inactive) instead of removing it from the database.",

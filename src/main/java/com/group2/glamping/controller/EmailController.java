@@ -20,7 +20,7 @@ public class EmailController {
 
     private final JavaMailSender mailSender;
 
-    @GetMapping("/send-email")
+    @GetMapping("/auto-email")
     public String sendEmail() {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
@@ -59,4 +59,4 @@ public class EmailController {
 //            throw new RuntimeException(e);
 //        }
     }
-}
+

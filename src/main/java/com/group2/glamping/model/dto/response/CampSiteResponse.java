@@ -18,10 +18,13 @@ public class CampSiteResponse {
     private int id;
     private String name;
     private String address;
+    private String city;
     private double latitude;
     private double longitude;
     private LocalDateTime createdTime;
     private CampSiteStatus status;
+    private String message;
+    private Double depositRate;
     private List<ImageResponse> imageList;
     private List<SelectionResponse> campSiteSelectionsList;
     private List<PlaceTypeResponse> campSitePlaceTypeList;
