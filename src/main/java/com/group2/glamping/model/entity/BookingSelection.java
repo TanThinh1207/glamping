@@ -31,5 +31,5 @@ public class BookingSelection {
     private String name;
 
     @Column(name = "quantity")
-    private double quantity;
+    private Integer quantity;
 }
