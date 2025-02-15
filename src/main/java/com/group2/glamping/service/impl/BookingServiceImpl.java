@@ -11,6 +11,7 @@ import com.group2.glamping.model.enums.BookingStatus;
 import com.group2.glamping.model.mapper.BookingMapper;
 import com.group2.glamping.repository.*;
 import com.group2.glamping.service.interfaces.BookingService;
+import com.group2.glamping.service.interfaces.EmailService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,7 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
     private final SelectionRepository selectionRepository;
     private final BookingMapper bookingMapper;
+    private final EmailService emailService;
 
     @Override
     public Optional<BookingResponse> createBooking(BookingRequest bookingRequest) {
@@ -133,5 +135,36 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toList());
     }
 
+    //Accept Bookings
+    @Override
+    public BookingResponse acceptBookings(Integer bookingId) {
+        Optional<Booking> existedBooking = bookingRepository.findById(bookingId);
+        Booking booking = new Booking();
+        if (existedBooking.isPresent()) {
+            booking = existedBooking.get();
+            if(booking.getStatus() == BookingStatus.Pending) {
+                booking.setStatus(BookingStatus.Accepted);
+            }
+            bookingRepository.save(booking);
+            User user = booking.getUser();
+            emailService.sendBookingConfirmation(user.getEmail(), user.getFirstname(), bookingId, booking.getCampSite().getName());
+        }
+        return bookingMapper.toDto(booking);
+    }
+
+    //Accept Bookings
+    @Override
+    public BookingResponse denyBookings(Integer bookingId) {
+        Optional<Booking> existedBooking = bookingRepository.findById(bookingId);
+        Booking booking = new Booking();
+        if (existedBooking.isPresent()) {
+            booking = existedBooking.get();
+            if(booking.getStatus() == BookingStatus.Pending) {
+                booking.setStatus(BookingStatus.Denied);
+            }
+            bookingRepository.save(booking);
+        }
+        return bookingMapper.toDto(booking);
+    }
 }
 
