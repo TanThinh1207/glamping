@@ -20,7 +20,7 @@ public class CampTypeController {
 
     private final CampTypeServiceImpl campTypeService;
 
-    @GetMapping("/availableQuantity")
+    @GetMapping("/available-quantity")
     public ResponseEntity<Long> getAvailableQuantity(
             @RequestParam Integer campTypeId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime checkIn,
