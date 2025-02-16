@@ -62,7 +62,7 @@ public class BookingServiceImpl implements BookingService {
 
         List<BookingSelection> bookingSelections = bookingRequest.getBookingSelectionRequestList().stream()
                 .map(bookingService -> {
-                    Selection service = selectionRepository.findById(bookingService.idBooking())
+                    Selection service = selectionRepository.findById(bookingService.idSelection())
                             .orElseThrow(() -> new AppException(ErrorCode.SELECTION_NOT_FOUND));
 
                     return BookingSelection.builder()
