@@ -6,10 +6,10 @@ import jakarta.validation.constraints.NotNull;
 
 public record BookingSelectionRequest(
 
-        @Schema(description = "ID of the booking", example = "1")
-        @NotNull(message = "Booking ID cannot be null")
-        @Min(value = 1, message = "Booking ID must be a positive number")
-        int idBooking,
+        @Schema(description = "ID of the selection", example = "1")
+        @NotNull(message = "Selection ID cannot be null")
+        @Min(value = 1, message = "Selection ID must be a positive number")
+        int idSelection,
 
         @Schema(description = "Quantity of selections", example = "2")
         @NotNull(message = "Quantity cannot be null")
