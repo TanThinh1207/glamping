@@ -76,25 +76,11 @@ public class PlaceTypeController {
     )
     public ResponseEntity<BaseResponse> updatePlaceType(
             @Parameter(description = "ID of the place type to update", required = true)
-            @Valid @ModelAttribute PlaceTypeRequest request,
-            BindingResult bindingResult,
+            @Valid @RequestBody PlaceTypeRequest request,
             @Parameter(description = "Updated image file for the place type (optional)")
             @RequestParam(required = false) MultipartFile image
 
     ) {
-        if (bindingResult.hasErrors()) {
-            List<Map<String, Object>> errors = bindingResult.getFieldErrors().stream().map(error -> {
-                Map<String, Object> errorMap = new HashMap<>();
-                errorMap.put("field", error.getField());
-                errorMap.put("rejectedValue", error.getRejectedValue());
-                errorMap.put("message", error.getDefaultMessage());
-                return errorMap;
-            }).collect(Collectors.toList());
-
-            return ResponseEntity.badRequest().body(
-                    new BaseResponse(HttpStatus.BAD_REQUEST.value(), "Validation errors", errors)
-            );
-        }
         try {
             PlaceTypeResponse response = placeTypeService.updatePlaceType(request, image);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Place type updated successfully", response));

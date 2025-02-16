@@ -1,6 +1,5 @@
 package com.group2.glamping.model.entity;
 
-import com.group2.glamping.model.entity.id.IdBookingDetailOrder;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,22 +11,23 @@ import lombok.NoArgsConstructor;
 @Entity(name = "booking_detail_order")
 public class BookingDetailOrder {
 
-    @EmbeddedId
-    private IdBookingDetailOrder idBookingDetailOrder;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-    @ManyToOne
-    @MapsId("bookingDetailId")
-    @JoinColumn(name = "id_booking_detail", insertable = false, updatable = false)
-    private BookingDetail bookingDetail;
-
-    @ManyToOne
-    @MapsId("orderId")
-    @JoinColumn(name = "id_order", insertable = false, updatable = false)
-    private Order order;
+    @Column(name = "name")
+    private String name;
 
     @Column(name = "quantity")
-    private int quantity;
+    private Integer quantity;
 
     @Column(name = "total_amount")
-    private double totalAmount;
+    private Double totalAmount;
+
+    @Column(name = "text")
+    private String text;
+
+    @ManyToOne
+    @JoinColumn(name = "id_booking_detail")
+    private BookingDetail bookingDetail;
 }

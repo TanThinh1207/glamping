@@ -52,6 +52,8 @@ public class BookingServiceImpl implements BookingService {
                 .totalAmount(bookingRequest.getTotalAmount())
                 .status(BookingStatus.Pending)
                 .createdTime(LocalDateTime.now())
+                .systemFee(0.9 * bookingRequest.getTotalAmount())
+                .netAmount(bookingRequest.getTotalAmount() - (0.9 * bookingRequest.getTotalAmount()))
                 .build();
 
         Booking bookingDb = bookingRepository.save(booking);
