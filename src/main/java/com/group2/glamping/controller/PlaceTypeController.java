@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/placeTypes")
+@RequestMapping("/api/place-types")
 @Tag(name = "PlaceType API", description = "API for managing place types")
 @RequiredArgsConstructor
 public class PlaceTypeController {
