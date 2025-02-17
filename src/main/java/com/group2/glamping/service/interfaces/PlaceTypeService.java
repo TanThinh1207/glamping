@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface PlaceTypeService {
 
-    PlaceTypeResponse createPlaceType(PlaceTypeRequest request);
+    PlaceTypeResponse createPlaceType(PlaceTypeRequest request, MultipartFile image);
 
     PlaceTypeResponse updatePlaceType(PlaceTypeRequest request, MultipartFile image);
 

@@ -5,6 +5,7 @@ import com.group2.glamping.model.dto.response.PlaceTypeResponse;
 import com.group2.glamping.model.entity.PlaceType;
 import com.group2.glamping.repository.PlaceTypeRepository;
 import com.group2.glamping.service.interfaces.PlaceTypeService;
+import com.group2.glamping.service.interfaces.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,9 +19,10 @@ import java.util.stream.Collectors;
 public class PlaceTypeServiceImpl implements PlaceTypeService {
 
     private final PlaceTypeRepository placeTypeRepository;
+    private final S3Service s3Service;
 
     @Override
-    public PlaceTypeResponse createPlaceType(PlaceTypeRequest request) {
+    public PlaceTypeResponse createPlaceType(PlaceTypeRequest request, MultipartFile image) {
         if (request.id() != null) {
             throw new RuntimeException("ID must be null when creating a new place type");
         }
@@ -28,10 +30,8 @@ public class PlaceTypeServiceImpl implements PlaceTypeService {
                 .name(request.name())
                 .status(true)
                 .build();
-//        if (request.imagePath() != null && !request.imagePath().isEmpty()) {
-//            String filename = request.imagePath().getOriginalFilename();
-//            placeType.setImage(filename);
-//        }
+
+        placeType.setImage(s3Service.uploadFile(image, "PlaceType", "place_type_" + placeType.getId()));
         placeTypeRepository.save(placeType);
         return convertToResponse(placeType);
     }
@@ -48,6 +48,7 @@ public class PlaceTypeServiceImpl implements PlaceTypeService {
             String filename = image.getOriginalFilename();
             placeType.setImage(filename);
         }
+        placeType.setImage(s3Service.uploadFile(image, "PlaceType", "place_type_" + placeType.getId()));
         placeTypeRepository.save(placeType);
         return convertToResponse(placeType);
     }

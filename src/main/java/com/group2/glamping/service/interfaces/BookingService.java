@@ -17,4 +17,6 @@ public interface BookingService {
     BookingResponse acceptBookings(Integer campSiteId);
 
     BookingResponse denyBookings(Integer bookingId);
+
+    void confirmPaymentSuccess(Integer orderId);
 }

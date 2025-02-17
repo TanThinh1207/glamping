@@ -47,7 +47,7 @@ public class FacilityController {
     ) {
         try {
             FacilityRequest request = new FacilityRequest(null, name, description);
-            FacilityResponse response = facilityService.createFacility(request);
+            FacilityResponse response = facilityService.createFacility(request, image);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Facility created successfully", response));
         } catch (Exception e) {
             logger.error("Error while creating facility: {}", e.getMessage(), e);
@@ -79,7 +79,7 @@ public class FacilityController {
     ) {
         try {
             FacilityRequest request = new FacilityRequest(id, name, description);
-            FacilityResponse response = facilityService.updateFacility(request);
+            FacilityResponse response = facilityService.updateFacility(request, image);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Facility updated successfully", response));
         } catch (Exception e) {
             logger.error("Error while updating facility: {}", e.getMessage(), e);

@@ -63,7 +63,8 @@ public class AuthenticationService {
 
         return AuthenticationResponse.builder()
                 .user(user)
-                .message("いいですね")
+                //.message("いいですね")
+                .message("ok")
                 .accessToken(jwtToken)
                 .build();
     }

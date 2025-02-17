@@ -1,5 +1,6 @@
 package com.group2.glamping.controller;
 
+import com.group2.glamping.exception.AppException;
 import com.group2.glamping.model.dto.requests.PlaceTypeRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.PlaceTypeResponse;
@@ -14,14 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/place-types")
@@ -52,9 +49,8 @@ public class PlaceTypeController {
             PlaceTypeRequest request = PlaceTypeRequest.builder()
                     .id(null)
                     .name(name)
-//                    .imagePath(image)
                     .build();
-            PlaceTypeResponse response = placeTypeService.createPlaceType(request);
+            PlaceTypeResponse response = placeTypeService.createPlaceType(request, image);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Place type created successfully", response));
         } catch (Exception e) {
             logger.error("Error while creating place type: {}", e.getMessage(), e);
@@ -84,6 +80,13 @@ public class PlaceTypeController {
         try {
             PlaceTypeResponse response = placeTypeService.updatePlaceType(request, image);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Place type updated successfully", response));
+        } catch (AppException e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.badRequest().body(BaseResponse.builder()
+                    .statusCode(e.getErrorCode().getCode())
+                    .data(null)
+                    .message(e.getMessage())
+                    .build());
         } catch (Exception e) {
             logger.error("Error while updating place type: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

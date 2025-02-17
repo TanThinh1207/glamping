@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Thanh Toán VNPay</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h1>Thanh Toán VNPay</h1>
+
+    <!-- Hiển thị thông báo -->
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <!-- Form xác nhận thanh toán -->
+    <form th:action="@{/confirm-payment?vnp_ResponseCode=00}" method="post">
+        <div class="mb-3">
+            <label for="orderId" class="form-label">Mã Đơn Hàng</label>
+            <input type="text" class="form-control" id="orderId" name="orderId" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Xác Nhận Thanh Toán</button>
+    </form>
+</div>
+</body>
+</html>

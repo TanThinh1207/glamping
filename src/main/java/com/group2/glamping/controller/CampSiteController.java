@@ -8,6 +8,7 @@ import com.group2.glamping.exception.AppException;
 import com.group2.glamping.model.dto.requests.CampSiteRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.CampSiteResponse;
+import com.group2.glamping.model.enums.CampSiteStatus;
 import com.group2.glamping.service.interfaces.CampSiteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -36,30 +37,18 @@ public class CampSiteController {
     private static final Logger logger = LoggerFactory.getLogger(CampSiteController.class);
 
     @Operation(
-            summary = "Get all available campsites",
-            description = "Retrieve a list of available campsites",
+            summary = "Get campsites by status",
+            description = "Retrieve a list of campsites by status",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Camp sites retrieved successfully")
             }
     )
-    @GetMapping
-    public ResponseEntity<BaseResponse> getAllAvailableCampSites() {
-        List<CampSiteResponse> campsites = campSiteService.getAvailableCampSites();
+    @GetMapping("/status/{status}")
+    public ResponseEntity<BaseResponse> getCampSiteByStatus(@PathVariable CampSiteStatus status) {
+        List<CampSiteResponse> campsites = campSiteService.getCampSiteByStatus(status);
         return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Camp sites retrieved successfully", campsites));
     }
 
-    @Operation(
-            summary = "Get all pending campsites",
-            description = "Retrieve a list of campsites that are pending approval",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Pending camp sites retrieved successfully")
-            }
-    )
-    @GetMapping("/pending")
-    public ResponseEntity<BaseResponse> getAllPendingCampSites() {
-        List<CampSiteResponse> campsites = campSiteService.getPendingCampSites();
-        return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Camp sites retrieved successfully", campsites));
-    }
 
     @Operation(
             summary = "Get campsite by ID",
