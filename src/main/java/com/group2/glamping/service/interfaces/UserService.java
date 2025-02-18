@@ -1,5 +1,6 @@
 package com.group2.glamping.service.interfaces;
 
+import com.google.firebase.auth.FirebaseAuthException;
 import com.group2.glamping.model.dto.requests.UserUpdateRequest;
 import com.group2.glamping.model.dto.response.UserResponse;
 import com.group2.glamping.model.entity.User;
@@ -17,5 +18,5 @@ public interface UserService {
 
     UserResponse updateUser(int id, UserUpdateRequest userUpdateRequest);
 
-    UserResponse deleteUser(int id);
+    UserResponse deleteUser(int id) throws FirebaseAuthException;
 }

@@ -139,7 +139,15 @@
             <version>2.15.0</version>
         </dependency>
 
-<!--        JAVA MAIL SENDER-->
+        <!-- https://mvnrepository.com/artifact/com.google.firebase/firebase-admin -->
+        <dependency>
+            <groupId>com.google.firebase</groupId>
+            <artifactId>firebase-admin</artifactId>
+            <version>8.1.0</version>
+        </dependency>
+
+
+        <!--        JAVA MAIL SENDER-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>

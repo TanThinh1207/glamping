@@ -17,5 +17,6 @@ public class AuthenticationResponse {
     //private String expiresIn;
     private User user;
     private String message;
+    private boolean isNew;
 
 }
