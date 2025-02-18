@@ -89,6 +89,37 @@ public class BookingController {
         }
     }
 
+    @GetMapping("/{bookingId}")
+    @Operation(
+            summary = "Retrieve bookings by id",
+            description = "Retrieves Booking records filtered by Booking Id.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Bookings retrieved successfully"),
+                    @ApiResponse(responseCode = "404", description = "No Bookings found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<BaseResponse> getBookingById(@PathVariable Integer bookingId) {
+        try {
+            BookingResponse response = bookingService.getBookingById(bookingId);
+
+            if (response == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new BaseResponse(HttpStatus.NOT_FOUND.value(),
+                                "No Booking found with Booking Id: " + bookingId, null));
+            }
+
+            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(),
+                    "Bookings retrieved successfully", response));
+        } catch (Exception e) {
+            logger.error("Error while retrieving booking with ID {}: {}", bookingId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            "An unexpected error occurred. Please try again later.", null));
+        }
+    }
+
+
     //Accept bookings
     @GetMapping("/{bookingId}/accept")
     @Operation(

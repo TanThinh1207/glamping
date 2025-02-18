@@ -135,6 +135,15 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toList());
     }
 
+    //Retrieve bookings by Id
+    @Override
+    public BookingResponse getBookingById(Integer bookingId) {
+        Optional<Booking> bookingOptional = bookingRepository.findById(bookingId);
+        return bookingOptional.map(bookingMapper::toDto).orElse(null);
+
+    }
+
+
     //Accept Bookings
     @Override
     public BookingResponse acceptBookings(Integer bookingId) {
