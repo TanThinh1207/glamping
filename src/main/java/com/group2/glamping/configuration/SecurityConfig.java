@@ -41,7 +41,8 @@ public class SecurityConfig {
             "/api/camp-types/**", "/api/selections/**", "/api/facilities/**", "/api/utilities/**",
             "/api/place-types/**", "/mail/**", "/api/users/**",
             "/api/v1/auth/**", "/api/campsites/**", "/api/bookings/**",
-            "/home/**", "/home", "/api/s3/**"
+            "/home/**", "/home"
+//            , "/api/s3/**"
 
     };
 

@@ -4,7 +4,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
 import com.group2.glamping.exception.AppException;
-import com.group2.glamping.model.dto.requests.RegisterRequest;
+import com.group2.glamping.model.dto.requests.VerifyTokenRequest;
 import com.group2.glamping.model.dto.response.AuthenticationResponse;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.service.impl.AuthenticationService;
@@ -26,13 +26,10 @@ public class AuthenticationController {
     private final FirebaseAuth auth;
 
     @PostMapping("/verify")
-    public ResponseEntity<BaseResponse> verifyToken(@RequestParam String idToken) {
+    public ResponseEntity<BaseResponse> verifyToken(@RequestBody VerifyTokenRequest idToken) {
         try {
-            FirebaseToken decodedToken = auth.verifyIdToken(idToken);
-            AuthenticationResponse resp = authenticationService.verify(RegisterRequest.builder()
-                    .email(decodedToken.getEmail())
-                    .password("*")
-                    .build());
+            FirebaseToken decodedToken = auth.verifyIdToken(idToken.getIdToken());
+            AuthenticationResponse resp = authenticationService.verify(decodedToken.getEmail());
             return ResponseEntity.ok(BaseResponse.builder()
                     .message("Login successful")
                     .data(resp)
