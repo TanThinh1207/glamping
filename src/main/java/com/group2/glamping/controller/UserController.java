@@ -36,7 +36,7 @@ public class UserController {
                 .build(), HttpStatus.OK);
     }
 
-    @PostMapping("/update/{id}")
+    @PostMapping("/{id}")
     @Transactional
     public ResponseEntity<?> updateUser(
             @PathVariable int id,
@@ -50,7 +50,7 @@ public class UserController {
                 HttpStatus.OK);
     }
 
-    @PostMapping("/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable Integer id) throws FirebaseAuthException {
         return new ResponseEntity<>(BaseResponse.builder()
                 .statusCode(HttpStatus.OK.value())

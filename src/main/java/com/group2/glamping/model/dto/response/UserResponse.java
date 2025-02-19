@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 
 @Data
 @AllArgsConstructor
@@ -31,7 +30,7 @@ public class UserResponse {
         this.lastname = user.getLastname();
         this.address = user.getAddress();
         this.phone = user.getPhoneNumber();
-        this.birthday = user.getDob().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        this.birthday = (user.getDob() != null) ? user.getDob().toLocalDate() : null;
         this.status = user.isStatus();
     }
 }
