@@ -3,11 +3,14 @@ package com.group2.glamping.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.model.dto.requests.CampSiteRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.CampSiteResponse;
+import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.service.interfaces.CampSiteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,10 +22,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -35,6 +40,40 @@ public class CampSiteController {
 
     private static final Logger logger = LoggerFactory.getLogger(CampSiteController.class);
 
+
+    @GetMapping
+    public ResponseEntity<MappingJacksonValue> getCampSites(
+            @RequestParam Map<String, String> params,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(name = "fields", required = false) String fields) {
+
+        // Get data from service
+        PagingResponse<?> campSites = campSiteService.getCampSites(params, page, size);
+
+        // Apply dynamic filtering
+        SimpleFilterProvider filters;
+        if (fields != null && !fields.isEmpty()) {
+            filters = new SimpleFilterProvider()
+                    .addFilter("dynamicFilter", SimpleBeanPropertyFilter.filterOutAllExcept(fields.split(",")));
+        } else {
+            filters = new SimpleFilterProvider()
+                    .addFilter("dynamicFilter", SimpleBeanPropertyFilter.serializeAll());
+        }
+
+        // Wrap response with MappingJacksonValue
+        MappingJacksonValue mapping = new MappingJacksonValue(BaseResponse.builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(campSites)
+                .message("Retrieve all campsites successfully")
+                .build());
+
+        mapping.setFilters(filters);
+
+        return ResponseEntity.ok(mapping);
+    }
+
+
     @Operation(
             summary = "Get all available campsites",
             description = "Retrieve a list of available campsites",
@@ -42,7 +81,7 @@ public class CampSiteController {
                     @ApiResponse(responseCode = "200", description = "Camp sites retrieved successfully")
             }
     )
-    @GetMapping
+    @GetMapping("/cac")
     public ResponseEntity<BaseResponse> getAllAvailableCampSites() {
         List<CampSiteResponse> campsites = campSiteService.getAvailableCampSites();
         return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Camp sites retrieved successfully", campsites));

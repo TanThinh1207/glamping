@@ -1,5 +1,6 @@
 package com.group2.glamping.model.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.group2.glamping.model.entity.CampType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CampTypeResponse {
     int id;
     String type;
