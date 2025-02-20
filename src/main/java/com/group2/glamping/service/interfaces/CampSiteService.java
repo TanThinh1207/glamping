@@ -3,6 +3,8 @@ package com.group2.glamping.service.interfaces;
 import com.group2.glamping.model.dto.requests.CampSiteRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.CampSiteResponse;
+import com.group2.glamping.model.dto.response.PagingResponse;
+import com.group2.glamping.model.enums.CampSiteStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
