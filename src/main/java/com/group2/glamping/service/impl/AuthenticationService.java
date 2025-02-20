@@ -18,7 +18,7 @@ import java.util.Optional;
 public class AuthenticationService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+//    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
     public AuthenticationResponse verify(String email) throws AppException {

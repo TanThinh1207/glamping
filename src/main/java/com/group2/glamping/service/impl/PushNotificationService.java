@@ -31,12 +31,10 @@ public class PushNotificationService {
                             .build())
                     .putData("click_action", "FLUTTER_NOTIFICATION_CLICK")
                     .build();
-
-
             try {
                 FirebaseMessaging.getInstance().sendAsync(message).get();
             } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+                System.out.println(e.getMessage());
             }
         }
     }
