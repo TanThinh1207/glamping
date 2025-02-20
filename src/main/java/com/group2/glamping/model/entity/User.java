@@ -31,8 +31,8 @@ public class User implements UserDetails {
     @Column(name = "email")
     private String email;
 
-    @Column(name = "password")
-    private String password;
+//    @Column(name = "password")
+//    private String password;
 
     @Column(name = "first_name")
     private String firstname;
@@ -77,6 +77,11 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
+    }
+
+    @Override
+    public String getPassword() {
+        return "";
     }
 
     @Override

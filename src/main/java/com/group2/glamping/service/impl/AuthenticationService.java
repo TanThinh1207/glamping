@@ -42,7 +42,7 @@ public class AuthenticationService {
 
         User newUser = User.builder()
                 .email(email)
-                .password(passwordEncoder.encode(email))
+//                .password(passwordEncoder.encode(email))
                 .status(true)
                 .build();
 

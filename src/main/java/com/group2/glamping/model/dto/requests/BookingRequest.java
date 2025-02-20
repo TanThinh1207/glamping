@@ -13,5 +13,4 @@ public class BookingRequest {
     double totalAmount;
     List<BookingSelectionRequest> bookingSelectionRequestList;
 
-
 }
