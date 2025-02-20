@@ -23,7 +23,7 @@ public interface CampSiteService {
 
     //Optional<CampSiteResponse> updateCampSite(int id, CampSiteRequest campSiteRequest);
 
-    Optional<?> deleteCampSite(int id);
+    void deleteCampSite(int id);
 
     BaseResponse searchCampSiteByNameOrCity(String str);
 

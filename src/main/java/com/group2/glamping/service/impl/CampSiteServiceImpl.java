@@ -233,14 +233,13 @@ public class CampSiteServiceImpl implements CampSiteService {
 
 
     @Override
-    public Optional<CampSite> deleteCampSite(int id) {
+    public void deleteCampSite(int id) {
         Optional<CampSite> existingCampSite = campSiteRepository.findById(id);
 
         if (existingCampSite.isPresent()) {
             CampSite campSite = existingCampSite.get();
             campSite.setStatus(CampSiteStatus.Not_Available);
             campSiteRepository.save(campSite);
-            return Optional.of(campSite);
         } else {
             throw new AppException(ErrorCode.CAMP_SITE_NOT_FOUND);
         }
