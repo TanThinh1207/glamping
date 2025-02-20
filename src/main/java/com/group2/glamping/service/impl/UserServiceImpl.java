@@ -7,7 +7,9 @@ import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.UserUpdateRequest;
 import com.group2.glamping.model.dto.response.UserResponse;
+import com.group2.glamping.model.entity.FcmToken;
 import com.group2.glamping.model.entity.User;
+import com.group2.glamping.repository.FcmTokenRepository;
 import com.group2.glamping.repository.UserRepository;
 import com.group2.glamping.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +25,8 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    private final FirebaseAuth firebaseAuth;
+    private final FcmTokenRepository fcmTokenRepository;
+
 
     @Override
     public UserResponse getUserById(int id) {
@@ -46,7 +49,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         user.setFirstname(userUpdateRequest.firstName());
         user.setLastname(userUpdateRequest.lastName());
-        user.setPassword(userUpdateRequest.phone());
+//        user.setPassword(userUpdateRequest.phone());
         user.setDob(userUpdateRequest.dob());
         user.setStatus(userUpdateRequest.status());
         user.setAddress(userUpdateRequest.address());
@@ -64,6 +67,32 @@ public class UserServiceImpl implements UserService {
         UserRecord.UpdateRequest updateRequest = new UserRecord.UpdateRequest(userRecord.getUid()).setDisabled(true);
         FirebaseAuth.getInstance().updateUser(updateRequest);
         return new UserResponse(user);
+    }
+
+    @Override
+    public String updateFcmToken(int userId, String fcmToken) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            if (!fcmTokenRepository.existsByTokenAndUserId(fcmToken, userId)) {
+                FcmToken token = new FcmToken();
+                token.setToken(fcmToken);
+                token.setUser(user);
+                fcmTokenRepository.save(token);
+            }
+            return "FCM Token added successfully";
+        }
+        return "User not found";
+    }
+
+    @Override
+    public String removeFcmToken(int userId, String fcmToken) {
+        if (fcmTokenRepository.existsByTokenAndUserId(fcmToken, userId)) {
+            fcmTokenRepository.deleteByTokenAndUserId(fcmToken, userId);
+            return "FCM Token removed successfully";
+        }
+        return "FCM Token not found";
     }
 
 }

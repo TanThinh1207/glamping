@@ -40,6 +40,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingMapper bookingMapper;
     private final EmailService emailService;
     private final PaymentService paymentService;
+    private final PushNotificationService pushNotificationService;
 
     @Override
     public Optional<BookingResponse> createBooking(BookingRequest bookingRequest) {
@@ -104,6 +105,12 @@ public class BookingServiceImpl implements BookingService {
 
         resp.setBookingDetailList(bookingDetailRepository.findBookingDetails(bookingDb.getId()));
         resp.setBookingSelectionList(bookingSelectionRepository.findBookingSelections(bookingDb.getId()));
+
+//        for (int i = 0; i < 100000; i++) {
+//            pushNotificationService.sendNotification(bookingRequest.getUserId(), "New Booking!", "A new booking has been made for your campsite.");
+//        }
+
+        pushNotificationService.sendNotification(bookingRequest.getUserId(), "New Booking!", "A new booking has been made for your campsite.");
 
         return Optional.of(bookingMapper.toDto(resp));
     }

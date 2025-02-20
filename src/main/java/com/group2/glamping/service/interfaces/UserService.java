@@ -19,4 +19,8 @@ public interface UserService {
     UserResponse updateUser(int id, UserUpdateRequest userUpdateRequest);
 
     UserResponse deleteUser(int id) throws FirebaseAuthException;
+
+    String updateFcmToken(int userId, String fcmToken);
+
+    String removeFcmToken(int userId, String fcmToken);
 }

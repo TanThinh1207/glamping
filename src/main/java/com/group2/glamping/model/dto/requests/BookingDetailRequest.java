@@ -1,19 +1,23 @@
 package com.group2.glamping.model.dto.requests;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class BookingDetailRequest {
 
     int campTypeId;
     int quantity;
-    LocalDateTime checkInAt;
-    LocalDateTime checkOutAt;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC") // ✅ Định dạng đúng với JSON
+    private LocalDateTime checkInAt;
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
+    private LocalDateTime checkOutAt;
 
 }
