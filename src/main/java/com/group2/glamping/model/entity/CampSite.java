@@ -1,5 +1,6 @@
 package com.group2.glamping.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.group2.glamping.model.enums.CampSiteStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -37,6 +38,7 @@ public class CampSite {
     private double longitude;
 
     @Column(name = "created_at")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdTime;
 
     @Column(name = "status")
@@ -46,7 +48,7 @@ public class CampSite {
     @Column(name = "message")
     private String message;
 
-    @Column(name = "deposit_rate",columnDefinition = "DOUBLE DEFAULT 0.0", nullable = false)
+    @Column(name = "deposit_rate", columnDefinition = "DOUBLE DEFAULT 0.0", nullable = false)
     private Double depositRate;
 
     @ManyToOne
