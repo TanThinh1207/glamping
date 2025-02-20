@@ -4,10 +4,10 @@ package com.group2.glamping.configuration;
 import com.group2.glamping.auth.JwtAuthenticationFilter;
 import com.group2.glamping.auth.google.CustomAccessDeniedHandler;
 import com.group2.glamping.auth.google.CustomAuthenticationEntryPoint;
-import com.group2.glamping.auth.google.CustomAuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -32,7 +32,7 @@ public class SecurityConfig {
 
     //    private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    //    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
@@ -64,13 +64,11 @@ public class SecurityConfig {
                         .accessDeniedHandler(customAccessDeniedHandler))
 //                .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo.userService(oauth2UserService()))
-                        .successHandler(customAuthenticationSuccessHandler)
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/home")
-                )
-
+//                .oauth2Login(oauth2 -> oauth2
+//                        .userInfoEndpoint(userInfo -> userInfo.userService(oauth2UserService()))
+//                        .successHandler(customAuthenticationSuccessHandler)
+//                )
+//                .formLogin(Customizer.withDefaults())
                 .build();
     }
 

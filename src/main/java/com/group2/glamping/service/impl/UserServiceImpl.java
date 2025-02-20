@@ -1,5 +1,8 @@
 package com.group2.glamping.service.impl;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.UserRecord;
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.UserUpdateRequest;
@@ -20,6 +23,8 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
+    private final FirebaseAuth firebaseAuth;
+
     @Override
     public UserResponse getUserById(int id) {
         User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -32,7 +37,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponse> getUsers(){
+    public List<UserResponse> getUsers() {
         return userRepository.findAll().stream().filter(User::isStatus).map(UserResponse::new).collect(Collectors.toList());
     }
 
@@ -51,11 +56,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse deleteUser(int id) {
+    public UserResponse deleteUser(int id) throws FirebaseAuthException {
         User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         user.setStatus(false);
         userRepository.save(user);
-
+        UserRecord userRecord = FirebaseAuth.getInstance().getUserByEmail(user.getEmail());
+        UserRecord.UpdateRequest updateRequest = new UserRecord.UpdateRequest(userRecord.getUid()).setDisabled(true);
+        FirebaseAuth.getInstance().updateUser(updateRequest);
         return new UserResponse(user);
     }
 

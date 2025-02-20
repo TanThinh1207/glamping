@@ -25,11 +25,8 @@ public enum ErrorCode {
     FILE_NOT_FOUND(10015, "File not found", HttpStatus.NOT_FOUND),
     S3_ERROR(10016, "S3 error", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_USERNAME(10012, "Username must be at least {min} characters", HttpStatus.BAD_REQUEST),
-    PLACE_TYPE_NOT_FOUND(10016, "Place type not found", HttpStatus.NOT_FOUND);
-
-
-
-
+    PLACE_TYPE_NOT_FOUND(10016, "Place type not found", HttpStatus.NOT_FOUND),
+    USER_NOT_AVAILABLE(10017, "User is currently disable", HttpStatus.NOT_FOUND);
     private final int code;
     private final String message;
     private final HttpStatusCode statusCode;

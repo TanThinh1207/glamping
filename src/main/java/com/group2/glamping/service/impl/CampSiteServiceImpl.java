@@ -5,25 +5,26 @@ import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.CampSiteRequest;
 import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
 import com.group2.glamping.model.dto.requests.SelectionRequest;
-import com.group2.glamping.model.dto.response.BaseResponse;
-import com.group2.glamping.model.dto.response.CampSiteResponse;
-import com.group2.glamping.model.dto.response.CampSiteResponseDTO;
-import com.group2.glamping.model.dto.response.ImageResponse;
+import com.group2.glamping.model.dto.response.*;
 import com.group2.glamping.model.entity.*;
 import com.group2.glamping.model.enums.CampSiteStatus;
 import com.group2.glamping.model.mapper.CampSiteMapper;
 import com.group2.glamping.repository.*;
 import com.group2.glamping.service.interfaces.CampSiteService;
 import com.group2.glamping.service.interfaces.S3Service;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -229,14 +230,13 @@ public class CampSiteServiceImpl implements CampSiteService {
 
 
     @Override
-    public Optional<CampSite> deleteCampSite(int id) {
+    public void deleteCampSite(int id) {
         Optional<CampSite> existingCampSite = campSiteRepository.findById(id);
 
         if (existingCampSite.isPresent()) {
             CampSite campSite = existingCampSite.get();
             campSite.setStatus(CampSiteStatus.Not_Available);
             campSiteRepository.save(campSite);
-            return Optional.of(campSite);
         } else {
             throw new AppException(ErrorCode.CAMP_SITE_NOT_FOUND);
         }
@@ -302,5 +302,59 @@ public class CampSiteServiceImpl implements CampSiteService {
         return Optional.empty();
     }
 
+    @Override
+    public PagingResponse<?> getCampSites(Map<String, String> params, int page, int size) {
+        Specification<CampSite> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            params.forEach((key, value) -> {
+                switch (key) {
+                    case "name":
+                        predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
+                        break;
+                    case "status":
+                        predicates.add(criteriaBuilder.equal(root.get("status"), CampSiteStatus.Available));
+                        break;
+                    case "city":
+                        predicates.add(criteriaBuilder.like(root.get("address"), "%" + value + "%"));
+                        break;
+                    case "placeTypeName":
+                        List<String> placeTypeList = Arrays.asList(value.split(","));
+                        Join<CampSite, PlaceType> placeTypeJoin = root.join("placeTypes");
+                        predicates.add(placeTypeJoin.get("name").in(placeTypeList));
+                        break;
+                }
+            });
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+        Pageable pageable = PageRequest.of(page, size);
+        Page<CampSite> campSitePage = campSiteRepository.findAll(spec, pageable);
+        List<CampSiteResponse> campSiteResponses = campSitePage.getContent().stream()
+                .map(campSiteMapper::toDto)
+                .toList();
+//        if (params.containsKey("display")) {
+//            Set<String> allowedFields = Set.of(params.get("display").split(","));
+//            List<ObjectNode> filteredResponses = ResponseFilterUtil.filterFields(campSiteResponses, allowedFields);
+//
+//            return new PagingResponse<>(
+//                    filteredResponses,
+//                    campSitePage.getTotalElements(),
+//                    campSitePage.getTotalPages(),
+//                    campSitePage.getNumber(),
+//                    campSitePage.getNumberOfElements()
+//            );
+//        }
+
+
+        return new PagingResponse<>(
+                campSiteResponses,
+                campSitePage.getTotalElements(),
+                campSitePage.getTotalPages(),
+                campSitePage.getNumber(),
+                campSitePage.getNumberOfElements()
+        );
+
+    }
 }
+
 

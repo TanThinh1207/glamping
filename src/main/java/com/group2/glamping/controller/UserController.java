@@ -1,5 +1,6 @@
 package com.group2.glamping.controller;
 
+import com.google.firebase.auth.FirebaseAuthException;
 import com.group2.glamping.model.dto.requests.UserUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.service.interfaces.UserService;
@@ -35,7 +36,7 @@ public class UserController {
                 .build(), HttpStatus.OK);
     }
 
-    @PostMapping("/update/{id}")
+    @PostMapping("/{id}")
     @Transactional
     public ResponseEntity<?> updateUser(
             @PathVariable int id,
@@ -49,8 +50,8 @@ public class UserController {
                 HttpStatus.OK);
     }
 
-    @PostMapping("/delete/{id}")
-    public ResponseEntity<?> delete(@PathVariable Integer id) {
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> delete(@PathVariable Integer id) throws FirebaseAuthException {
         return new ResponseEntity<>(BaseResponse.builder()
                 .statusCode(HttpStatus.OK.value())
                 .message("Successfully deleted user")

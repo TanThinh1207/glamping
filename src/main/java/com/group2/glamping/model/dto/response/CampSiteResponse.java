@@ -1,5 +1,7 @@
 package com.group2.glamping.model.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.group2.glamping.model.enums.CampSiteStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonFilter("dynamicFilter")
 public class CampSiteResponse {
 
     private int id;
@@ -21,6 +24,7 @@ public class CampSiteResponse {
     private String city;
     private double latitude;
     private double longitude;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdTime;
     private CampSiteStatus status;
     private String message;

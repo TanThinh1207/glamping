@@ -14,9 +14,12 @@ public interface BookingService {
 
     List<BookingResponse> getCompletedBookingsByCampSiteId(Integer campSiteId);
 
+    BookingResponse getBookingById(Integer bookingId);
+
     BookingResponse acceptBookings(Integer campSiteId);
 
     BookingResponse denyBookings(Integer bookingId);
 
     void confirmPaymentSuccess(Integer orderId);
+
 }

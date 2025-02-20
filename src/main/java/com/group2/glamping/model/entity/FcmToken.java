@@ -2,21 +2,15 @@ package com.group2.glamping.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
+@Entity
+@Table(name = "fcm_token")
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "verification_token")
-public class VerificationToken {
-
+public class FcmToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -24,13 +18,8 @@ public class VerificationToken {
     @Column(name = "token")
     private String token;
 
-    @Column(name = "create_at")
-    private LocalDateTime createdTime;
-
-    @Column(name = "expires_at")
-    private LocalDateTime expiresTime;
-
     @ManyToOne
     @JoinColumn(name = "id_user")
     private User user;
+
 }
