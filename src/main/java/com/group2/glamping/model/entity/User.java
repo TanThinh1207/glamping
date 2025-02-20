@@ -71,9 +71,8 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<Report> reportList;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "user")
-    private List<VerificationToken> verificationTokenList;
+    private List<FcmToken> fcmTokenList;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
