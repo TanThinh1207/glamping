@@ -5,8 +5,10 @@ import com.group2.glamping.model.dto.response.FacilityResponse;
 import com.group2.glamping.model.entity.Facility;
 import com.group2.glamping.repository.FacilityRepository;
 import com.group2.glamping.service.interfaces.FacilityService;
+import com.group2.glamping.service.interfaces.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,25 +17,24 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FacilityServiceImpl implements FacilityService {
     private final FacilityRepository facilityRepository;
+    private final S3Service s3Service;
 
     @Override
-    public FacilityResponse createFacility(FacilityRequest request) {
+    public FacilityResponse createFacility(FacilityRequest request, MultipartFile file) {
         if (request.id() != null) {
             throw new RuntimeException("ID must be null when creating a new facility");
         }
         Facility facility = new Facility();
         facility.setName(request.name());
         facility.setDescription(request.description());
-//        if (request.image() != null && !request.image().isEmpty()) {
-//            facility.setImageUrl(request.image().getOriginalFilename());
-//        }
         facility.setStatus(true);
+        facility.setImageUrl(s3Service.uploadFile(file, "Facility", "facility" + facility.getId()));
         facilityRepository.save(facility);
         return convertToResponse(facility);
     }
 
     @Override
-    public FacilityResponse updateFacility(FacilityRequest request) {
+    public FacilityResponse updateFacility(FacilityRequest request, MultipartFile file) {
         if (request.id() == null) {
             throw new RuntimeException("ID is required for update");
         }
@@ -41,9 +42,8 @@ public class FacilityServiceImpl implements FacilityService {
                 .orElseThrow(() -> new RuntimeException("Facility not found"));
         facility.setName(request.name());
         facility.setDescription(request.description());
-//        if (request.image() != null && !request.image().isEmpty()) {
-//            facility.setImageUrl(request.image().getOriginalFilename());
-//        }
+        facility.setImageUrl(s3Service.uploadFile(file, "Facility", "facility" + facility.getId()));
+
         facilityRepository.save(facility);
         return convertToResponse(facility);
     }
@@ -69,6 +69,7 @@ public class FacilityServiceImpl implements FacilityService {
     @Override
     public List<FacilityResponse> getFacilitiesByStatus(Boolean status) {
         // Nếu status null, có thể chọn trả về tất cả hoặc ném exception – ở đây mình giả sử trả về tất cả
+        // ???
         if (status == null) {
             return getAllFacilities();
         }

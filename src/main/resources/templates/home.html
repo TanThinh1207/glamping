@@ -12,7 +12,7 @@
         }
 
         // Chuyển hướng hoặc hiển thị thông tin token
-        window.onload = function() {
+        window.onload = function () {
             const token = getQueryParam("token");
             if (token) {
                 localStorage.setItem("jwt_token", token); // Lưu token vào localStorage

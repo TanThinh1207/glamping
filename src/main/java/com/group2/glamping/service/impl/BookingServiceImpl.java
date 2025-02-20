@@ -8,10 +8,12 @@ import com.group2.glamping.model.entity.*;
 import com.group2.glamping.model.entity.id.IdBookingSelection;
 import com.group2.glamping.model.enums.BookingDetailStatus;
 import com.group2.glamping.model.enums.BookingStatus;
+import com.group2.glamping.model.enums.PaymentStatus;
 import com.group2.glamping.model.mapper.BookingMapper;
 import com.group2.glamping.repository.*;
 import com.group2.glamping.service.interfaces.BookingService;
 import com.group2.glamping.service.interfaces.EmailService;
+import com.group2.glamping.service.interfaces.PaymentService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,7 @@ public class BookingServiceImpl implements BookingService {
     private final SelectionRepository selectionRepository;
     private final BookingMapper bookingMapper;
     private final EmailService emailService;
+    private final PaymentService paymentService;
 
     @Override
     public Optional<BookingResponse> createBooking(BookingRequest bookingRequest) {
@@ -151,7 +154,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = new Booking();
         if (existedBooking.isPresent()) {
             booking = existedBooking.get();
-            if(booking.getStatus() == BookingStatus.Pending) {
+            if (booking.getStatus() == BookingStatus.Pending) {
                 booking.setStatus(BookingStatus.Accepted);
             }
             bookingRepository.save(booking);
@@ -168,12 +171,27 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = new Booking();
         if (existedBooking.isPresent()) {
             booking = existedBooking.get();
-            if(booking.getStatus() == BookingStatus.Pending) {
+            if (booking.getStatus() == BookingStatus.Pending) {
                 booking.setStatus(BookingStatus.Denied);
             }
             bookingRepository.save(booking);
         }
         return bookingMapper.toDto(booking);
+    }
+
+    @Override
+    public void confirmPaymentSuccess(Integer bookingId) {
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        Payment payment = Payment.builder()
+                .booking(booking)
+                .paymentMethod("VN-Pay")
+                .completedTime(LocalDateTime.now())
+                .status(PaymentStatus.Completed)
+                .totalAmount(booking.getTotalAmount() * 0.3)
+                .build();
+        paymentService.save(payment);
+        booking.setStatus(BookingStatus.Deposit);
+        bookingRepository.save(booking);
     }
 }
 

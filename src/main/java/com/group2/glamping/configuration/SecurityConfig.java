@@ -30,7 +30,7 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final AuthenticationProvider authenticationProvider;
+    //    private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     //    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
@@ -40,9 +40,10 @@ public class SecurityConfig {
             "/api-docs/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/api/docs/**",
             "/api/camp-types/**", "/api/selections/**", "/api/facilities/**", "/api/utilities/**",
             "/api/place-types/**", "/mail/**", "/api/users/**",
-            "/api/v1/auth/**", "/api/campsites/**", "/api/bookings/**",
-            "/home/**", "/home"
-//            , "/api/s3/**"
+            "/api/v1/auth/**", "/api/campsites/**", "/api/bookings/**", "/api/payments/**",
+            "/home/**", "/home", "/api/s3/**",
+            "/", "/login", "/payment",
+            "/confirm-payment" // sau khi có link FE sẽ đổi sang link fe
 
     };
 
@@ -55,13 +56,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(req -> {
                             req.requestMatchers(WHITE_LIST).permitAll();
 //                            req.requestMatchers("/api/demo/**", "/api/campsites/**", "/login/oauth2/code/**").hasRole("USER");
-//                            req.requestMatchers("/home").authenticated();
+                            req.requestMatchers("/home").authenticated();
                         }
                 )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                         .accessDeniedHandler(customAccessDeniedHandler))
-                .authenticationProvider(authenticationProvider)
+//                .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 //                .oauth2Login(oauth2 -> oauth2
 //                        .userInfoEndpoint(userInfo -> userInfo.userService(oauth2UserService()))

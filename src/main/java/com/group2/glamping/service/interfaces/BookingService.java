@@ -20,4 +20,6 @@ public interface BookingService {
 
     BookingResponse denyBookings(Integer bookingId);
 
+    void confirmPaymentSuccess(Integer orderId);
+
 }

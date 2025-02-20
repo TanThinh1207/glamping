@@ -1,5 +1,6 @@
 package com.group2.glamping.controller;
 
+import com.group2.glamping.exception.AppException;
 import com.group2.glamping.model.dto.requests.PlaceTypeRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.PlaceTypeResponse;
@@ -48,9 +49,8 @@ public class PlaceTypeController {
             PlaceTypeRequest request = PlaceTypeRequest.builder()
                     .id(null)
                     .name(name)
-//                    .imagePath(image)
                     .build();
-            PlaceTypeResponse response = placeTypeService.createPlaceType(request);
+            PlaceTypeResponse response = placeTypeService.createPlaceType(request, image);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Place type created successfully", response));
         } catch (Exception e) {
             logger.error("Error while creating place type: {}", e.getMessage(), e);
@@ -80,6 +80,13 @@ public class PlaceTypeController {
         try {
             PlaceTypeResponse response = placeTypeService.updatePlaceType(request, image);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Place type updated successfully", response));
+        } catch (AppException e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.badRequest().body(BaseResponse.builder()
+                    .statusCode(e.getErrorCode().getCode())
+                    .data(null)
+                    .message(e.getMessage())
+                    .build());
         } catch (Exception e) {
             logger.error("Error while updating place type: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

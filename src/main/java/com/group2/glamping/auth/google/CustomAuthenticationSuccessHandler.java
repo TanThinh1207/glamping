@@ -52,6 +52,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                 authenticationResponse = AuthenticationResponse.builder()
                         .user(user)
                         .accessToken(token)
+                        .isNew(false)
                         .build();
 
             } else {
@@ -69,6 +70,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             authenticationResponse = AuthenticationResponse.builder()
                     .user(newUser)
                     .accessToken(token)
+                    .isNew(true)
                     .build();
         }
 
