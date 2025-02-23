@@ -3,15 +3,11 @@ package com.group2.glamping.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.model.dto.requests.CampSiteRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.CampSiteResponse;
-import com.group2.glamping.model.enums.CampSiteStatus;
-import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.service.interfaces.CampSiteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,68 +37,21 @@ public class CampSiteController {
 
     private static final Logger logger = LoggerFactory.getLogger(CampSiteController.class);
 
-
+    @Operation(
+            summary = "Get list of campsites",
+            description = "Retrieve a paginated list of campsites with optional filtering and field selection",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Campsites retrieved successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid input or bad request")
+            }
+    )
     @GetMapping
     public ResponseEntity<MappingJacksonValue> getCampSites(
             @RequestParam Map<String, String> params,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(name = "fields", required = false) String fields) {
-
-        // Get data from service
-        PagingResponse<?> campSites = campSiteService.getCampSites(params, page, size);
-
-        // Apply dynamic filtering
-        SimpleFilterProvider filters;
-        if (fields != null && !fields.isEmpty()) {
-            filters = new SimpleFilterProvider()
-                    .addFilter("dynamicFilter", SimpleBeanPropertyFilter.filterOutAllExcept(fields.split(",")));
-        } else {
-            filters = new SimpleFilterProvider()
-                    .addFilter("dynamicFilter", SimpleBeanPropertyFilter.serializeAll());
-        }
-
-        // Wrap response with MappingJacksonValue
-        MappingJacksonValue mapping = new MappingJacksonValue(BaseResponse.builder()
-                .statusCode(HttpStatus.OK.value())
-                .data(campSites)
-                .message("Retrieve all campsites successfully")
-                .build());
-
-        mapping.setFilters(filters);
-
-        return ResponseEntity.ok(mapping);
-    }
-
-
-    @Operation(
-            summary = "Get campsites by status",
-            description = "Retrieve a list of campsites by status",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Camp sites retrieved successfully")
-            }
-    )
-    @GetMapping("/status/{status}")
-    public ResponseEntity<BaseResponse> getCampSiteByStatus(@PathVariable CampSiteStatus status) {
-        List<CampSiteResponse> campsites = campSiteService.getCampSiteByStatus(status);
-        return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Camp sites retrieved successfully", campsites));
-    }
-
-
-    @Operation(
-            summary = "Get campsite by ID",
-            description = "Retrieve details of a specific campsite by its ID",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Camp site found"),
-                    @ApiResponse(responseCode = "404", description = "Camp site not found")
-            }
-    )
-    @GetMapping("/{id}")
-    public ResponseEntity<BaseResponse> getCampSiteById(
-            @Parameter(description = "ID of the campsite", example = "1") @PathVariable int id) {
-        Optional<CampSiteResponse> campsite = campSiteService.getCampSiteBasicDetail(id);
-        return campsite.map(site -> ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Camp site found", site)))
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(new BaseResponse(HttpStatus.NOT_FOUND.value(), "Camp site not found", null)));
+        return ResponseEntity.ok(campSiteService.getFilteredCampSites(params, page, size, fields));
     }
 
     @Operation(

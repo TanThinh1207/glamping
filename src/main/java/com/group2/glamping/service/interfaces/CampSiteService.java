@@ -4,7 +4,7 @@ import com.group2.glamping.model.dto.requests.CampSiteRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.CampSiteResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
-import com.group2.glamping.model.enums.CampSiteStatus;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -13,13 +13,7 @@ import java.util.Optional;
 
 public interface CampSiteService {
 
-    List<CampSiteResponse> getCampSiteByStatus(CampSiteStatus status);
-
     Optional<CampSiteResponse> saveCampSite(CampSiteRequest campSiteUpdateRequest, List<MultipartFile> files, MultipartFile selectionFile, MultipartFile campTypeFile);
-
-    Optional<CampSiteResponse> getCampSiteBasicDetail(int id);
-
-    //Optional<CampSiteResponse> updateCampSite(int id, CampSiteRequest campSiteRequest);
 
     void deleteCampSite(int id);
 
@@ -28,4 +22,6 @@ public interface CampSiteService {
     Optional<CampSiteResponse> enableCampSite(int id);
 
     PagingResponse<?> getCampSites(Map<String, String> params, int page, int size);
+
+    MappingJacksonValue getFilteredCampSites(Map<String, String> params, int page, int size, String fields);
 }

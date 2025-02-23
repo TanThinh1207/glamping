@@ -1,5 +1,7 @@
 package com.group2.glamping.service.impl;
 
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.CampSiteRequest;
@@ -20,6 +22,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,18 +43,6 @@ public class CampSiteServiceImpl implements CampSiteService {
     private final CampTypeRepository campTypeRepository;
     private final S3Service s3Service;
     private final CampSiteMapper campSiteMapper;
-
-
-    @Override
-    public List<CampSiteResponse> getCampSiteByStatus(CampSiteStatus status) {
-        if (campSiteRepository.findAllByStatus(status).isEmpty()) {
-            return Collections.emptyList();
-        }
-        return campSiteRepository.findAllByStatus(status).stream()
-                .map(campSiteMapper::toDto)
-                .collect(Collectors.toList());
-    }
-
 
     @Override
     public Optional<CampSiteResponse> saveCampSite(CampSiteRequest campSiteUpdateRequest,
@@ -200,13 +192,6 @@ public class CampSiteServiceImpl implements CampSiteService {
     }
 
 
-    @Override
-    public Optional<CampSiteResponse> getCampSiteBasicDetail(int id) {
-        return campSiteRepository.findById(id)
-                .map(campSiteMapper::toDto);
-    }
-
-
 //    @Override
 //    public Optional<CampSiteResponse> updateCampSite(int id, CampSiteRequest campSiteUpdateRequest) {
 //        CampSite campSite = campSiteRepository.findById(id)
@@ -309,20 +294,42 @@ public class CampSiteServiceImpl implements CampSiteService {
 
             params.forEach((key, value) -> {
                 switch (key) {
+                    case "id":
+                        predicates.add(criteriaBuilder.equal(root.get("id"), value));
+                        break;
                     case "name":
                         predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
                         break;
                     case "status":
-                        predicates.add(criteriaBuilder.equal(root.get("status"), CampSiteStatus.Available));
+                        predicates.add(criteriaBuilder.equal(root.get("status"), value));
                         break;
                     case "city":
+                        predicates.add(criteriaBuilder.like(root.get("city"), "%" + value + "%"));
+                        break;
+                    case "address":
                         predicates.add(criteriaBuilder.like(root.get("address"), "%" + value + "%"));
+                        break;
+                    case "createdTime":
+                        predicates.add(criteriaBuilder.equal(root.get("createdTime"), value));
+                        break;
+                    case "depositRate":
+                        predicates.add(criteriaBuilder.equal(root.get("depositRate"), value));
+                        break;
+                    case "latitude":
+                        predicates.add(criteriaBuilder.equal(root.get("latitude"), value));
+                        break;
+                    case "longitude":
+                        predicates.add(criteriaBuilder.equal(root.get("longitude"), value));
                         break;
                     case "placeTypeName":
                         List<String> placeTypeList = Arrays.asList(value.split(","));
                         Join<CampSite, PlaceType> placeTypeJoin = root.join("placeTypes");
                         predicates.add(placeTypeJoin.get("name").in(placeTypeList));
                         break;
+                    case "utilityName":
+                        List<String> utilityNameList = Arrays.asList(value.split(","));
+                        Join<CampSite, Utility> utilityJoin = root.join("utilities");
+                        predicates.add(utilityJoin.get("name").in(utilityNameList));
                 }
             });
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
@@ -332,19 +339,6 @@ public class CampSiteServiceImpl implements CampSiteService {
         List<CampSiteResponse> campSiteResponses = campSitePage.getContent().stream()
                 .map(campSiteMapper::toDto)
                 .toList();
-//        if (params.containsKey("display")) {
-//            Set<String> allowedFields = Set.of(params.get("display").split(","));
-//            List<ObjectNode> filteredResponses = ResponseFilterUtil.filterFields(campSiteResponses, allowedFields);
-//
-//            return new PagingResponse<>(
-//                    filteredResponses,
-//                    campSitePage.getTotalElements(),
-//                    campSitePage.getTotalPages(),
-//                    campSitePage.getNumber(),
-//                    campSitePage.getNumberOfElements()
-//            );
-//        }
-
 
         return new PagingResponse<>(
                 campSiteResponses,
@@ -355,6 +349,34 @@ public class CampSiteServiceImpl implements CampSiteService {
         );
 
     }
+
+    @Override
+    public MappingJacksonValue getFilteredCampSites(Map<String, String> params, int page, int size, String fields) {
+        // Get data from repository or other service
+        PagingResponse<?> campSites = getCampSites(params, page, size);
+
+        // Apply dynamic filtering
+        SimpleFilterProvider filters;
+        if (fields != null && !fields.isEmpty()) {
+            filters = new SimpleFilterProvider()
+                    .addFilter("dynamicFilter", SimpleBeanPropertyFilter.filterOutAllExcept(fields.split(",")));
+        } else {
+            filters = new SimpleFilterProvider()
+                    .addFilter("dynamicFilter", SimpleBeanPropertyFilter.serializeAll());
+        }
+
+        // Wrap response with MappingJacksonValue
+        MappingJacksonValue mapping = new MappingJacksonValue(BaseResponse.builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(campSites)
+                .message("Retrieve all campsites successfully")
+                .build());
+
+        mapping.setFilters(filters);
+
+        return mapping;
+    }
+
 }
 
 
