@@ -1,9 +1,14 @@
 package com.group2.glamping.service.impl;
 
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.BookingRequest;
+import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.BookingResponse;
+import com.group2.glamping.model.dto.response.PagingResponse;
+import com.group2.glamping.model.dto.response.UtilityResponse;
 import com.group2.glamping.model.entity.*;
 import com.group2.glamping.model.entity.id.IdBookingSelection;
 import com.group2.glamping.model.enums.BookingDetailStatus;
@@ -14,14 +19,19 @@ import com.group2.glamping.repository.*;
 import com.group2.glamping.service.interfaces.BookingService;
 import com.group2.glamping.service.interfaces.EmailService;
 import com.group2.glamping.service.interfaces.PaymentService;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -185,6 +195,66 @@ public class BookingServiceImpl implements BookingService {
         }
         return bookingMapper.toDto(booking);
     }
+
+    @Override
+    public PagingResponse<?> getBookings(Map<String, String> params, int page, int size) {
+        Specification<Booking> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            params.forEach((key, value) -> {
+                switch (key) {
+                    case "id":
+                        predicates.add(criteriaBuilder.equal(root.get("id"), value));
+                        break;
+                    case "name":
+                        predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
+                        break;
+                    case "status":
+                        predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
+                        break;
+                }
+            });
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Booking> bookingPage = bookingRepository.findAll(spec, pageable);
+        List<BookingResponse> bookingResponses = bookingPage.getContent().stream()
+                .map(bookingMapper::toDto)  // Fix lỗi gọi hàm mapping
+                .toList();
+
+        return new PagingResponse<>(
+                bookingResponses,
+                bookingPage.getTotalElements(),
+                bookingPage.getTotalPages(),
+                bookingPage.getNumber(),
+                bookingPage.getNumberOfElements()
+        );
+    }
+
+    @Override
+    public MappingJacksonValue getFilteredBookings(Map<String, String> params, int page, int size, String fields) {
+        PagingResponse<?> bookings = getBookings(params, page, size); // Fix lỗi gọi sai hàm
+
+        SimpleFilterProvider filters = new SimpleFilterProvider();
+        if (fields != null && !fields.isEmpty()) {
+            filters.addFilter("dynamicFilter", SimpleBeanPropertyFilter.filterOutAllExcept(fields.split(",")));
+        } else {
+            filters.addFilter("dynamicFilter", SimpleBeanPropertyFilter.serializeAll());
+        }
+
+        MappingJacksonValue mapping = new MappingJacksonValue(BaseResponse.builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(bookings)
+                .message("Retrieve all bookings successfully") // Fix message
+                .build());
+
+        mapping.setFilters(filters);
+
+        return mapping;
+    }
+
 
     @Override
     public void confirmPaymentSuccess(Integer bookingId) {

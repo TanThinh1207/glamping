@@ -33,3 +33,4 @@ build/
 .vscode/
 qodana.yaml
 glamping_v8.sql
+src/main/resources/glamping-450314-firebase-adminsdk-fbsvc-75970ba374.json
