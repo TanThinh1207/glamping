@@ -183,7 +183,7 @@ public class BookingServiceImpl implements BookingService {
 
     //Accept Bookings
     @Override
-    public BookingResponse denyBookings(Integer bookingId) {
+    public BookingResponse denyBookings(Integer bookingId, String deniedReason) {
         Optional<Booking> existedBooking = bookingRepository.findById(bookingId);
         Booking booking = new Booking();
         if (existedBooking.isPresent()) {
@@ -192,6 +192,12 @@ public class BookingServiceImpl implements BookingService {
                 booking.setStatus(BookingStatus.Denied);
             }
             bookingRepository.save(booking);
+            User user = booking.getUser();
+            emailService.sendDeniedBookingEmail(user.getEmail(),
+                    user.getFirstname(),
+                    bookingId,
+                    booking.getCampSite().getName(),
+                    deniedReason);
         }
         return bookingMapper.toDto(booking);
     }

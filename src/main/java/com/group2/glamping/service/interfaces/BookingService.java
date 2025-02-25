@@ -21,7 +21,7 @@ public interface BookingService {
 
     BookingResponse acceptBookings(Integer campSiteId);
 
-    BookingResponse denyBookings(Integer bookingId);
+    BookingResponse denyBookings(Integer bookingId, String deniedReason);
 
     PagingResponse<?> getBookings(Map<String, String> params, int page, int size);
 

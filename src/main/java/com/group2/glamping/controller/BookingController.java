@@ -109,7 +109,7 @@ public class BookingController {
 //    }
 
        //Accept bookings
-    @GetMapping("/{bookingId}/accept")
+    @PutMapping("/{bookingId}/accept")
     @Operation(
             summary = "Retrieve bookings by status and Camp Site Id",
             description = "Retrieves Booking records filtered by status (Pending, Completed, etc.) and Camp Site Id.",
@@ -139,7 +139,7 @@ public class BookingController {
     }
 
     //Deny bookings
-    @GetMapping("/{bookingId}/deny")
+    @PutMapping("/{bookingId}/deny")
     @Operation(
             summary = "Retrieve bookings by status and Camp Site Id",
             description = "Retrieves Booking records filtered by status (Pending, Completed, etc.) and Camp Site Id.",
@@ -150,10 +150,11 @@ public class BookingController {
             }
     )
     public ResponseEntity<BaseResponse> denyBookings(
-            @PathVariable Integer bookingId
+            @PathVariable Integer bookingId,
+            @RequestParam String deniedReason
     ) {
         try {
-            BookingResponse responses = bookingService.denyBookings(bookingId);
+            BookingResponse responses = bookingService.denyBookings(bookingId, deniedReason);
             if (responses == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new BaseResponse(HttpStatus.NOT_FOUND.value(),
