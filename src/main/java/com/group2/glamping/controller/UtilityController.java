@@ -13,10 +13,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/utilities")
@@ -85,80 +87,22 @@ public class UtilityController {
         }
     }
 
-
     // Retrieve Utilities
-    @GetMapping()
     @Operation(
-            summary = "Retrieve utilities",
-            description = "Retrieves all utilities.",
+            summary = "Get list of campsites",
+            description = "Retrieve a paginated list of campsites with optional filtering and field selection",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Utilities retrieved successfully"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
+                    @ApiResponse(responseCode = "200", description = "Campsites retrieved successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid input or bad request")
             }
     )
-    public ResponseEntity<BaseResponse> getAllUtilities(){
-        try {
-            List<UtilityResponse> responses = utilityService.getAllUtilities();
-
-            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Data retrieved successfully", responses));
-        } catch (Exception e) {
-            logger.error("Error while retrieving utilities", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
-        }
-    }
-
-    //Get all utilities by name
-    @GetMapping("/name/{name}")
-    @Operation(
-            summary = "Retrieve utilities",
-            description = "Retrieves all utilities or filters by name if provided.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Utilities retrieved successfully"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
-    public ResponseEntity<BaseResponse> retrieveUtilitiesByName(
-            @Parameter(description = "Name of the utility (optional)", example = "WiFi")
-            @PathVariable(required = false) String name // Cho phép null
-    ) {
-        try {
-            List<UtilityResponse> responses = (name == null || name.trim().isEmpty())
-                    ? utilityService.getAllUtilities()
-                    : utilityService.getUtilitiesByName(name);
-
-            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Data retrieved successfully", responses));
-        } catch (Exception e) {
-            logger.error("Error while retrieving utilities", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
-        }
-    }
-
-
-    // Get all utilities by status
-    @GetMapping("/status/{status}")
-    @Operation(
-            summary = "Retrieve utilities by status",
-            description = "Retrieves all utilities or filters by status if provided.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Utilities retrieved successfully"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
-    public ResponseEntity<BaseResponse> retrieveUtilitiesByStatus(
-            @Parameter(description = "Status of the utility (optional)", example = "true/false")
-            @PathVariable(required = false) Boolean status) {
-        try {
-            List<UtilityResponse> responses = (status == null) ?
-                    utilityService.getAllUtilities() : utilityService.getUtilitiesByStatus(status);
-
-            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Data retrieved successfully", responses));
-        } catch (Exception e) {
-            logger.error("Error while retrieving utilities by status", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
-        }
+    @GetMapping
+    public ResponseEntity<MappingJacksonValue> getCampSites(
+            @RequestParam Map<String, String> params,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(name = "fields", required = false) String fields) {
+        return ResponseEntity.ok(utilityService.getFilteredUtilities(params, page, size, fields));
     }
 
 

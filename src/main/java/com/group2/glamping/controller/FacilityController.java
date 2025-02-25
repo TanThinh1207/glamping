@@ -13,10 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/facilities")
@@ -88,75 +89,22 @@ public class FacilityController {
         }
     }
 
-    // Retrieve All Facilities
-    @GetMapping()
+    // Retrieve Facilities
     @Operation(
-            summary = "Retrieve all facilities",
-            description = "Retrieves all facilities.",
+            summary = "Get list of campsites",
+            description = "Retrieve a paginated list of campsites with optional filtering and field selection",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Facilities retrieved successfully"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
+                    @ApiResponse(responseCode = "200", description = "Campsites retrieved successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid input or bad request")
             }
     )
-    public ResponseEntity<BaseResponse> getAllFacilities() {
-        try {
-            List<FacilityResponse> facilities = facilityService.getAllFacilities();
-            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Facilities retrieved successfully", facilities));
-        } catch (Exception e) {
-            logger.error("Error while retrieving all facilities", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
-        }
-    }
-
-    // Retrieve Facilities by Name
-    @GetMapping("/name/{name}")
-    @Operation(
-            summary = "Retrieve facilities by name",
-            description = "Retrieves facilities filtered by the provided name.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Facilities retrieved successfully"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
-    public ResponseEntity<BaseResponse> getFacilitiesByName(
-            @Parameter(description = "Name of the facility", example = "Gym", required = true)
-            @PathVariable(required = false) String name
-    ) {
-        try {
-            List<FacilityResponse> responses = (name == null || name.trim().isEmpty())
-                    ? facilityService.getAllFacilities()
-                    : facilityService.getFacilityByName(name);
-            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Facilities retrieved successfully", responses));
-        } catch (Exception e) {
-            logger.error("Error while retrieving facilities by name", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
-        }
-    }
-
-    // Retrieve Facilities by Status
-    @GetMapping("/status/{status}")
-    @Operation(
-            summary = "Retrieve facilities by status",
-            description = "Retrieves facilities filtered by status (true for active, false for inactive).",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Facilities retrieved successfully"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
-    public ResponseEntity<BaseResponse> getFacilitiesByStatus(
-            @Parameter(description = "Status of the facility", example = "true", required = true)
-            @PathVariable(required = false) Boolean status
-    ) {
-        try {
-            List<FacilityResponse> facilities = facilityService.getFacilitiesByStatus(status);
-            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Facilities retrieved successfully", facilities));
-        } catch (Exception e) {
-            logger.error("Error while retrieving facilities by status", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
-        }
+    @GetMapping
+    public ResponseEntity<MappingJacksonValue> getCampSites(
+            @RequestParam Map<String, String> params,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(name = "fields", required = false) String fields) {
+        return ResponseEntity.ok(facilityService.getFilteredFacilities(params, page, size, fields));
     }
 
     // Delete Facility (Soft Delete)

@@ -1,14 +1,29 @@
 package com.group2.glamping.service.impl;
 
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.group2.glamping.model.dto.requests.UtilityRequest;
+import com.group2.glamping.model.dto.response.BaseResponse;
+import com.group2.glamping.model.dto.response.FacilityResponse;
+import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.dto.response.UtilityResponse;
+import com.group2.glamping.model.entity.Facility;
 import com.group2.glamping.model.entity.Utility;
 import com.group2.glamping.repository.UtilityRepository;
 import com.group2.glamping.service.interfaces.UtilityService;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,7 +42,7 @@ public class UtilityServiceImpl implements UtilityService {
         Utility utility = mapRequestToEntity(request);
         utility.setStatus(true);
         utilityRepository.save(utility);
-        return mapEntityToResponse(utility);
+        return convertToResponse(utility);
     }
 
     @Override
@@ -44,7 +59,7 @@ public class UtilityServiceImpl implements UtilityService {
 
         utilityRepository.save(existingUtility);
 
-        return mapEntityToResponse(existingUtility);
+        return convertToResponse(existingUtility);
     }
 
 
@@ -54,28 +69,53 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
-    public List<UtilityResponse> getAllUtilities() {
-        List<Utility> utilities = utilityRepository.findAll();
-        return utilities.stream()
-                .map(this::mapEntityToResponse)
-                .collect(Collectors.toList());
+    public PagingResponse<?> getUtilities(Map<String, String> params, int page, int size) {
+        Specification<Utility> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            params.forEach((key, value) -> {
+                switch (key) {
+                    case "name" -> predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
+                    case "status" ->
+                            predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
+                }
+            });
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Utility> utilityPage = utilityRepository.findAll(spec, pageable);
+        List<UtilityResponse> utilityResponses = utilityPage.getContent().stream()
+                .map(this::convertToResponse)
+                .toList();
+
+        return new PagingResponse<>(
+                utilityResponses,
+                utilityPage.getTotalElements(),
+                utilityPage.getTotalPages(),
+                utilityPage.getNumber(),
+                utilityPage.getNumberOfElements()
+        );
     }
 
     @Override
-    public List<UtilityResponse> getUtilitiesByName(String name) {
-        List<Utility> utilities = utilityRepository.findByNameContainingIgnoreCase(name);
-        return utilities.stream()
-                .map(this::mapEntityToResponse)
-                .collect(Collectors.toList());
-    }
+    public MappingJacksonValue getFilteredUtilities(Map<String, String> params, int page, int size, String fields) {
+        PagingResponse<?> utilities = getUtilities(params, page, size);
 
-    //Get Utilities by status
-    @Override
-    public List<UtilityResponse> getUtilitiesByStatus(Boolean status) {
-        List<Utility> utilities = utilityRepository.findByStatus(status);
-        return utilities.stream()
-                .map(this::mapEntityToResponse)
-                .collect(Collectors.toList());
+        SimpleFilterProvider filters = new SimpleFilterProvider()
+                .addFilter("dynamicFilter", fields != null && !fields.isEmpty() ?
+                        SimpleBeanPropertyFilter.filterOutAllExcept(fields.split(",")) :
+                        SimpleBeanPropertyFilter.serializeAll());
+
+        MappingJacksonValue mapping = new MappingJacksonValue(BaseResponse.builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(utilities)
+                .message("Retrieve all utilities successfully")
+                .build());
+        mapping.setFilters(filters);
+
+        return mapping;
     }
 
     @Override
@@ -83,9 +123,8 @@ public class UtilityServiceImpl implements UtilityService {
         Utility utility = getUtilityById(id);
         utility.setStatus(false);
         utilityRepository.save(utility);
-        return mapEntityToResponse(utility);
+        return convertToResponse(utility);
     }
-
 
 
     // Mapping request to entity
@@ -109,9 +148,8 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
 
-
     // Mapping to entity to entityResponse
-    private UtilityResponse mapEntityToResponse(Utility utility) {
+    private UtilityResponse convertToResponse(Utility utility) {
         return UtilityResponse.builder()
                 .id(utility.getId())
                 .name(utility.getName())

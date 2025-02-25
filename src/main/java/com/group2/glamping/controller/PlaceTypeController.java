@@ -15,10 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/place-types")
@@ -94,96 +96,22 @@ public class PlaceTypeController {
         }
     }
 
-    // Retrieve All PlaceTypes
-    @GetMapping()
+    // Retrieve PlaceTypes
     @Operation(
-            summary = "Retrieve all place types",
-            description = "Retrieves all place types.",
+            summary = "Get list of campsites",
+            description = "Retrieve a paginated list of campsites with optional filtering and field selection",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Place types retrieved successfully"),
-                    @ApiResponse(responseCode = "404", description = "No place types found"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
+                    @ApiResponse(responseCode = "200", description = "Campsites retrieved successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid input or bad request")
             }
     )
-    public ResponseEntity<BaseResponse> getAllPlaceTypes() {
-        try {
-            List<PlaceTypeResponse> responses = placeTypeService.getAllPlaceTypes();
-
-            if (responses.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new BaseResponse(HttpStatus.NOT_FOUND.value(), "No place types found", responses));
-            }
-
-            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Place types retrieved successfully", responses));
-        } catch (Exception e) {
-            logger.error("Error while retrieving all place types: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
-        }
-    }
-
-    // Retrieve PlaceTypes by Name
-    @GetMapping("/name/{name}")
-    @Operation(
-            summary = "Retrieve place types by name",
-            description = "Retrieves place types filtered by the provided name.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Place types retrieved successfully"),
-                    @ApiResponse(responseCode = "404", description = "No place types found"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
-    public ResponseEntity<BaseResponse> getPlaceTypesByName(
-            @Parameter(description = "Name of the place type", example = "Hotel", required = true)
-            @PathVariable(required = false) String name
-    ) {
-        try {
-            List<PlaceTypeResponse> responses = (name == null || name.trim().isEmpty())
-                    ? placeTypeService.getAllPlaceTypes()
-                    : placeTypeService.getPlaceTypeByName(name);
-
-            if (responses.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new BaseResponse(HttpStatus.NOT_FOUND.value(), "No place types found", responses));
-            }
-
-            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Place types retrieved successfully", responses));
-        } catch (Exception e) {
-            logger.error("Error while retrieving place types by name: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
-        }
-    }
-
-    // Retrieve PlaceTypes by Status
-    @GetMapping("/status/{status}")
-    @Operation(
-            summary = "Retrieve place types by status",
-            description = "Retrieves place types filtered by status (true for active, false for inactive).",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Place types retrieved successfully"),
-                    @ApiResponse(responseCode = "404", description = "No place types found"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
-    public ResponseEntity<BaseResponse> getPlaceTypesByStatus(
-            @Parameter(description = "Status of the place type", example = "true", required = true)
-            @PathVariable(required = true) Boolean status
-    ) {
-        try {
-            List<PlaceTypeResponse> responses = placeTypeService.getPlaceTypeByStatus(status);
-
-            if (responses.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new BaseResponse(HttpStatus.NOT_FOUND.value(), "No place types found with status: " + status, responses));
-            }
-
-            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Place types retrieved successfully", responses));
-        } catch (Exception e) {
-            logger.error("Error while retrieving place types by status: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
-        }
+    @GetMapping
+    public ResponseEntity<MappingJacksonValue> getCampSites(
+            @RequestParam Map<String, String> params,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(name = "fields", required = false) String fields) {
+        return ResponseEntity.ok(placeTypeService.getFilteredPlaceTypes(params, page, size, fields));
     }
 
 
