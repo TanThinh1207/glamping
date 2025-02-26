@@ -1,17 +1,32 @@
 package com.group2.glamping.service.impl;
 
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.group2.glamping.model.dto.requests.SelectionRequest;
+import com.group2.glamping.model.dto.response.BaseResponse;
+import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.dto.response.SelectionResponse;
+import com.group2.glamping.model.dto.response.UtilityResponse;
 import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.model.entity.Selection;
+import com.group2.glamping.model.entity.Utility;
 import com.group2.glamping.repository.CampSiteRepository;
 import com.group2.glamping.repository.SelectionRepository;
 import com.group2.glamping.service.interfaces.SelectionService;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,7 +58,7 @@ public class SelectionServiceImpl implements SelectionService {
             selection.setCampSite(campSite);
         }
         selection = selectionRepository.save(selection);
-        return mapEntityToResponse(selection);
+        return convertToResponse(selection);
     }
 
     // Update selection
@@ -72,35 +87,59 @@ public class SelectionServiceImpl implements SelectionService {
             selection.setCampSite(campSite);
         }
         selection = selectionRepository.save(selection);
-        return mapEntityToResponse(selection);
+        return convertToResponse(selection);
     }
 
-    //Get all selection
     @Override
-    public List<SelectionResponse> getAllSelections() {
-        List<Selection> selections = selectionRepository.findAll();
-        return selections.stream()
-                .map(this::mapEntityToResponse)
-                .collect(Collectors.toList());
+    public PagingResponse<?> getSelections(Map<String, String> params, int page, int size) {
+        Specification<Selection> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            params.forEach((key, value) -> {
+                switch (key) {
+                    case "name" -> predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
+                    case "status" ->
+                            predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
+                }
+            });
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Selection> selectionPage = selectionRepository.findAll(spec, pageable);
+        List<SelectionResponse> selectionResponses = selectionPage.getContent().stream()
+                .map(this::convertToResponse)
+                .toList();
+
+        return new PagingResponse<>(
+                selectionResponses,
+                selectionPage.getTotalElements(),
+                selectionPage.getTotalPages(),
+                selectionPage.getNumber(),
+                selectionPage.getNumberOfElements()
+        );
     }
 
-    //Get selection by name ignoreCase
     @Override
-    public List<SelectionResponse> getSelectionsByName(String name) {
-        List<Selection> selections = selectionRepository.findByNameContainingIgnoreCase(name);
-        return selections.stream()
-                .map(this::mapEntityToResponse)
-                .collect(Collectors.toList());
+    public MappingJacksonValue getFilteredSelections(Map<String, String> params, int page, int size, String fields) {
+        PagingResponse<?> selections = getSelections(params, page, size);
+
+        SimpleFilterProvider filters = new SimpleFilterProvider()
+                .addFilter("dynamicFilter", fields != null && !fields.isEmpty() ?
+                        SimpleBeanPropertyFilter.filterOutAllExcept(fields.split(",")) :
+                        SimpleBeanPropertyFilter.serializeAll());
+
+        MappingJacksonValue mapping = new MappingJacksonValue(BaseResponse.builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(selections)
+                .message("Retrieve all utilities successfully")
+                .build());
+        mapping.setFilters(filters);
+
+        return mapping;
     }
 
-    //Get selection by status
-    @Override
-    public List<SelectionResponse> getSelectionsByStatus(boolean status) {
-        List<Selection> selections = selectionRepository.findByStatus(status);
-        return selections.stream()
-                .map(this::mapEntityToResponse)
-                .collect(Collectors.toList());
-    }
 
     //Soft delete
     @Override
@@ -109,11 +148,11 @@ public class SelectionServiceImpl implements SelectionService {
                 .orElseThrow(() -> new RuntimeException("Selection not found with id: " + id));
         selection.setStatus(false);
         selectionRepository.save(selection);
-        return mapEntityToResponse(selection);
+        return convertToResponse(selection);
     }
 
     // Mapping entity Selection to SelectionResponse
-    private SelectionResponse mapEntityToResponse(Selection selection) {
+    private SelectionResponse convertToResponse(Selection selection) {
         SelectionResponse response = new SelectionResponse();
         response.setId(selection.getId());
         response.setName(selection.getName());

@@ -1,10 +1,13 @@
 package com.group2.glamping.service.interfaces;
 
 import com.group2.glamping.model.dto.requests.UtilityRequest;
+import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.dto.response.UtilityResponse;
 import com.group2.glamping.model.entity.Utility;
+import org.springframework.http.converter.json.MappingJacksonValue;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UtilityService {
     UtilityResponse createUtility(UtilityRequest request);
@@ -13,11 +16,9 @@ public interface UtilityService {
 
     Utility getUtilityById(int id);
 
-    List<UtilityResponse> getAllUtilities();
+    PagingResponse<?> getUtilities(Map<String, String> params, int page, int size);
 
-    List<UtilityResponse> getUtilitiesByName(String name);
-
-    List<UtilityResponse> getUtilitiesByStatus(Boolean status);
+    MappingJacksonValue getFilteredUtilities(Map<String, String> params, int page, int size, String fields);
 
     UtilityResponse softDeleteUtility(int id);
 

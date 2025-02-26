@@ -13,10 +13,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/selections")
@@ -96,77 +98,14 @@ public class SelectionController {
         }
     }
 
-    // Get All Selections
-    @GetMapping()
-    @Operation(
-            summary = "Retrieve all selections",
-            description = "Retrieves all selections.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Selections retrieved successfully"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
-    public ResponseEntity<BaseResponse> getAllSelections() {
-        try {
-            List<SelectionResponse> responses = selectionService.getAllSelections();
-            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Data retrieved successfully", responses));
-        } catch (Exception e) {
-            logger.error("Error while retrieving selections: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
-        }
-    }
-
-    // Get Selections by Name
-    @GetMapping("/name/{name}")
-    @Operation(
-            summary = "Retrieve selections by name",
-            description = "Retrieves selections that match or contain the specified name.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Selections retrieved successfully"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
-    public ResponseEntity<BaseResponse> getSelectionsByName(
-            @Parameter(description = "Name of the selection (optional)", example = "WiFi")
-            @PathVariable(required = false) String name
-    ) {
-        try {
-            List<SelectionResponse> responses = (name == null || name.trim().isEmpty())
-                    ? selectionService.getAllSelections()
-                    : selectionService.getSelectionsByName(name);
-            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Data retrieved successfully", responses));
-        } catch (Exception e) {
-            logger.error("Error while retrieving selections by name: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
-        }
-    }
-
-    // Get Selections by Status
-    @GetMapping("/status/{status}")
-    @Operation(
-            summary = "Retrieve selections by status",
-            description = "Retrieves selections based on their status (true for active, false for inactive).",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Selections retrieved successfully"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
-    public ResponseEntity<BaseResponse> getSelectionsByStatus(
-            @Parameter(description = "Status of the selection (true for active, false for inactive)", example = "true")
-            @PathVariable(required = false) Boolean status
-    ) {
-        try {
-            List<SelectionResponse> responses = (status == null)
-                    ? selectionService.getAllSelections()
-                    : selectionService.getSelectionsByStatus(status);
-            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Data retrieved successfully", responses));
-        } catch (Exception e) {
-            logger.error("Error while retrieving selections by status: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
-        }
+    // Get Selections
+    @GetMapping
+    public ResponseEntity<MappingJacksonValue> getCampSites(
+            @RequestParam Map<String, String> params,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(name = "fields", required = false) String fields) {
+        return ResponseEntity.ok(selectionService.getFilteredSelections(params, page, size, fields));
     }
 
     // Soft Delete Selection

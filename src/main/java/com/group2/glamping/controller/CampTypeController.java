@@ -4,13 +4,17 @@ import com.group2.glamping.model.dto.requests.CampTypeCreateRequest;
 import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.service.impl.CampTypeServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 
 @RequiredArgsConstructor
@@ -37,11 +41,22 @@ public class CampTypeController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    //RETRIEVE
-    @GetMapping("/{campSiteId}")
-    public ResponseEntity<BaseResponse> getCampTypesByCampSite(@PathVariable int campSiteId) {
-        BaseResponse response = campTypeService.findByCampSiteId(campSiteId);
-        return ResponseEntity.status(response.getStatusCode()).body(response);
+    //Retrieve Camp Type
+    @Operation(
+            summary = "Get list of campsites",
+            description = "Retrieve a paginated list of campsites with optional filtering and field selection",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Campsites retrieved successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid input or bad request")
+            }
+    )
+    @GetMapping
+    public ResponseEntity<MappingJacksonValue> getCampSites(
+            @RequestParam Map<String, String> params,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(name = "fields", required = false) String fields) {
+        return ResponseEntity.ok(campTypeService.getFilteredCampTypes(params, page, size, fields));
     }
 
     //UPDATE

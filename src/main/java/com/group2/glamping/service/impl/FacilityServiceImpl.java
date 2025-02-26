@@ -1,16 +1,35 @@
 package com.group2.glamping.service.impl;
 
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.group2.glamping.model.dto.requests.FacilityRequest;
+import com.group2.glamping.model.dto.response.BaseResponse;
+import com.group2.glamping.model.dto.response.CampSiteResponse;
 import com.group2.glamping.model.dto.response.FacilityResponse;
+import com.group2.glamping.model.dto.response.PagingResponse;
+import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.model.entity.Facility;
+import com.group2.glamping.model.entity.PlaceType;
+import com.group2.glamping.model.entity.Utility;
 import com.group2.glamping.repository.FacilityRepository;
 import com.group2.glamping.service.interfaces.FacilityService;
 import com.group2.glamping.service.interfaces.S3Service;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,38 +68,54 @@ public class FacilityServiceImpl implements FacilityService {
     }
 
     @Override
-    public List<FacilityResponse> getAllFacilities() {
-        return facilityRepository.findAll()
-                .stream().map(this::convertToResponse)
-                .collect(Collectors.toList());
+    public PagingResponse<?> getFacilities(Map<String, String> params, int page, int size) {
+        Specification<Facility> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            params.forEach((key, value) -> {
+                switch (key) {
+                    case "name" -> predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
+                    case "status" -> predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
+                }
+            });
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Facility> facilityPage = facilityRepository.findAll(spec, pageable);
+        List<FacilityResponse> facilityResponses = facilityPage.getContent().stream()
+                .map(this::convertToResponse)
+                .toList();
+
+        return new PagingResponse<>(
+                facilityResponses,
+                facilityPage.getTotalElements(),
+                facilityPage.getTotalPages(),
+                facilityPage.getNumber(),
+                facilityPage.getNumberOfElements()
+        );
     }
 
     @Override
-    public List<FacilityResponse> getFacilityByName(String name) {
-        List<Facility> facilities = facilityRepository.findByNameContainingIgnoreCase(name);
-        if (facilities.isEmpty()) {
-            throw new RuntimeException("No facilities found with name: " + name);
-        }
-        return facilities.stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
+    public MappingJacksonValue getFilteredFacilities(Map<String, String> params, int page, int size, String fields) {
+        PagingResponse<?> facilities = getFacilities(params, page, size);
+
+        SimpleFilterProvider filters = new SimpleFilterProvider()
+                .addFilter("dynamicFilter", fields != null && !fields.isEmpty() ?
+                        SimpleBeanPropertyFilter.filterOutAllExcept(fields.split(",")) :
+                        SimpleBeanPropertyFilter.serializeAll());
+
+        MappingJacksonValue mapping = new MappingJacksonValue(BaseResponse.builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(facilities)
+                .message("Retrieve all facilities successfully")
+                .build());
+        mapping.setFilters(filters);
+
+        return mapping;
     }
 
-    @Override
-    public List<FacilityResponse> getFacilitiesByStatus(Boolean status) {
-        // Nếu status null, có thể chọn trả về tất cả hoặc ném exception – ở đây mình giả sử trả về tất cả
-        // ???
-        if (status == null) {
-            return getAllFacilities();
-        }
-        List<Facility> facilities = facilityRepository.findByStatus(status);
-        if (facilities.isEmpty()) {
-            throw new RuntimeException("No facilities found with status: " + status);
-        }
-        return facilities.stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
-    }
 
     @Override
     public FacilityResponse deleteFacility(Integer id) {

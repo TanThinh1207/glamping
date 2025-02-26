@@ -1,30 +1,35 @@
 package com.group2.glamping.service.impl;
 
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.group2.glamping.model.dto.requests.CampTypeCreateRequest;
 import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
-import com.group2.glamping.model.dto.response.BaseResponse;
-import com.group2.glamping.model.dto.response.CampTypeRemainingResponse;
-import com.group2.glamping.model.dto.response.CampTypeResponse;
+import com.group2.glamping.model.dto.response.*;
 import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.model.entity.CampType;
+import com.group2.glamping.model.entity.Utility;
 import com.group2.glamping.repository.CampSiteRepository;
 import com.group2.glamping.repository.CampTypeRepository;
-import com.group2.glamping.service.interfaces.ICampTypeService;
+import com.group2.glamping.service.interfaces.CampTypeService;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class CampTypeServiceImpl implements ICampTypeService {
+public class CampTypeServiceImpl implements CampTypeService {
 
     private final CampTypeRepository campTypeRepository;
     private final CampSiteRepository campSiteRepository;
@@ -144,36 +149,65 @@ public class CampTypeServiceImpl implements ICampTypeService {
     }
 
     @Override
-    public BaseResponse findByCampSiteId(int campSiteId) {
-        BaseResponse response = new BaseResponse();
+    public PagingResponse<?> getCampTypes(Map<String, String> params, int page, int size) {
+        Specification<CampType> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
 
-        List<CampType> campTypeList = campTypeRepository.findByCampSiteId(campSiteId);
+            params.forEach((key, value) -> {
+                switch (key) {
+//                    case "name" -> predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
+//                    case "status" ->
+//                            predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
+                    case "campSiteId":
+                        predicates.add(criteriaBuilder.equal(root.get("campSite").get("id"), Integer.parseInt(value)));
+                        break;
+                }
+            });
 
-        if (campTypeList.isEmpty()) {
-            response.setStatusCode(HttpStatus.NOT_FOUND.value());
-            response.setMessage("No CampTypes found for this CampSite");
-            response.setData(Collections.emptyList());
-            return response;
-        }
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
 
-        List<CampTypeResponse> campTypeResponses = campTypeList.stream().map(campType ->
-                CampTypeResponse.builder()
-                        .id(campType.getId())
-                        .type(campType.getType())
-                        .capacity(campType.getCapacity())
-                        .price(campType.getPrice())
-                        .weekendRate(campType.getWeekendRate())
-                        .quantity(campType.getQuantity())
-                        .status(campType.isStatus())
-                        .build()
-        ).toList();
+        Pageable pageable = PageRequest.of(page, size);
+        Page<CampType> utilityPage = campTypeRepository.findAll(spec, pageable);
+        List<CampTypeResponse> utilityResponses = utilityPage.getContent().stream()
+                .map(this::convertToResponse)
+                .toList();
 
-        response.setStatusCode(HttpStatus.OK.value());
-        response.setMessage("Retrieved CampTypes successfully");
-        response.setData(campTypeResponses);
-        return response;
+        return new PagingResponse<>(
+                utilityResponses,
+                utilityPage.getTotalElements(),
+                utilityPage.getTotalPages(),
+                utilityPage.getNumber(),
+                utilityPage.getNumberOfElements()
+        );
     }
 
+    @Override
+    public MappingJacksonValue getFilteredCampTypes(Map<String, String> params, int page, int size, String fields) {
+        // Get data from repository or other service
+        PagingResponse<?> campSites = getCampTypes(params, page, size);
+
+        // Apply dynamic filtering
+        SimpleFilterProvider filters;
+        if (fields != null && !fields.isEmpty()) {
+            filters = new SimpleFilterProvider()
+                    .addFilter("dynamicFilter", SimpleBeanPropertyFilter.filterOutAllExcept(fields.split(",")));
+        } else {
+            filters = new SimpleFilterProvider()
+                    .addFilter("dynamicFilter", SimpleBeanPropertyFilter.serializeAll());
+        }
+
+        // Wrap response with MappingJacksonValue
+        MappingJacksonValue mapping = new MappingJacksonValue(BaseResponse.builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(campSites)
+                .message("Retrieve all campsites successfully")
+                .build());
+
+        mapping.setFilters(filters);
+
+        return mapping;
+    }
 
     @Override
     public BaseResponse softDeleteCampType(int campTypeId) {
@@ -185,23 +219,28 @@ public class CampTypeServiceImpl implements ICampTypeService {
             campType.setStatus(false);
             campTypeRepository.save(campType);
 
-            CampTypeResponse campTypeResponse = new CampTypeResponse();
-            campTypeResponse.setId(campType.getId());
-            campTypeResponse.setType(campType.getType());
-            campTypeResponse.setCapacity(campType.getCapacity());
-            campTypeResponse.setPrice(campType.getPrice());
-            campTypeResponse.setWeekendRate(campType.getWeekendRate());
-            campTypeResponse.setQuantity(campType.getQuantity());
-            campTypeResponse.setStatus(campType.isStatus());
-
             response.setStatusCode(200);
             response.setMessage("Camp Type status updated to NOT_AVAILABLE");
-            response.setData(campTypeResponse);
+            response.setData(convertToResponse(campType));
         } else {
             response.setStatusCode(404);
             response.setMessage("Camp Type not found");
             response.setData(null);
         }
         return response;
+    }
+
+    // Mapping to entity to entityResponse
+    private CampTypeResponse convertToResponse(CampType campType) {
+        return CampTypeResponse.builder()
+                .id(campType.getId())
+                .type(campType.getType())
+                .capacity(campType.getCapacity())
+                .price(campType.getPrice())
+                .weekendRate(campType.getWeekendRate())
+                .quantity(campType.getQuantity())
+                .status(campType.isStatus())
+                .build();
+
     }
 }
