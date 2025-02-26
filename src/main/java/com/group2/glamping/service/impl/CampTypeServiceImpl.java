@@ -240,6 +240,7 @@ public class CampTypeServiceImpl implements CampTypeService {
                 .weekendRate(campType.getWeekendRate())
                 .quantity(campType.getQuantity())
                 .status(campType.isStatus())
+                .campSiteId(campType.getCampSite().getId())
                 .build();
 
     }

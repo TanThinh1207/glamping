@@ -124,7 +124,8 @@ public class CampSiteMapper {
                                         placeType.getWeekendRate(),
                                         LocalDateTime.now(),
                                         placeType.getQuantity(),
-                                        placeType.isStatus()
+                                        placeType.isStatus(),
+                                        campSite.getId()
                                 );
                             }
                             return null;
