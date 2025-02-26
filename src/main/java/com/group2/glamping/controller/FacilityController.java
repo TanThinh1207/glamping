@@ -91,15 +91,15 @@ public class FacilityController {
 
     // Retrieve Facilities
     @Operation(
-            summary = "Get list of campsites",
-            description = "Retrieve a paginated list of campsites with optional filtering and field selection",
+            summary = "Get list of facilities",
+            description = "Retrieve a paginated list of facilities with optional filtering and field selection",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Campsites retrieved successfully"),
+                    @ApiResponse(responseCode = "200", description = "Facilities retrieved successfully"),
                     @ApiResponse(responseCode = "400", description = "Invalid input or bad request")
             }
     )
     @GetMapping
-    public ResponseEntity<MappingJacksonValue> getCampSites(
+    public ResponseEntity<MappingJacksonValue> getFacilities(
             @RequestParam Map<String, String> params,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
