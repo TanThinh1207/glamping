@@ -30,7 +30,10 @@ import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -123,45 +126,6 @@ public class BookingServiceImpl implements BookingService {
 
         return Optional.of(bookingMapper.toDto(resp));
     }
-
-    //Retrieve Pending Bookings
-    @Override
-    public List<BookingResponse> getPendingBookingsByCampSiteId(Integer campSiteId) {
-        List<Booking> bookings = bookingRepository.findPendingBookingsByCampSiteId(campSiteId);
-
-        // Nếu danh sách booking trống, trả về danh sách rỗng
-        if (bookings.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return bookings.stream()
-                .map(bookingMapper::toDto)
-                .collect(Collectors.toList());
-    }
-
-    //Retrieve Completed Bookings
-    @Override
-    public List<BookingResponse> getCompletedBookingsByCampSiteId(Integer campSiteId) {
-        List<Booking> bookings = bookingRepository.findCompletedBookingsByCampSiteId(campSiteId);
-
-        // Nếu danh sách booking trống, trả về danh sách rỗng
-        if (bookings.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return bookings.stream()
-                .map(bookingMapper::toDto)
-                .collect(Collectors.toList());
-    }
-
-    //Retrieve bookings by Id
-    @Override
-    public BookingResponse getBookingById(Integer bookingId) {
-        Optional<Booking> bookingOptional = bookingRepository.findById(bookingId);
-        return bookingOptional.map(bookingMapper::toDto).orElse(null);
-
-    }
-
 
     //Accept Bookings
     @Override
