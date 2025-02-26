@@ -158,13 +158,11 @@ public class CampTypeServiceImpl implements CampTypeService {
             List<Predicate> predicates = new ArrayList<>();
 
             params.forEach((key, value) -> {
-                switch (key) {
-//                    case "name" -> predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
-//                    case "status" ->
-//                            predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
-                    case "campSiteId":
-                        predicates.add(criteriaBuilder.equal(root.get("campSite").get("id"), Integer.parseInt(value)));
-                        break;
+                //                    case "name" -> predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
+                //                    case "status" ->
+                //                            predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
+                if (key.equals("campSiteId")) {
+                    predicates.add(criteriaBuilder.equal(root.get("campSite").get("id"), Integer.parseInt(value)));
                 }
             });
 

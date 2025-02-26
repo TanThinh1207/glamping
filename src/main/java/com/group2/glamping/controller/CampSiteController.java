@@ -121,7 +121,6 @@ public class CampSiteController {
         try {
             updatedCampSite = new ObjectMapper().readValue(updatedCampSiteJson, CampSiteUpdateRequest.class);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
             throw new AppException(ErrorCode.INVALID_REQUEST, "Invalid JSON format for updatedCampSite");
         }
 
@@ -149,21 +148,5 @@ public class CampSiteController {
         return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Camp site deleted successfully", null));
     }
 
-
-    private void logFileDetails(List<MultipartFile> files) {
-        logger.info("Files: {}", files);
-        if (files != null) {
-            for (MultipartFile file : files) {
-                logSingleFileDetails(file, "Received file");
-            }
-        }
-    }
-
-    private void logSingleFileDetails(MultipartFile file, String fileName) {
-        logger.info("{}: {} (Size: {})",
-                fileName,
-                file != null ? file.getOriginalFilename() : "null",
-                file != null ? file.getSize() : "N/A");
-    }
 
 }

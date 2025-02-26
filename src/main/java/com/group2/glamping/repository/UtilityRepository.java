@@ -10,8 +10,5 @@ import java.util.List;
 @Repository
 public interface UtilityRepository extends JpaRepository<Utility, Integer>, JpaSpecificationExecutor<Utility> {
 
-    List<Utility> findByNameContainingIgnoreCase(String name);
-
-    List<Utility> findByStatus(Boolean status);
 }
 

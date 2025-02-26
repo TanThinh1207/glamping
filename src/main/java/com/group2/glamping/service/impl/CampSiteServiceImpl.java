@@ -155,15 +155,15 @@ public class CampSiteServiceImpl implements CampSiteService {
     }
 
     @Override
-    public Optional<CampSiteResponse> updateCampSite(int id,
-                                                     CampSiteUpdateRequest campSiteUpdateRequest,
-                                                     List<MultipartFile> files) {
+    public void updateCampSite(int id,
+                               CampSiteUpdateRequest campSiteUpdateRequest,
+                               List<MultipartFile> files) {
         CampSite campSite = campSiteRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.CAMP_SITE_NOT_FOUND));
 
         updateProperties(campSite, campSiteUpdateRequest);
 
-        return Optional.of(campSiteMapper.toDto(campSiteRepository.save(campSite)));
+        campSiteMapper.toDto(campSiteRepository.save(campSite));
     }
 
     private void updateProperties(CampSite campSite, CampSiteUpdateRequest campSiteUpdateRequest) {

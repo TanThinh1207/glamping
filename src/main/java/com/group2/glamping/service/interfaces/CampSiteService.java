@@ -21,6 +21,6 @@ public interface CampSiteService {
 
     MappingJacksonValue getFilteredCampSites(Map<String, String> params, int page, int size, String fields);
 
-    Optional<CampSiteResponse> updateCampSite(int id, CampSiteUpdateRequest campSiteUpdateRequest, List<MultipartFile> files);
+    void updateCampSite(int id, CampSiteUpdateRequest campSiteUpdateRequest, List<MultipartFile> files);
 
 }

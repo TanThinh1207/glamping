@@ -71,9 +71,7 @@ public class PlaceTypeController {
     )
     public ResponseEntity<BaseResponse> updatePlaceType(
             @Parameter(description = "ID of the place type to update", required = true)
-            @Valid @RequestBody PlaceTypeRequest request,
-            @Parameter(description = "Updated image file for the place type (optional)")
-            @RequestParam(required = false) MultipartFile image
+            @Valid @RequestBody PlaceTypeRequest request
 
     ) {
         try {

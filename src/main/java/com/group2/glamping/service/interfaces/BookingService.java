@@ -13,12 +13,6 @@ public interface BookingService {
 
     Optional<BookingResponse> createBooking(BookingRequest booking);
 
-    List<BookingResponse> getPendingBookingsByCampSiteId(Integer campSiteId);
-
-    List<BookingResponse> getCompletedBookingsByCampSiteId(Integer campSiteId);
-
-    BookingResponse getBookingById(Integer bookingId);
-
     BookingResponse acceptBookings(Integer campSiteId);
 
     BookingResponse denyBookings(Integer bookingId, String deniedReason);
@@ -26,8 +20,6 @@ public interface BookingService {
     PagingResponse<?> getBookings(Map<String, String> params, int page, int size);
 
     MappingJacksonValue getFilteredBookings(Map<String, String> params, int page, int size, String fields);
-
-    ;
 
     void confirmPaymentSuccess(Integer orderId);
 

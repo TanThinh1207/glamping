@@ -45,8 +45,6 @@ public class SelectionController {
             @RequestParam String description,
             @Parameter(description = "Price of the selection", required = true)
             @RequestParam double price,
-            @Parameter(description = "Image file for the selection (optional)")
-            @RequestParam(required = false) MultipartFile image,
             @Parameter(description = "Campsite ID", required = true)
             @RequestParam Integer campSiteId
     ) {
@@ -81,8 +79,6 @@ public class SelectionController {
             @RequestParam String description,
             @Parameter(description = "Updated price of the selection", required = true)
             @RequestParam double price,
-            @Parameter(description = "Updated image file for the selection (optional)")
-            @RequestParam(required = false) MultipartFile image,
             @Parameter(description = "Updated campsite ID", required = true)
             @RequestParam Integer campSiteId
     ) {

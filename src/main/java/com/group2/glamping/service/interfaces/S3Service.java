@@ -12,13 +12,6 @@ public interface S3Service {
 
     String uploadFile(MultipartFile file, String fileType, int campSiteId);
 
-    InputStreamResource downloadFile(String fileName) throws IOException;
-
-    String deleteFile(String fileName);
-
-    List<String> listFiles(String folderName);
-
     String generatePresignedUrl(String fileName);
 
-    List<String> generatePresignedUrls(List<String> fileKeys);
 }

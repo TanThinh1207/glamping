@@ -10,13 +10,12 @@ import com.group2.glamping.repository.UtilityRepository;
 import com.group2.glamping.service.interfaces.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
@@ -26,7 +25,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -75,13 +73,11 @@ public class S3ServiceImpl implements S3Service {
     @Override
     public String uploadFile(MultipartFile file, String fileType, int id) {
         try {
-            String prefix = "";
-            String folderName = "Others";
+            String prefix;
+            String folderName;
             String fileName = "";
             switch (fileType) {
-                case "campSite" -> {
-                    uploadCampSiteFiles(Collections.singletonList(file), id);
-                }
+                case "campSite" -> uploadCampSiteFiles(Collections.singletonList(file), id);
                 case "selection" -> {
                     Selection selection = selectionRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.SELECTION_NOT_FOUND));
                     folderName = "CampSite";
@@ -122,41 +118,6 @@ public class S3ServiceImpl implements S3Service {
         }
     }
 
-    @Override
-    public InputStreamResource downloadFile(String fileName) {
-        ResponseInputStream<GetObjectResponse> s3Object = s3Client.getObject(GetObjectRequest.builder()
-                .bucket(bucketName)
-                .key(fileName)
-                .build());
-
-        return new InputStreamResource(s3Object);
-    }
-
-
-    @Override
-    public String deleteFile(String fileName) {
-        try {
-            s3Client.deleteObject(DeleteObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(fileName)
-                    .build());
-            return fileName + " removed successfully.";
-        } catch (S3Exception e) {
-            throw new AppException(ErrorCode.FILE_NOT_FOUND);
-        }
-    }
-
-    @Override
-    public List<String> listFiles(String folderName) {
-        ListObjectsV2Response listResponse = s3Client.listObjectsV2(ListObjectsV2Request.builder()
-                .bucket(bucketName)
-                .prefix(folderName + "/")
-                .build());
-
-        return listResponse.contents().stream()
-                .map(S3Object::key)
-                .collect(Collectors.toList());
-    }
 
     @Override
     public String generatePresignedUrl(String fileName) {
@@ -177,11 +138,4 @@ public class S3ServiceImpl implements S3Service {
         }
     }
 
-
-    @Override
-    public List<String> generatePresignedUrls(List<String> fileKeys) {
-        return fileKeys.stream()
-                .map(this::generatePresignedUrl)
-                .collect(Collectors.toList());
-    }
 }
