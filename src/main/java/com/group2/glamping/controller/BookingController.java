@@ -59,12 +59,12 @@ public class BookingController {
             summary = "Get list of bookings",
             description = "Retrieve a paginated list of bookings with optional filtering and field selection",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Campsites retrieved successfully"),
+                    @ApiResponse(responseCode = "200", description = "Bookings retrieved successfully"),
                     @ApiResponse(responseCode = "400", description = "Invalid input or bad request")
             }
     )
     @GetMapping
-    public ResponseEntity<MappingJacksonValue> getCampSites(
+    public ResponseEntity<MappingJacksonValue> getBookings(
             @RequestParam Map<String, String> params,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,

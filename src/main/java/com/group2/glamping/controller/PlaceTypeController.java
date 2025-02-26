@@ -98,15 +98,15 @@ public class PlaceTypeController {
 
     // Retrieve PlaceTypes
     @Operation(
-            summary = "Get list of campsites",
-            description = "Retrieve a paginated list of campsites with optional filtering and field selection",
+            summary = "Get list of place types",
+            description = "Retrieve a paginated list of place types with optional filtering and field selection",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Campsites retrieved successfully"),
+                    @ApiResponse(responseCode = "200", description = "Place types retrieved successfully"),
                     @ApiResponse(responseCode = "400", description = "Invalid input or bad request")
             }
     )
     @GetMapping
-    public ResponseEntity<MappingJacksonValue> getCampSites(
+    public ResponseEntity<MappingJacksonValue> getPlaceTypes(
             @RequestParam Map<String, String> params,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,

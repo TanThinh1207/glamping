@@ -99,8 +99,16 @@ public class SelectionController {
     }
 
     // Get Selections
+    @Operation(
+            summary = "Get list of selections",
+            description = "Retrieve a paginated list of selections with optional filtering and field selection",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Selections retrieved successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid input or bad request")
+            }
+    )
     @GetMapping
-    public ResponseEntity<MappingJacksonValue> getCampSites(
+    public ResponseEntity<MappingJacksonValue> getSelections(
             @RequestParam Map<String, String> params,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
