@@ -4,12 +4,11 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.group2.glamping.model.dto.requests.UtilityRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
-import com.group2.glamping.model.dto.response.FacilityResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.dto.response.UtilityResponse;
-import com.group2.glamping.model.entity.Facility;
 import com.group2.glamping.model.entity.Utility;
 import com.group2.glamping.repository.UtilityRepository;
+import com.group2.glamping.service.interfaces.S3Service;
 import com.group2.glamping.service.interfaces.UtilityService;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +23,13 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UtilityServiceImpl implements UtilityService {
 
     private final UtilityRepository utilityRepository;
+    private final S3Service s3Service;
 
     @Override
     public UtilityResponse createUtility(UtilityRequest request) {
@@ -153,7 +152,7 @@ public class UtilityServiceImpl implements UtilityService {
         return UtilityResponse.builder()
                 .id(utility.getId())
                 .name(utility.getName())
-                .imagePath(utility.getImageUrl())
+                .imagePath(s3Service.generatePresignedUrl(utility.getImageUrl()))
                 .status(utility.isStatus())
                 .build();
     }

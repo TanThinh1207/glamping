@@ -6,7 +6,6 @@ import com.group2.glamping.model.dto.response.UtilityResponse;
 import com.group2.glamping.model.entity.Utility;
 import org.springframework.http.converter.json.MappingJacksonValue;
 
-import java.util.List;
 import java.util.Map;
 
 public interface UtilityService {
