@@ -4,17 +4,12 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.group2.glamping.model.dto.requests.FacilityRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
-import com.group2.glamping.model.dto.response.CampSiteResponse;
 import com.group2.glamping.model.dto.response.FacilityResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
-import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.model.entity.Facility;
-import com.group2.glamping.model.entity.PlaceType;
-import com.group2.glamping.model.entity.Utility;
 import com.group2.glamping.repository.FacilityRepository;
 import com.group2.glamping.service.interfaces.FacilityService;
 import com.group2.glamping.service.interfaces.S3Service;
-import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,13 +19,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +31,7 @@ public class FacilityServiceImpl implements FacilityService {
     private final S3Service s3Service;
 
     @Override
-    public FacilityResponse createFacility(FacilityRequest request, MultipartFile file) {
+    public FacilityResponse createFacility(FacilityRequest request) {
         if (request.id() != null) {
             throw new RuntimeException("ID must be null when creating a new facility");
         }
@@ -47,13 +39,13 @@ public class FacilityServiceImpl implements FacilityService {
         facility.setName(request.name());
         facility.setDescription(request.description());
         facility.setStatus(true);
-        facility.setImageUrl(s3Service.uploadFile(file, "Facility", "facility" + facility.getId()));
+//        facility.setImageUrl(s3Service.uploadFile(file, "Facility", "facility" + facility.getId()));
         facilityRepository.save(facility);
         return convertToResponse(facility);
     }
 
     @Override
-    public FacilityResponse updateFacility(FacilityRequest request, MultipartFile file) {
+    public FacilityResponse updateFacility(FacilityRequest request) {
         if (request.id() == null) {
             throw new RuntimeException("ID is required for update");
         }
@@ -61,7 +53,7 @@ public class FacilityServiceImpl implements FacilityService {
                 .orElseThrow(() -> new RuntimeException("Facility not found"));
         facility.setName(request.name());
         facility.setDescription(request.description());
-        facility.setImageUrl(s3Service.uploadFile(file, "Facility", "facility" + facility.getId()));
+//        facility.setImageUrl(s3Service.uploadFile(file, "Facility", "facility" + facility.getId()));
 
         facilityRepository.save(facility);
         return convertToResponse(facility);
@@ -75,7 +67,8 @@ public class FacilityServiceImpl implements FacilityService {
             params.forEach((key, value) -> {
                 switch (key) {
                     case "name" -> predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
-                    case "status" -> predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
+                    case "status" ->
+                            predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
                 }
             });
 
@@ -131,7 +124,7 @@ public class FacilityServiceImpl implements FacilityService {
                 facility.getId(),
                 facility.getName(),
                 facility.getDescription(),
-                facility.getImageUrl(),
+                s3Service.generatePresignedUrl(facility.getImageUrl()),
                 facility.isStatus()
         );
     }

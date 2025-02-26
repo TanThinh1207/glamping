@@ -3,10 +3,7 @@ package com.group2.glamping.model.dto.requests;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.Builder;
-import org.springframework.web.multipart.MultipartFile;
 
 @Builder
 @Schema(description = "Request DTO for creating or updating a PlaceType")

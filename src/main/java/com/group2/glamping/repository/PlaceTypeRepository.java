@@ -16,7 +16,9 @@ public interface PlaceTypeRepository extends JpaRepository<PlaceType, Integer>, 
 
     @Query("SELECT p FROM PlaceType p JOIN p.campSites cs WHERE p.name = :name AND cs.id = :campSiteId")
     Optional<PlaceType> findByNameAndCampSiteId(@Param("name") String name, @Param("campSiteId") int campSiteId);
+
     List<PlaceType> findByNameContainingIgnoreCase(String name);
+
     List<PlaceType> findByStatus(Boolean status);
 }
 

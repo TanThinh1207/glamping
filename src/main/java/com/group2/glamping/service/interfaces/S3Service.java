@@ -8,7 +8,9 @@ import java.util.List;
 
 public interface S3Service {
 
-    String uploadFile(MultipartFile file, String folderName, String prefix);
+    String uploadCampSiteFiles(List<MultipartFile> files, int id);
+
+    String uploadFile(MultipartFile file, String fileType, int campSiteId);
 
     InputStreamResource downloadFile(String fileName) throws IOException;
 

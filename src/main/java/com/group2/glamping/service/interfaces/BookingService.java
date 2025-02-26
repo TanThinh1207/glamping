@@ -25,7 +25,9 @@ public interface BookingService {
 
     PagingResponse<?> getBookings(Map<String, String> params, int page, int size);
 
-    MappingJacksonValue getFilteredBookings(Map<String, String> params, int page, int size, String fields);;
+    MappingJacksonValue getFilteredBookings(Map<String, String> params, int page, int size, String fields);
+
+    ;
 
     void confirmPaymentSuccess(Integer orderId);
 

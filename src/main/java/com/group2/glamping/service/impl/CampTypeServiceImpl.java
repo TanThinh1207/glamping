@@ -4,14 +4,15 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.group2.glamping.model.dto.requests.CampTypeCreateRequest;
 import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
-import com.group2.glamping.model.dto.response.*;
+import com.group2.glamping.model.dto.response.BaseResponse;
+import com.group2.glamping.model.dto.response.CampTypeRemainingResponse;
+import com.group2.glamping.model.dto.response.CampTypeResponse;
+import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.model.entity.CampType;
-import com.group2.glamping.model.entity.Utility;
 import com.group2.glamping.repository.CampSiteRepository;
 import com.group2.glamping.repository.CampTypeRepository;
 import com.group2.glamping.service.interfaces.CampTypeService;
-import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,7 +25,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

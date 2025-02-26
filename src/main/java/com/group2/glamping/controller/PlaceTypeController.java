@@ -19,7 +19,6 @@ import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -43,16 +42,14 @@ public class PlaceTypeController {
     )
     public ResponseEntity<BaseResponse> createPlaceType(
             @Parameter(description = "Name of the place type", required = true)
-            @RequestParam String name,
-            @Parameter(description = "Image file for the place type (optional)")
-            @RequestParam(required = false) MultipartFile image
+            @RequestParam String name
     ) {
         try {
             PlaceTypeRequest request = PlaceTypeRequest.builder()
                     .id(null)
                     .name(name)
                     .build();
-            PlaceTypeResponse response = placeTypeService.createPlaceType(request, image);
+            PlaceTypeResponse response = placeTypeService.createPlaceType(request);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Place type created successfully", response));
         } catch (Exception e) {
             logger.error("Error while creating place type: {}", e.getMessage(), e);
@@ -80,7 +77,7 @@ public class PlaceTypeController {
 
     ) {
         try {
-            PlaceTypeResponse response = placeTypeService.updatePlaceType(request, image);
+            PlaceTypeResponse response = placeTypeService.updatePlaceType(request);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Place type updated successfully", response));
         } catch (AppException e) {
             logger.error(e.getMessage());

@@ -8,8 +8,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -54,6 +50,7 @@ public class BookingController {
                         .data(null)
                         .build()));
     }
+
     // Retrieve Bookings
     @Operation(
             summary = "Get list of bookings",
@@ -108,7 +105,7 @@ public class BookingController {
 //        }
 //    }
 
-       //Accept bookings
+    //Accept bookings
     @PutMapping("/{bookingId}/accept")
     @Operation(
             summary = "Retrieve bookings by status and Camp Site Id",
@@ -127,7 +124,7 @@ public class BookingController {
             if (responses == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new BaseResponse(HttpStatus.NOT_FOUND.value(),
-                                "No Bookings found with Id: " + bookingId , null));
+                                "No Bookings found with Id: " + bookingId, null));
             }
 
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Bookings accepted successfully", responses));
@@ -158,7 +155,7 @@ public class BookingController {
             if (responses == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new BaseResponse(HttpStatus.NOT_FOUND.value(),
-                                "No Bookings found with Id: " + bookingId , null));
+                                "No Bookings found with Id: " + bookingId, null));
             }
 
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Bookings denied successfully", responses));

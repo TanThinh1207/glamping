@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -42,13 +41,11 @@ public class FacilityController {
             @Parameter(description = "Name of the facility", required = true)
             @RequestParam String name,
             @Parameter(description = "Description of the facility", required = true)
-            @RequestParam String description,
-            @Parameter(description = "Image file for the facility (optional)")
-            @RequestParam(required = false) MultipartFile image
+            @RequestParam String description
     ) {
         try {
             FacilityRequest request = new FacilityRequest(null, name, description);
-            FacilityResponse response = facilityService.createFacility(request, image);
+            FacilityResponse response = facilityService.createFacility(request);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Facility created successfully", response));
         } catch (Exception e) {
             logger.error("Error while creating facility: {}", e.getMessage(), e);
@@ -74,13 +71,11 @@ public class FacilityController {
             @Parameter(description = "Updated name of the facility", required = true)
             @RequestParam String name,
             @Parameter(description = "Updated description of the facility", required = true)
-            @RequestParam String description,
-            @Parameter(description = "Updated image file for the facility (optional)")
-            @RequestParam(required = false) MultipartFile image
+            @RequestParam String description
     ) {
         try {
             FacilityRequest request = new FacilityRequest(id, name, description);
-            FacilityResponse response = facilityService.updateFacility(request, image);
+            FacilityResponse response = facilityService.updateFacility(request);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Facility updated successfully", response));
         } catch (Exception e) {
             logger.error("Error while updating facility: {}", e.getMessage(), e);

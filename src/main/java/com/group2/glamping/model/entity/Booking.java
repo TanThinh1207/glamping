@@ -41,10 +41,10 @@ public class Booking {
     @Column(name = "total_amount")
     private Double totalAmount;
 
-    @Column(name = "system_fee",columnDefinition = "DOUBLE DEFAULT 0.0", nullable = false)
+    @Column(name = "system_fee", columnDefinition = "DOUBLE DEFAULT 0.0", nullable = false)
     private Double systemFee = 0.0;
 
-    @Column(name = "net_amount",columnDefinition = "DOUBLE DEFAULT 0.0", nullable = false)
+    @Column(name = "net_amount", columnDefinition = "DOUBLE DEFAULT 0.0", nullable = false)
     private Double netAmount = 0.0;
 
     @Column(name = "comment")

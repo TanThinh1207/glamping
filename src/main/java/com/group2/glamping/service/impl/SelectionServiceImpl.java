@@ -6,12 +6,11 @@ import com.group2.glamping.model.dto.requests.SelectionRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.dto.response.SelectionResponse;
-import com.group2.glamping.model.dto.response.UtilityResponse;
 import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.model.entity.Selection;
-import com.group2.glamping.model.entity.Utility;
 import com.group2.glamping.repository.CampSiteRepository;
 import com.group2.glamping.repository.SelectionRepository;
+import com.group2.glamping.service.interfaces.S3Service;
 import com.group2.glamping.service.interfaces.SelectionService;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +26,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +33,7 @@ public class SelectionServiceImpl implements SelectionService {
 
     private final SelectionRepository selectionRepository;
     private final CampSiteRepository campSiteRepository;
+    private final S3Service s3Service;
 
     // Create selection
     @Override
@@ -158,7 +157,7 @@ public class SelectionServiceImpl implements SelectionService {
         response.setName(selection.getName());
         response.setDescription(selection.getDescription());
         response.setPrice(selection.getPrice());
-        response.setImage(selection.getImageUrl());
+        response.setImage(s3Service.generatePresignedUrl(selection.getImageUrl()));
         response.setStatus(selection.isStatus());
         return response;
     }

@@ -6,7 +6,6 @@ import com.group2.glamping.model.dto.requests.PlaceTypeRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.dto.response.PlaceTypeResponse;
-import com.group2.glamping.model.dto.response.UtilityResponse;
 import com.group2.glamping.model.entity.PlaceType;
 import com.group2.glamping.repository.PlaceTypeRepository;
 import com.group2.glamping.service.interfaces.PlaceTypeService;
@@ -20,7 +19,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +32,7 @@ public class PlaceTypeServiceImpl implements PlaceTypeService {
     private final S3Service s3Service;
 
     @Override
-    public PlaceTypeResponse createPlaceType(PlaceTypeRequest request, MultipartFile image) {
+    public PlaceTypeResponse createPlaceType(PlaceTypeRequest request) {
         if (request.id() != null) {
             throw new RuntimeException("ID must be null when creating a new place type");
         }
@@ -43,24 +41,24 @@ public class PlaceTypeServiceImpl implements PlaceTypeService {
                 .status(true)
                 .build();
 
-        placeType.setImage(s3Service.uploadFile(image, "PlaceType", "place_type_" + placeType.getId()));
+//        placeType.setImage(s3Service.uploadFile(image, "PlaceType", "place_type_" + placeType.getId()));
         placeTypeRepository.save(placeType);
         return convertToResponse(placeType);
     }
 
     @Override
-    public PlaceTypeResponse updatePlaceType(PlaceTypeRequest request, MultipartFile image) {
+    public PlaceTypeResponse updatePlaceType(PlaceTypeRequest request) {
         if (request.id() == null) {
             throw new RuntimeException("ID is required for update");
         }
         PlaceType placeType = placeTypeRepository.findById(request.id())
                 .orElseThrow(() -> new RuntimeException("Place type not found"));
         placeType.setName(request.name());
-        if (image != null && !image.isEmpty()) {
-            String filename = image.getOriginalFilename();
-            placeType.setImage(filename);
-        }
-        placeType.setImage(s3Service.uploadFile(image, "PlaceType", "place_type_" + placeType.getId()));
+//        if (image != null && !image.isEmpty()) {
+//            String filename = image.getOriginalFilename();
+//            placeType.setImage(filename);
+//        }
+//        placeType.setImage(s3Service.uploadFile(image, "PlaceType", "place_type_" + placeType.getId()));
         placeTypeRepository.save(placeType);
         return convertToResponse(placeType);
     }
@@ -118,7 +116,7 @@ public class PlaceTypeServiceImpl implements PlaceTypeService {
         return mapping;
     }
 
-        @Override
+    @Override
     public PlaceTypeResponse deletePlaceType(Integer id) {
         PlaceType placeType = placeTypeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Place type not found"));
@@ -131,7 +129,7 @@ public class PlaceTypeServiceImpl implements PlaceTypeService {
         return PlaceTypeResponse.builder()
                 .id(placeType.getId())
                 .name(placeType.getName())
-                .imagePath(placeType.getImage())
+                .imagePath(s3Service.generatePresignedUrl(placeType.getImage()))
                 .status(placeType.isStatus())
                 .build();
     }
