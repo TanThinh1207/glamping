@@ -46,7 +46,7 @@ public class S3ServiceImpl implements S3Service {
             String fileName = "";
             String folderName = "CampSite";
             CampSite campsite = campSiteRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.CAMP_SITE_NOT_FOUND));
-            String prefix = campsite.getName() + "_CAMPSITE_";
+            String prefix = campsite.getName() + "/CAMPSITE";
             List<Image> images = new ArrayList<>();
             for (MultipartFile file : files) {
                 fileName = folderName + "/" + prefix + "_" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
@@ -80,8 +80,10 @@ public class S3ServiceImpl implements S3Service {
                 case "campSite" -> uploadCampSiteFiles(Collections.singletonList(file), id);
                 case "selection" -> {
                     Selection selection = selectionRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.SELECTION_NOT_FOUND));
+                    CampSite campSite = campSiteRepository.findById(selection.getCampSite().getId()).orElseThrow(
+                            () -> new AppException(ErrorCode.CAMP_SITE_NOT_FOUND));
                     folderName = "CampSite";
-                    prefix = selection.getName() + "_SELECTION_";
+                    prefix = campSite.getName() + "/SELECTION_";
                     fileName = folderName + "/" + prefix + "_" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
                     selection.setImageUrl(fileName);
                     selectionRepository.save(selection);

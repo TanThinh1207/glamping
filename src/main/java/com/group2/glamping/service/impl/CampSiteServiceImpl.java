@@ -1,14 +1,11 @@
 package com.group2.glamping.service.impl;
 
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.CampSiteRequest;
 import com.group2.glamping.model.dto.requests.CampSiteUpdateRequest;
 import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
 import com.group2.glamping.model.dto.requests.SelectionRequest;
-import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.CampSiteResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.entity.*;
@@ -16,6 +13,7 @@ import com.group2.glamping.model.enums.CampSiteStatus;
 import com.group2.glamping.model.mapper.CampSiteMapper;
 import com.group2.glamping.repository.*;
 import com.group2.glamping.service.interfaces.CampSiteService;
+import com.group2.glamping.utils.ResponseFilterUtil;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
@@ -24,8 +22,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -257,30 +253,9 @@ public class CampSiteServiceImpl implements CampSiteService {
     }
 
     @Override
-    public MappingJacksonValue getFilteredCampSites(Map<String, String> params, int page, int size, String fields) {
-        // Get data from repository or other service
+    public Object getFilteredCampSites(Map<String, String> params, int page, int size, String fields) {
         PagingResponse<?> campSites = getCampSites(params, page, size);
-
-        // Apply dynamic filtering
-        SimpleFilterProvider filters;
-        if (fields != null && !fields.isEmpty()) {
-            filters = new SimpleFilterProvider()
-                    .addFilter("dynamicFilter", SimpleBeanPropertyFilter.filterOutAllExcept(fields.split(",")));
-        } else {
-            filters = new SimpleFilterProvider()
-                    .addFilter("dynamicFilter", SimpleBeanPropertyFilter.serializeAll());
-        }
-
-        // Wrap response with MappingJacksonValue
-        MappingJacksonValue mapping = new MappingJacksonValue(BaseResponse.builder()
-                .statusCode(HttpStatus.OK.value())
-                .data(campSites)
-                .message("Retrieve all campsites successfully")
-                .build());
-
-        mapping.setFilters(filters);
-
-        return mapping;
+        return ResponseFilterUtil.getFilteredResponse(fields, campSites, "Retrieve filtered list successfully");
     }
 
 

@@ -1,7 +1,5 @@
 package com.group2.glamping.service.impl;
 
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.group2.glamping.model.dto.requests.CampTypeCreateRequest;
 import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
@@ -13,6 +11,7 @@ import com.group2.glamping.model.entity.CampType;
 import com.group2.glamping.repository.CampSiteRepository;
 import com.group2.glamping.repository.CampTypeRepository;
 import com.group2.glamping.service.interfaces.CampTypeService;
+import com.group2.glamping.utils.ResponseFilterUtil;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,7 +19,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -185,30 +183,11 @@ public class CampTypeServiceImpl implements CampTypeService {
     }
 
     @Override
-    public MappingJacksonValue getFilteredCampTypes(Map<String, String> params, int page, int size, String fields) {
+    public Object getFilteredCampTypes(Map<String, String> params, int page, int size, String fields) {
         // Get data from repository or other service
-        PagingResponse<?> campSites = getCampTypes(params, page, size);
+        PagingResponse<?> campTypes = getCampTypes(params, page, size);
+        return ResponseFilterUtil.getFilteredResponse(fields, campTypes, "Retrieve filtered list successfully");
 
-        // Apply dynamic filtering
-        SimpleFilterProvider filters;
-        if (fields != null && !fields.isEmpty()) {
-            filters = new SimpleFilterProvider()
-                    .addFilter("dynamicFilter", SimpleBeanPropertyFilter.filterOutAllExcept(fields.split(",")));
-        } else {
-            filters = new SimpleFilterProvider()
-                    .addFilter("dynamicFilter", SimpleBeanPropertyFilter.serializeAll());
-        }
-
-        // Wrap response with MappingJacksonValue
-        MappingJacksonValue mapping = new MappingJacksonValue(BaseResponse.builder()
-                .statusCode(HttpStatus.OK.value())
-                .data(campSites)
-                .message("Retrieve all campsites successfully")
-                .build());
-
-        mapping.setFilters(filters);
-
-        return mapping;
     }
 
     @Override

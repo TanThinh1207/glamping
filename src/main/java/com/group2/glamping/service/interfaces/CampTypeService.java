@@ -4,7 +4,6 @@ import com.group2.glamping.model.dto.requests.CampTypeCreateRequest;
 import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
-import org.springframework.http.converter.json.MappingJacksonValue;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -18,7 +17,7 @@ public interface CampTypeService {
 
     PagingResponse<?> getCampTypes(Map<String, String> params, int page, int size);
 
-    MappingJacksonValue getFilteredCampTypes(Map<String, String> params, int page, int size, String fields);
+    Object getFilteredCampTypes(Map<String, String> params, int page, int size, String fields);
 
     BaseResponse softDeleteCampType(int campTypeId);
 

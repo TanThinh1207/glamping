@@ -1,23 +1,19 @@
 package com.group2.glamping.service.impl;
 
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.group2.glamping.model.dto.requests.UtilityRequest;
-import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.dto.response.UtilityResponse;
 import com.group2.glamping.model.entity.Utility;
 import com.group2.glamping.repository.UtilityRepository;
 import com.group2.glamping.service.interfaces.S3Service;
 import com.group2.glamping.service.interfaces.UtilityService;
+import com.group2.glamping.utils.ResponseFilterUtil;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -99,22 +95,9 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
-    public MappingJacksonValue getFilteredUtilities(Map<String, String> params, int page, int size, String fields) {
+    public Object getFilteredUtilities(Map<String, String> params, int page, int size, String fields) {
         PagingResponse<?> utilities = getUtilities(params, page, size);
-
-        SimpleFilterProvider filters = new SimpleFilterProvider()
-                .addFilter("dynamicFilter", fields != null && !fields.isEmpty() ?
-                        SimpleBeanPropertyFilter.filterOutAllExcept(fields.split(",")) :
-                        SimpleBeanPropertyFilter.serializeAll());
-
-        MappingJacksonValue mapping = new MappingJacksonValue(BaseResponse.builder()
-                .statusCode(HttpStatus.OK.value())
-                .data(utilities)
-                .message("Retrieve all utilities successfully")
-                .build());
-        mapping.setFilters(filters);
-
-        return mapping;
+        return ResponseFilterUtil.getFilteredResponse(fields, utilities, "Retrieve filtered list successfully");
     }
 
     @Override

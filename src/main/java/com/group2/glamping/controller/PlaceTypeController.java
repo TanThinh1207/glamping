@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -100,7 +99,7 @@ public class PlaceTypeController {
             }
     )
     @GetMapping
-    public ResponseEntity<MappingJacksonValue> getPlaceTypes(
+    public ResponseEntity<Object> getPlaceTypes(
             @RequestParam Map<String, String> params,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
