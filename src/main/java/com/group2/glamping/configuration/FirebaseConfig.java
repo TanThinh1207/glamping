@@ -24,6 +24,7 @@ public class FirebaseConfig {
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 //.setDatabaseUrl("YOUR_FIREBASE_DATABASE_URL") // Optional: Add your Firebase database URL
+                .setProjectId("glamping-450314")
                 .build();
         if (FirebaseApp.getApps().isEmpty()) {
             return FirebaseApp.initializeApp(options);
