@@ -72,7 +72,7 @@ public class CampTypeController {
     @DeleteMapping("/{campTypeId}")
     public ResponseEntity<BaseResponse> deleteCampType(@PathVariable int campTypeId) {
         BaseResponse response = campTypeService.softDeleteCampType(campTypeId);
-        return ResponseEntity.status((int) response.getStatusCode()).body(response);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }
 
