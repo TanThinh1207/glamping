@@ -66,6 +66,8 @@ public class BookingServiceImpl implements BookingService {
                 .totalAmount(bookingRequest.getTotalAmount())
                 .status(BookingStatus.Pending)
                 .createdTime(LocalDateTime.now())
+                .checkInTime(bookingRequest.getCheckInTime())
+                .checkOutTime(bookingRequest.getCheckOutTime())
                 .systemFee(0.9 * bookingRequest.getTotalAmount())
                 .netAmount(bookingRequest.getTotalAmount() - (0.9 * bookingRequest.getTotalAmount()))
                 .build();
@@ -181,7 +183,7 @@ public class BookingServiceImpl implements BookingService {
         return bookingMapper.toDto(booking);
     }
 
-    //Accept Bookings
+    //Deny Bookings
     @Override
     public BookingResponse denyBookings(Integer bookingId, String deniedReason) {
         Optional<Booking> existedBooking = bookingRepository.findById(bookingId);
@@ -201,6 +203,9 @@ public class BookingServiceImpl implements BookingService {
         }
         return bookingMapper.toDto(booking);
     }
+
+
+
 
     @Override
     public PagingResponse<?> getBookings(Map<String, String> params, int page, int size) {
