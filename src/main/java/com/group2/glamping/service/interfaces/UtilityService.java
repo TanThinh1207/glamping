@@ -14,9 +14,9 @@ public interface UtilityService {
 
     Utility getUtilityById(int id);
 
-    PagingResponse<?> getUtilities(Map<String, String> params, int page, int size);
+    PagingResponse<?> getUtilities(Map<String, String> params, int page, int size, String sortBy, String direction);
 
-    Object getFilteredUtilities(Map<String, String> params, int page, int size, String fields);
+    Object getFilteredUtilities(Map<String, String> params, int page, int size, String fields, String sortBy, String direction);
 
     UtilityResponse softDeleteUtility(int id);
 

@@ -15,9 +15,9 @@ public interface CampTypeService {
 
     BaseResponse updateCampType(int campTypeId, CampTypeUpdateRequest request);
 
-    PagingResponse<?> getCampTypes(Map<String, String> params, int page, int size);
+    PagingResponse<?> getCampTypes(Map<String, String> params, int page, int size, String sortBy, String direction);
 
-    Object getFilteredCampTypes(Map<String, String> params, int page, int size, String fields);
+    Object getFilteredCampTypes(Map<String, String> params, int page, int size, String fields, String sortBy, String direction);
 
     BaseResponse softDeleteCampType(int campTypeId);
 

@@ -12,9 +12,9 @@ public interface PlaceTypeService {
 
     PlaceTypeResponse updatePlaceType(PlaceTypeRequest request);
 
-    PagingResponse<?> getPlaceTypes(Map<String, String> params, int page, int size);
+    PagingResponse<?> getPlaceTypes(Map<String, String> params, int page, int size, String sortBy, String direction);
 
-    Object getFilteredPlaceTypes(Map<String, String> params, int page, int size, String fields);
+    Object getFilteredPlaceTypes(Map<String, String> params, int page, int size, String fields, String sortBy, String direction);
 
     PlaceTypeResponse deletePlaceType(Integer id);
 }

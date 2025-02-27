@@ -12,9 +12,9 @@ public interface FacilityService {
 
     FacilityResponse updateFacility(FacilityRequest request);
 
-    PagingResponse<?> getFacilities(Map<String, String> params, int page, int size);
+    PagingResponse<?> getFacilities(Map<String, String> params, int page, int size, String sortBy, String direction);
 
-    Object getFilteredFacilities(Map<String, String> params, int page, int size, String fields);
+    Object getFilteredFacilities(Map<String, String> params, int page, int size, String fields, String sortBy, String direction);
 
     FacilityResponse deleteFacility(Integer id);
 }

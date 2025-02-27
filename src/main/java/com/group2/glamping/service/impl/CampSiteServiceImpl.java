@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -188,9 +189,8 @@ public class CampSiteServiceImpl implements CampSiteService {
         }
     }
 
-
     @Override
-    public PagingResponse<?> getCampSites(Map<String, String> params, int page, int size) {
+    public PagingResponse<?> getCampSites(Map<String, String> params, int page, int size, String sortBy, String direction) {
         Specification<CampSite> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -234,9 +234,12 @@ public class CampSiteServiceImpl implements CampSiteService {
                         predicates.add(utilityJoin.get("name").in(utilityNameList));
                 }
             });
+
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
-        Pageable pageable = PageRequest.of(page, size);
+
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
         Page<CampSite> campSitePage = campSiteRepository.findAll(spec, pageable);
         List<CampSiteResponse> campSiteResponses = campSitePage.getContent().stream()
                 .map(campSiteMapper::toDto)
@@ -249,12 +252,12 @@ public class CampSiteServiceImpl implements CampSiteService {
                 campSitePage.getNumber(),
                 campSitePage.getNumberOfElements()
         );
-
     }
 
+
     @Override
-    public Object getFilteredCampSites(Map<String, String> params, int page, int size, String fields) {
-        PagingResponse<?> campSites = getCampSites(params, page, size);
+    public Object getFilteredCampSites(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
+        PagingResponse<?> campSites = getCampSites(params, page, size, sortBy, direction);
         return ResponseFilterUtil.getFilteredResponse(fields, campSites, "Retrieve filtered list successfully");
     }
 

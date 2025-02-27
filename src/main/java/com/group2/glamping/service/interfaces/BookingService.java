@@ -3,7 +3,6 @@ package com.group2.glamping.service.interfaces;
 import com.group2.glamping.model.dto.requests.BookingRequest;
 import com.group2.glamping.model.dto.response.BookingResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
-import org.springframework.http.converter.json.MappingJacksonValue;
 
 import java.util.Map;
 import java.util.Optional;
@@ -16,9 +15,9 @@ public interface BookingService {
 
     BookingResponse denyBookings(Integer bookingId, String deniedReason);
 
-    PagingResponse<?> getBookings(Map<String, String> params, int page, int size);
+    PagingResponse<?> getBookings(Map<String, String> params, int page, int size, String sortBy, String direction);
 
-    MappingJacksonValue getFilteredBookings(Map<String, String> params, int page, int size, String fields);
+    Object getFilteredBookings(Map<String, String> params, int page, int size, String fields, String sortBy, String direction);
 
     void confirmPaymentSuccess(Integer orderId);
 

@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -61,49 +60,15 @@ public class BookingController {
             }
     )
     @GetMapping
-    public ResponseEntity<MappingJacksonValue> getBookings(
+    public ResponseEntity<Object> getBookings(
             @RequestParam Map<String, String> params,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(name = "fields", required = false) String fields) {
-        return ResponseEntity.ok(bookingService.getFilteredBookings(params, page, size, fields));
+            @RequestParam(name = "fields", required = false) String fields,
+            @RequestParam(name = "sortBy", required = false, defaultValue = "id") String sortBy,
+            @RequestParam(name = "direction", required = false, defaultValue = "ASC") String direction) {
+        return ResponseEntity.ok(bookingService.getFilteredBookings(params, page, size, fields, sortBy, direction));
     }
-
-//    //Retrieve by status
-//    @GetMapping
-//    @Operation(
-//            summary = "Retrieve bookings by status and Camp Site Id",
-//            description = "Retrieves Booking records filtered by status (Pending, Completed, etc.) and Camp Site Id.",
-//            responses = {
-//                    @ApiResponse(responseCode = "200", description = "Bookings retrieved successfully"),
-//                    @ApiResponse(responseCode = "404", description = "No Bookings found"),
-//                    @ApiResponse(responseCode = "500", description = "Internal server error")
-//            }
-//    )
-//    public ResponseEntity<BaseResponse> getBookings(
-//            @RequestParam Integer campSiteId,
-//            @RequestParam(required = false) String status
-//    ) {
-//        try {
-//            List<BookingResponse> responses = new ArrayList<>();
-//            if (status.equals("pending")) {
-//                responses = bookingService.getPendingBookingsByCampSiteId(campSiteId);
-//            } else if (status.equals("completed")) {
-//                responses = bookingService.getCompletedBookingsByCampSiteId(campSiteId);
-//            }
-//            if (responses.isEmpty()) {
-//                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                        .body(new BaseResponse(HttpStatus.NOT_FOUND.value(),
-//                                "No Bookings found with Camp Site Id: " + campSiteId + " and status: " + status, responses));
-//            }
-//
-//            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Bookings retrieved successfully", responses));
-//        } catch (Exception e) {
-//            logger.error("Error while retrieving bookings by status: {}", e.getMessage(), e);
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
-//        }
-//    }
 
     //Accept bookings
     @PutMapping("/{bookingId}/accept")
