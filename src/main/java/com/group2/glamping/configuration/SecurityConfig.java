@@ -7,7 +7,6 @@ import com.group2.glamping.auth.google.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -40,6 +39,8 @@ public class SecurityConfig {
             "/api-docs/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/api/docs/**",
             "/api/camp-types/**", "/api/selections/**", "/api/facilities/**", "/api/utilities/**",
             "/api/place-types/**", "/mail/**", "/api/users/**",
+            "/api/camp-types/**", "/api/selections/**", "/api/facilities/**", "/api/utilities/**","/api/booking-details/**",
+            "/api/place-types/**", "/mail/**", "/api/users/**", "/api/campsites/**",
             "/api/v1/auth/**", "/api/campsites/**", "/api/bookings/**", "/api/payments/**",
             "/home/**", "/home", "/api/s3/**",
             "/", "/login", "/payment",
