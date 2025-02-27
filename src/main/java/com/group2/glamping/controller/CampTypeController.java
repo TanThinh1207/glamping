@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -51,7 +50,7 @@ public class CampTypeController {
             }
     )
     @GetMapping
-    public ResponseEntity<MappingJacksonValue> getCampTypes(
+    public ResponseEntity<Object> getCampTypes(
             @RequestParam Map<String, String> params,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,

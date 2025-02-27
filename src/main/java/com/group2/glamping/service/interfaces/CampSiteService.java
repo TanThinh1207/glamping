@@ -4,7 +4,6 @@ import com.group2.glamping.model.dto.requests.CampSiteRequest;
 import com.group2.glamping.model.dto.requests.CampSiteUpdateRequest;
 import com.group2.glamping.model.dto.response.CampSiteResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -19,7 +18,7 @@ public interface CampSiteService {
 
     PagingResponse<?> getCampSites(Map<String, String> params, int page, int size);
 
-    MappingJacksonValue getFilteredCampSites(Map<String, String> params, int page, int size, String fields);
+    Object getFilteredCampSites(Map<String, String> params, int page, int size, String fields);
 
     void updateCampSite(int id, CampSiteUpdateRequest campSiteUpdateRequest, List<MultipartFile> files);
 

@@ -10,8 +10,4 @@ import java.util.List;
 @Repository
 public interface FacilityRepository extends JpaRepository<Facility, Integer>, JpaSpecificationExecutor<Facility> {
 
-    List<Facility> findByNameContainingIgnoreCase(String name);
-
-    List<Facility> findByStatus(boolean status);
-
 }

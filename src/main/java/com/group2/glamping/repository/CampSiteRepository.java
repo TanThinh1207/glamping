@@ -11,9 +11,6 @@ import java.util.List;
 @Repository
 public interface CampSiteRepository extends JpaRepository<CampSite, Integer>, JpaSpecificationExecutor<CampSite> {
 
-    List<CampSite> findByNameContainingIgnoreCaseOrCityContainingIgnoreCase(String name, String city);
-
-    List<CampSite> findAllByStatus(CampSiteStatus status);
 
 }
 
