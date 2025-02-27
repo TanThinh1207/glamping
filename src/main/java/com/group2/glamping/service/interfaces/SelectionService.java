@@ -11,9 +11,9 @@ public interface SelectionService {
 
     SelectionResponse updateSelection(SelectionRequest request);
 
-    PagingResponse<?> getSelections(Map<String, String> params, int page, int size);
+    PagingResponse<?> getSelections(Map<String, String> params, int page, int size, String sortBy, String direction);
 
-    Object getFilteredSelections(Map<String, String> params, int page, int size, String fields);
+    Object getFilteredSelections(Map<String, String> params, int page, int size, String fields, String sortBy, String direction);
 
     SelectionResponse softDeleteSelection(int id);
 }

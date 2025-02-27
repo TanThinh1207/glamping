@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -151,23 +152,31 @@ public class CampTypeServiceImpl implements CampTypeService {
     }
 
     @Override
-    public PagingResponse<?> getCampTypes(Map<String, String> params, int page, int size) {
+    public PagingResponse<?> getCampTypes(Map<String, String> params, int page, int size, String sortBy, String direction) {
         Specification<CampType> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
             params.forEach((key, value) -> {
-                //                    case "name" -> predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
-                //                    case "status" ->
-                //                            predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
-                if (key.equals("campSiteId")) {
-                    predicates.add(criteriaBuilder.equal(root.get("campSite").get("id"), Integer.parseInt(value)));
+                switch (key) {
+                    case "id" -> predicates.add(criteriaBuilder.equal(root.get("id"), value));
+                    case "type" -> predicates.add(criteriaBuilder.equal(root.get("type"), value));
+                    case "capacity" -> predicates.add(criteriaBuilder.equal(root.get("capacity"), value));
+                    case "price" -> predicates.add(criteriaBuilder.equal(root.get("price"), value));
+                    case "updatedAt" ->
+                            predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("updatedAt"), LocalDateTime.parse(value)));
+                    case "name" -> predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
+                    case "status" ->
+                            predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
                 }
+
+
             });
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
 
-        Pageable pageable = PageRequest.of(page, size);
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
         Page<CampType> utilityPage = campTypeRepository.findAll(spec, pageable);
         List<CampTypeResponse> utilityResponses = utilityPage.getContent().stream()
                 .map(this::convertToResponse)
@@ -183,9 +192,8 @@ public class CampTypeServiceImpl implements CampTypeService {
     }
 
     @Override
-    public Object getFilteredCampTypes(Map<String, String> params, int page, int size, String fields) {
-        // Get data from repository or other service
-        PagingResponse<?> campTypes = getCampTypes(params, page, size);
+    public Object getFilteredCampTypes(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
+        PagingResponse<?> campTypes = getCampTypes(params, page, size, sortBy, direction);
         return ResponseFilterUtil.getFilteredResponse(fields, campTypes, "Retrieve filtered list successfully");
 
     }

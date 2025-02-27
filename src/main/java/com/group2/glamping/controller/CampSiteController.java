@@ -38,7 +38,7 @@ public class CampSiteController {
 
     @Operation(
             summary = "Get list of campsites",
-            description = "Retrieve a paginated list of campsites with optional filtering and field selection",
+            description = "Retrieve a paginated list of campsites with optional filtering, field selection, and sorting",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Campsites retrieved successfully"),
                     @ApiResponse(responseCode = "400", description = "Invalid input or bad request")
@@ -49,9 +49,13 @@ public class CampSiteController {
             @RequestParam Map<String, String> params,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(name = "fields", required = false) String fields) {
-        return ResponseEntity.ok(campSiteService.getFilteredCampSites(params, page, size, fields));
+            @RequestParam(name = "fields", required = false) String fields,
+            @RequestParam(name = "sortBy", required = false, defaultValue = "id") String sortBy,
+            @RequestParam(name = "direction", required = false, defaultValue = "ASC") String direction
+    ) {
+        return ResponseEntity.ok(campSiteService.getFilteredCampSites(params, page, size, fields, sortBy, direction));
     }
+
 
     @Operation(
             summary = "Create a new campsite",

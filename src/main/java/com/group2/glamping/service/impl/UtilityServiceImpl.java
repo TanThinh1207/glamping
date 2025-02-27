@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -64,12 +65,13 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
-    public PagingResponse<?> getUtilities(Map<String, String> params, int page, int size) {
+    public PagingResponse<?> getUtilities(Map<String, String> params, int page, int size, String sortBy, String direction) {
         Specification<Utility> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
             params.forEach((key, value) -> {
                 switch (key) {
+                    case "id" -> predicates.add(criteriaBuilder.equal(root.get("id"), value));
                     case "name" -> predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
                     case "status" ->
                             predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
@@ -79,7 +81,8 @@ public class UtilityServiceImpl implements UtilityService {
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
 
-        Pageable pageable = PageRequest.of(page, size);
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
         Page<Utility> utilityPage = utilityRepository.findAll(spec, pageable);
         List<UtilityResponse> utilityResponses = utilityPage.getContent().stream()
                 .map(this::convertToResponse)
@@ -95,8 +98,8 @@ public class UtilityServiceImpl implements UtilityService {
     }
 
     @Override
-    public Object getFilteredUtilities(Map<String, String> params, int page, int size, String fields) {
-        PagingResponse<?> utilities = getUtilities(params, page, size);
+    public Object getFilteredUtilities(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
+        PagingResponse<?> utilities = getUtilities(params, page, size, sortBy, direction);
         return ResponseFilterUtil.getFilteredResponse(fields, utilities, "Retrieve filtered list successfully");
     }
 

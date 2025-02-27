@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -56,7 +57,7 @@ public class FacilityServiceImpl implements FacilityService {
     }
 
     @Override
-    public PagingResponse<?> getFacilities(Map<String, String> params, int page, int size) {
+    public PagingResponse<?> getFacilities(Map<String, String> params, int page, int size, String sortBy, String direction) {
         Specification<Facility> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -72,7 +73,8 @@ public class FacilityServiceImpl implements FacilityService {
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
 
-        Pageable pageable = PageRequest.of(page, size);
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
         Page<Facility> facilityPage = facilityRepository.findAll(spec, pageable);
         List<FacilityResponse> facilityResponses = facilityPage.getContent().stream()
                 .map(this::convertToResponse)
@@ -88,8 +90,8 @@ public class FacilityServiceImpl implements FacilityService {
     }
 
     @Override
-    public Object getFilteredFacilities(Map<String, String> params, int page, int size, String fields) {
-        PagingResponse<?> facilities = getFacilities(params, page, size);
+    public Object getFilteredFacilities(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
+        PagingResponse<?> facilities = getFacilities(params, page, size, sortBy, direction);
         return ResponseFilterUtil.getFilteredResponse(fields, facilities, "Retrieve list successfully");
     }
 

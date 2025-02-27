@@ -16,9 +16,9 @@ public interface CampSiteService {
 
     void deleteCampSite(int id);
 
-    PagingResponse<?> getCampSites(Map<String, String> params, int page, int size);
+    PagingResponse<?> getCampSites(Map<String, String> params, int page, int size, String sortBy, String direction);
 
-    Object getFilteredCampSites(Map<String, String> params, int page, int size, String fields);
+    Object getFilteredCampSites(Map<String, String> params, int page, int size, String fields, String sortBy, String direction);
 
     void updateCampSite(int id, CampSiteUpdateRequest campSiteUpdateRequest, List<MultipartFile> files);
 
