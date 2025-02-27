@@ -4,6 +4,7 @@ import com.group2.glamping.auth.JwtService;
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.response.AuthenticationResponse;
+import com.group2.glamping.model.dto.response.UserResponse;
 import com.group2.glamping.model.entity.User;
 import com.group2.glamping.model.enums.Role;
 import com.group2.glamping.repository.UserRepository;
@@ -50,7 +51,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             if (user.isStatus()) {
                 String token = jwtTokenProvider.generateToken(user);
                 authenticationResponse = AuthenticationResponse.builder()
-                        .user(user)
+                        .user(new UserResponse(user))
                         .accessToken(token)
                         .isNew(false)
                         .build();
@@ -68,7 +69,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             userRepository.save(newUser);
             String token = jwtTokenProvider.generateToken(newUser);
             authenticationResponse = AuthenticationResponse.builder()
-                    .user(newUser)
+                    .user(new UserResponse(newUser))
                     .accessToken(token)
                     .isNew(true)
                     .build();
