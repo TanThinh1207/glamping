@@ -28,7 +28,7 @@ public enum ErrorCode {
     PLACE_TYPE_NOT_FOUND(10016, "Place type not found", HttpStatus.NOT_FOUND),
     USER_NOT_AVAILABLE(10017, "User is currently disable", HttpStatus.NOT_FOUND),
     INVALID_REQUEST(10018, "Invalid request", HttpStatus.BAD_REQUEST),
-    FACILITY_NOT_FOUND(10019, "Facility not found", HttpStatus.NOT_FOUND);
+    FACILITY_NOT_FOUND(10019, "Facility not found", HttpStatus.NOT_FOUND),
     BOOKING_DETAIL_NOT_FOUND(10020, "Booking detail not found", HttpStatus.NOT_FOUND),
     CAMP_NOT_FOUND(10021, "Camp not found", HttpStatus.NOT_FOUND);
 
