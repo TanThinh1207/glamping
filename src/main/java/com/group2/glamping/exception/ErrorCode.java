@@ -29,6 +29,9 @@ public enum ErrorCode {
     USER_NOT_AVAILABLE(10017, "User is currently disable", HttpStatus.NOT_FOUND),
     INVALID_REQUEST(10018, "Invalid request", HttpStatus.BAD_REQUEST),
     FACILITY_NOT_FOUND(10019, "Facility not found", HttpStatus.NOT_FOUND);
+    BOOKING_DETAIL_NOT_FOUND(10020, "Booking detail not found", HttpStatus.NOT_FOUND),
+    CAMP_NOT_FOUND(10021, "Camp not found", HttpStatus.NOT_FOUND);
+
     private final int code;
     private final String message;
     private final HttpStatusCode statusCode;

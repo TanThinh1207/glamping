@@ -38,7 +38,7 @@ public class SecurityConfig {
     private final String[] WHITE_LIST = {
             "/api-docs/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/api/docs/**",
             "/api/camp-types/**", "/api/selections/**", "/api/facilities/**", "/api/utilities/**",
-            "/api/place-types/**", "/mail/**", "/api/users/**", "/api/campsites/**",
+            "/api/place-types/**", "/mail/**", "/api/users/**", "/api/campsites/**", "/api/booking-details/**",
             "/api/v1/auth/**", "/api/campsites/**", "/api/bookings/**", "/api/payments/**",
             "/home/**", "/home", "/api/s3/**",
             "/", "/login", "/payment",

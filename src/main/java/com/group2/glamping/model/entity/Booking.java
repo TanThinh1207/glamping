@@ -38,6 +38,12 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     private BookingStatus status;
 
+    @Column(name = "check_in_at")
+    private LocalDateTime checkInTime;
+
+    @Column(name = "check_out_at")
+    private LocalDateTime checkOutTime;
+
     @Column(name = "total_amount")
     private Double totalAmount;
 
