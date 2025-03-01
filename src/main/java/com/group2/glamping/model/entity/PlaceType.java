@@ -1,5 +1,6 @@
 package com.group2.glamping.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +15,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "place_type")
+@JsonFilter("dynamicFilter")
 public class PlaceType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

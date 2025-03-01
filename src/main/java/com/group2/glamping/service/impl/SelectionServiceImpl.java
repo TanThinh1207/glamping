@@ -1,33 +1,28 @@
 package com.group2.glamping.service.impl;
 
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.group2.glamping.model.dto.requests.SelectionRequest;
-import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.dto.response.SelectionResponse;
-import com.group2.glamping.model.dto.response.UtilityResponse;
 import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.model.entity.Selection;
-import com.group2.glamping.model.entity.Utility;
 import com.group2.glamping.repository.CampSiteRepository;
 import com.group2.glamping.repository.SelectionRepository;
+import com.group2.glamping.service.interfaces.S3Service;
 import com.group2.glamping.service.interfaces.SelectionService;
+import com.group2.glamping.utils.ResponseFilterUtil;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +30,7 @@ public class SelectionServiceImpl implements SelectionService {
 
     private final SelectionRepository selectionRepository;
     private final CampSiteRepository campSiteRepository;
+    private final S3Service s3Service;
 
     // Create selection
     @Override
@@ -91,12 +87,14 @@ public class SelectionServiceImpl implements SelectionService {
     }
 
     @Override
-    public PagingResponse<?> getSelections(Map<String, String> params, int page, int size) {
+    public PagingResponse<?> getSelections(Map<String, String> params, int page, int size, String sortBy, String direction) {
         Specification<Selection> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
             params.forEach((key, value) -> {
                 switch (key) {
+                    case "id" -> predicates.add(criteriaBuilder.equal(root.get("id"), value));
+                    case "price" -> predicates.add(criteriaBuilder.equal(root.get("price"), value));
                     case "name" -> predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
                     case "status" ->
                             predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
@@ -106,7 +104,8 @@ public class SelectionServiceImpl implements SelectionService {
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
 
-        Pageable pageable = PageRequest.of(page, size);
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
         Page<Selection> selectionPage = selectionRepository.findAll(spec, pageable);
         List<SelectionResponse> selectionResponses = selectionPage.getContent().stream()
                 .map(this::convertToResponse)
@@ -122,22 +121,9 @@ public class SelectionServiceImpl implements SelectionService {
     }
 
     @Override
-    public MappingJacksonValue getFilteredSelections(Map<String, String> params, int page, int size, String fields) {
-        PagingResponse<?> selections = getSelections(params, page, size);
-
-        SimpleFilterProvider filters = new SimpleFilterProvider()
-                .addFilter("dynamicFilter", fields != null && !fields.isEmpty() ?
-                        SimpleBeanPropertyFilter.filterOutAllExcept(fields.split(",")) :
-                        SimpleBeanPropertyFilter.serializeAll());
-
-        MappingJacksonValue mapping = new MappingJacksonValue(BaseResponse.builder()
-                .statusCode(HttpStatus.OK.value())
-                .data(selections)
-                .message("Retrieve all utilities successfully")
-                .build());
-        mapping.setFilters(filters);
-
-        return mapping;
+    public Object getFilteredSelections(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
+        PagingResponse<?> selections = getSelections(params, page, size, sortBy, direction);
+        return ResponseFilterUtil.getFilteredResponse(fields, selections, "Retrieve filtered list successfully");
     }
 
 
@@ -158,7 +144,7 @@ public class SelectionServiceImpl implements SelectionService {
         response.setName(selection.getName());
         response.setDescription(selection.getDescription());
         response.setPrice(selection.getPrice());
-        response.setImage(selection.getImageUrl());
+        response.setImage(s3Service.generatePresignedUrl(selection.getImageUrl()));
         response.setStatus(selection.isStatus());
         return response;
     }

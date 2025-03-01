@@ -1,19 +1,19 @@
 package com.group2.glamping.service.impl;
 
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.CampSiteRequest;
+import com.group2.glamping.model.dto.requests.CampSiteUpdateRequest;
 import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
 import com.group2.glamping.model.dto.requests.SelectionRequest;
-import com.group2.glamping.model.dto.response.*;
+import com.group2.glamping.model.dto.response.CampSiteResponse;
+import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.entity.*;
 import com.group2.glamping.model.enums.CampSiteStatus;
 import com.group2.glamping.model.mapper.CampSiteMapper;
 import com.group2.glamping.repository.*;
 import com.group2.glamping.service.interfaces.CampSiteService;
-import com.group2.glamping.service.interfaces.S3Service;
+import com.group2.glamping.utils.ResponseFilterUtil;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
@@ -21,9 +21,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,14 +40,11 @@ public class CampSiteServiceImpl implements CampSiteService {
     private final UtilityRepository utilityRepository;
     private final PlaceTypeRepository placeTypeRepository;
     private final CampTypeRepository campTypeRepository;
-    private final S3Service s3Service;
+    //    private final S3Service s3Service;
     private final CampSiteMapper campSiteMapper;
 
     @Override
-    public Optional<CampSiteResponse> saveCampSite(CampSiteRequest campSiteUpdateRequest,
-                                                   List<MultipartFile> files,
-                                                   MultipartFile selectionFile,
-                                                   MultipartFile campTypeFile) {
+    public Optional<CampSiteResponse> saveCampSite(CampSiteRequest campSiteUpdateRequest) {
         if (campSiteUpdateRequest == null) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
@@ -59,15 +55,12 @@ public class CampSiteServiceImpl implements CampSiteService {
                 campSiteUpdateRequest.name(),
                 campSiteUpdateRequest.address(),
                 campSiteUpdateRequest.city(),
-                files,
                 campSiteUpdateRequest.latitude(),
                 campSiteUpdateRequest.longitude(),
                 campSiteUpdateRequest.campSiteSelections(),
                 campSiteUpdateRequest.campSiteUtilities(),
                 campSiteUpdateRequest.campSitePlaceTypes(),
-                campSiteUpdateRequest.campTypeList(),
-                selectionFile,
-                campTypeFile);
+                campSiteUpdateRequest.campTypeList());
     }
 
 
@@ -78,15 +71,13 @@ public class CampSiteServiceImpl implements CampSiteService {
                                                            String name,
                                                            String address,
                                                            String city,
-                                                           List<MultipartFile> files,
                                                            double latitude,
                                                            double longitude,
                                                            List<SelectionRequest> campSiteSelections,
                                                            List<Integer> campSiteUtilities,
                                                            List<Integer> campSitePlaceTypes,
-                                                           List<CampTypeUpdateRequest> campTypeList,
-                                                           MultipartFile selectionFile,
-                                                           MultipartFile campTypeFile) {
+                                                           List<CampTypeUpdateRequest> campTypeList
+    ) {
 
         // Check Host
         campSite.setUser(userService.findById(hostId)
@@ -101,43 +92,17 @@ public class CampSiteServiceImpl implements CampSiteService {
         campSite.setCreatedTime(LocalDateTime.now());
         campSite.setCity(city);
 
-        List<Image> imageEntities;
-
-        // CampSite Image
-        if (files != null && !files.isEmpty()) {
-            imageEntities = files.stream()
-                    .map(file -> {
-                        String imageUrl = s3Service.uploadFile(file, "CampSite/" + campSite.getName(), "CAMP_SITE");
-                        return new Image(0, imageUrl, campSite);
-                    })
-                    .collect(Collectors.toList());
-            campSite.setImageList(imageEntities);
-
-        } else {
-            System.out.println("File is empty");
-        }
-
         // Selection
-        String selectionImageUrl = selectionFile != null
-                ? s3Service.uploadFile(selectionFile, "CampSite/" + campSite.getName(), "SELECTION")
-                : null;
-
         List<Selection> selections = campSiteSelections.stream()
                 .map(request -> Selection.builder()
                         .name(request.name())
                         .description(request.description())
                         .price(request.price())
                         .campSite(campSite)
-                        .imageUrl(selectionImageUrl)
                         .build())
                 .collect(Collectors.toList());
 
         campSite.setSelections(selections);
-
-        // CampType
-        String campTypeImageUrl = campTypeFile != null
-                ? s3Service.uploadFile(campTypeFile, "CampSite/" + campSite.getName(), "CAMP_TYPE")
-                : null;
 
         List<CampType> campTypes = campTypeList.stream()
                 .map(request -> campTypeRepository.findByTypeAndCampSiteId(request.type(), campSite.getId())
@@ -148,10 +113,6 @@ public class CampSiteServiceImpl implements CampSiteService {
                             existingCampType.setUpdatedTime(LocalDateTime.now());
                             existingCampType.setQuantity(request.quantity());
                             existingCampType.setStatus(request.status());
-
-                            if (campTypeImageUrl != null) {
-                                existingCampType.setImage(campTypeImageUrl);
-                            }
 
                             return campTypeRepository.save(existingCampType);
                         })
@@ -165,7 +126,6 @@ public class CampSiteServiceImpl implements CampSiteService {
                                     .quantity(request.quantity())
                                     .status(request.status())
                                     .campSite(campSite)
-                                    .image(campTypeImageUrl)
                                     .build();
                             return campTypeRepository.save(newCampType);
                         }))
@@ -191,27 +151,29 @@ public class CampSiteServiceImpl implements CampSiteService {
         return Optional.of(campSiteMapper.toDto(campSiteRepository.save(campSite)));
     }
 
+    @Override
+    public void updateCampSite(int id,
+                               CampSiteUpdateRequest campSiteUpdateRequest,
+                               List<MultipartFile> files) {
+        CampSite campSite = campSiteRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.CAMP_SITE_NOT_FOUND));
 
-//    @Override
-//    public Optional<CampSiteResponse> updateCampSite(int id, CampSiteRequest campSiteUpdateRequest) {
-//        CampSite campSite = campSiteRepository.findById(id)
-//                .orElseThrow(() -> new AppException(ErrorCode.CAMP_SITE_NOT_FOUND));
-//
-//        return getCampSiteResponse(campSite,
-//                campSiteUpdateRequest.hostId(),
-//                campSiteUpdateRequest.name(),
-//                campSiteUpdateRequest.address(),
-//                campSiteUpdateRequest.city(),
-//                files,
-//                campSiteUpdateRequest.latitude(),
-//                campSiteUpdateRequest.longitude(),
-//                campSiteUpdateRequest.campSiteSelections(),
-//                campSiteUpdateRequest.campSiteUtilities(),
-//                campSiteUpdateRequest.campSitePlaceTypes(),
-//                campSiteUpdateRequest.campTypeList(),
-//                selectionFile,
-//                campTypeFile);
-//    }
+        updateProperties(campSite, campSiteUpdateRequest);
+
+        campSiteMapper.toDto(campSiteRepository.save(campSite));
+    }
+
+    private void updateProperties(CampSite campSite, CampSiteUpdateRequest campSiteUpdateRequest) {
+        if (campSiteUpdateRequest.name() != null) {
+            campSite.setName(campSiteUpdateRequest.name());
+        }
+        if (campSiteUpdateRequest.status() != null) {
+            campSite.setStatus(campSiteUpdateRequest.status());
+        }
+        if (campSiteUpdateRequest.address() != null) {
+            campSite.setAddress(campSiteUpdateRequest.address());
+        }
+    }
 
 
     @Override
@@ -227,68 +189,8 @@ public class CampSiteServiceImpl implements CampSiteService {
         }
     }
 
-
     @Override
-    public BaseResponse searchCampSiteByNameOrCity(String str) {
-        BaseResponse response = new BaseResponse();
-
-        // CHECK INPUT
-        if (str == null || str.trim().isEmpty()) {
-            response.setStatusCode(400);
-            response.setMessage("Search keyword cannot be empty");
-            response.setData(Collections.emptyList());
-            return response;
-        }
-
-        List<CampSite> campSites = campSiteRepository
-                .findByNameContainingIgnoreCaseOrCityContainingIgnoreCase(str, str);
-
-        if (campSites.isEmpty()) {
-            response.setStatusCode(404);
-            response.setMessage("No campsites found for the given search keyword");
-            response.setData(Collections.emptyList());
-            return response;
-        }
-
-        // Chuyển đổi từ entity sang DTO
-        List<CampSiteResponseDTO> campSiteResponseList = campSites.stream().map(campSite -> {
-            CampSiteResponseDTO campSiteResponse = new CampSiteResponseDTO();
-            campSiteResponse.setId(campSite.getId());
-            campSiteResponse.setName(campSite.getName());
-            campSiteResponse.setAddress(campSite.getAddress());
-
-            // Chuyển danh sách Image sang danh sách ImageResponse
-            List<ImageResponse> imageResponses = campSite.getImageList().stream()
-                    .map(image -> new ImageResponse(image.getId(), image.getPath()))
-                    .collect(Collectors.toList());
-
-            campSiteResponse.setImageList(imageResponses);
-            campSiteResponse.setCreatedTime(campSite.getCreatedTime());
-            campSiteResponse.setStatus(campSite.getStatus());
-            return campSiteResponse;
-        }).collect(Collectors.toList());
-
-        // Trả về response
-        response.setStatusCode(200);
-        response.setMessage("Campsites found");
-        response.setData(campSiteResponseList);
-
-        return response;
-    }
-
-    @Override
-    public Optional<CampSiteResponse> enableCampSite(int id) {
-        Optional<CampSite> existingCampSite = campSiteRepository.findById(id);
-        if (existingCampSite.isPresent() && existingCampSite.get().getStatus() == CampSiteStatus.Not_Available) {
-            CampSite campSite = existingCampSite.get();
-            campSite.setStatus(CampSiteStatus.Available);
-            return Optional.of(campSiteMapper.toDto(campSiteRepository.save(campSite)));
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public PagingResponse<?> getCampSites(Map<String, String> params, int page, int size) {
+    public PagingResponse<?> getCampSites(Map<String, String> params, int page, int size, String sortBy, String direction) {
         Specification<CampSite> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -332,9 +234,12 @@ public class CampSiteServiceImpl implements CampSiteService {
                         predicates.add(utilityJoin.get("name").in(utilityNameList));
                 }
             });
+
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
-        Pageable pageable = PageRequest.of(page, size);
+
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
         Page<CampSite> campSitePage = campSiteRepository.findAll(spec, pageable);
         List<CampSiteResponse> campSiteResponses = campSitePage.getContent().stream()
                 .map(campSiteMapper::toDto)
@@ -347,35 +252,15 @@ public class CampSiteServiceImpl implements CampSiteService {
                 campSitePage.getNumber(),
                 campSitePage.getNumberOfElements()
         );
-
     }
+
 
     @Override
-    public MappingJacksonValue getFilteredCampSites(Map<String, String> params, int page, int size, String fields) {
-        // Get data from repository or other service
-        PagingResponse<?> campSites = getCampSites(params, page, size);
-
-        // Apply dynamic filtering
-        SimpleFilterProvider filters;
-        if (fields != null && !fields.isEmpty()) {
-            filters = new SimpleFilterProvider()
-                    .addFilter("dynamicFilter", SimpleBeanPropertyFilter.filterOutAllExcept(fields.split(",")));
-        } else {
-            filters = new SimpleFilterProvider()
-                    .addFilter("dynamicFilter", SimpleBeanPropertyFilter.serializeAll());
-        }
-
-        // Wrap response with MappingJacksonValue
-        MappingJacksonValue mapping = new MappingJacksonValue(BaseResponse.builder()
-                .statusCode(HttpStatus.OK.value())
-                .data(campSites)
-                .message("Retrieve all campsites successfully")
-                .build());
-
-        mapping.setFilters(filters);
-
-        return mapping;
+    public Object getFilteredCampSites(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
+        PagingResponse<?> campSites = getCampSites(params, page, size, sortBy, direction);
+        return ResponseFilterUtil.getFilteredResponse(fields, campSites, "Retrieve filtered list successfully");
     }
+
 
 }
 

@@ -3,9 +3,7 @@ package com.group2.glamping.service.interfaces;
 import com.group2.glamping.model.dto.requests.SelectionRequest;
 import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.dto.response.SelectionResponse;
-import org.springframework.http.converter.json.MappingJacksonValue;
 
-import java.util.List;
 import java.util.Map;
 
 public interface SelectionService {
@@ -13,9 +11,9 @@ public interface SelectionService {
 
     SelectionResponse updateSelection(SelectionRequest request);
 
-    PagingResponse<?> getSelections(Map<String, String> params, int page, int size);
+    PagingResponse<?> getSelections(Map<String, String> params, int page, int size, String sortBy, String direction);
 
-    MappingJacksonValue getFilteredSelections(Map<String, String> params, int page, int size, String fields);
+    Object getFilteredSelections(Map<String, String> params, int page, int size, String fields, String sortBy, String direction);
 
     SelectionResponse softDeleteSelection(int id);
 }

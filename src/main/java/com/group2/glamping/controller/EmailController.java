@@ -1,17 +1,11 @@
 package com.group2.glamping.controller;
 
-import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMailMessage;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.io.File;
 
 @RequiredArgsConstructor
 @RestController
@@ -58,5 +52,5 @@ public class EmailController {
 //        } catch (Exception e) {
 //            throw new RuntimeException(e);
 //        }
-    }
+}
 

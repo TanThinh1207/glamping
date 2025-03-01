@@ -19,6 +19,6 @@ public class Image {
     private String path;
 
     @ManyToOne
-    @JoinColumn(name = "id_camp_site")
+    @JoinColumn(name = "id_camp_site", nullable = false)
     private CampSite campSite;
 }

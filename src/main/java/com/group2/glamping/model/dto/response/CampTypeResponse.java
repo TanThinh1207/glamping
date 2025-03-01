@@ -23,6 +23,7 @@ public class CampTypeResponse {
     LocalDateTime updatedAt;
     int quantity;
     boolean status;
+    int campSiteId;
 
     public static CampTypeResponse fromEntity(CampType campType) {
         if (campType == null) {

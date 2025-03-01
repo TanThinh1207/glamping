@@ -8,7 +8,6 @@ import com.group2.glamping.model.dto.response.AuthenticationResponse;
 import com.group2.glamping.model.entity.User;
 import com.group2.glamping.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -18,7 +17,7 @@ import java.util.Optional;
 public class AuthenticationService {
 
     private final UserRepository userRepository;
-//    private final PasswordEncoder passwordEncoder;
+    //    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
     public AuthenticationResponse verify(String email) throws AppException {

@@ -3,11 +3,11 @@ package com.group2.glamping.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.group2.glamping.exception.AppException;
+import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.CampSiteRequest;
+import com.group2.glamping.model.dto.requests.CampSiteUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
-import com.group2.glamping.model.dto.response.CampSiteResponse;
 import com.group2.glamping.service.interfaces.CampSiteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,13 +19,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/campsites")
@@ -34,25 +32,30 @@ import java.util.Optional;
 public class CampSiteController {
 
     private final CampSiteService campSiteService;
+    private final ObjectMapper objectMapper;
 
     private static final Logger logger = LoggerFactory.getLogger(CampSiteController.class);
 
     @Operation(
             summary = "Get list of campsites",
-            description = "Retrieve a paginated list of campsites with optional filtering and field selection",
+            description = "Retrieve a paginated list of campsites with optional filtering, field selection, and sorting",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Campsites retrieved successfully"),
                     @ApiResponse(responseCode = "400", description = "Invalid input or bad request")
             }
     )
     @GetMapping
-    public ResponseEntity<MappingJacksonValue> getCampSites(
+    public ResponseEntity<Object> getCampSites(
             @RequestParam Map<String, String> params,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(name = "fields", required = false) String fields) {
-        return ResponseEntity.ok(campSiteService.getFilteredCampSites(params, page, size, fields));
+            @RequestParam(name = "fields", required = false) String fields,
+            @RequestParam(name = "sortBy", required = false, defaultValue = "id") String sortBy,
+            @RequestParam(name = "direction", required = false, defaultValue = "ASC") String direction
+    ) {
+        return ResponseEntity.ok(campSiteService.getFilteredCampSites(params, page, size, fields, sortBy, direction));
     }
+
 
     @Operation(
             summary = "Create a new campsite",
@@ -63,36 +66,14 @@ public class CampSiteController {
             }
     )
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BaseResponse> createCampSite(
-            @RequestParam("campSiteRequest") String campSiteRequest,
-            @RequestParam(value = "files", required = false) List<MultipartFile> files,
-            @RequestParam(value = "selectionFile", required = false) MultipartFile selectionFile,
-            @RequestParam(value = "campTypeFile", required = false) MultipartFile campTypeFile
-    ) {
+    public ResponseEntity<BaseResponse> createCampSite(@RequestBody String campSiteRequest) {
         try {
-            logger.info("Files: {}", files);
-            if (files != null) {
-                for (MultipartFile file : files) {
-                    logger.info("Received file: {} (Size: {} bytes)", file.getOriginalFilename(), file.getSize());
-                }
-            }
-            logger.info("Selection File: {} (Size: {})",
-                    selectionFile != null ? selectionFile.getOriginalFilename() : "null",
-                    selectionFile != null ? selectionFile.getSize() : "N/A");
-            logger.info("Camp Type File: {} (Size: {})",
-                    campTypeFile != null ? campTypeFile.getOriginalFilename() : "null",
-                    campTypeFile != null ? campTypeFile.getSize() : "N/A");
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.registerModule(new JavaTimeModule());
             CampSiteRequest request = objectMapper.readValue(campSiteRequest, CampSiteRequest.class);
-            logger.info("Parsed campSiteRequest: {}", request);
-            logger.info("Files count: {}", (files != null ? files.size() : "null"));
-            logger.info("Selection File: {}", (selectionFile != null ? selectionFile.getOriginalFilename() : "null"));
-            logger.info("Camp Type File: {}", (campTypeFile != null ? campTypeFile.getOriginalFilename() : "null"));
 
+            logger.info("Parsed campSiteRequest: {}", request);
             return ResponseEntity.ok().body(BaseResponse.builder()
                     .statusCode(HttpStatus.OK.value())
-                    .data(campSiteService.saveCampSite(request, files, selectionFile, campTypeFile))
+                    .data(campSiteService.saveCampSite(request))
                     .message("Camp Site created successfully")
                     .build());
 
@@ -122,53 +103,37 @@ public class CampSiteController {
     }
 
 
-//    @Operation(
-//            summary = "Update a campsite",
-//            description = "Modify details of an existing campsite by ID",
-//            responses = {
-//                    @ApiResponse(responseCode = "200", description = "Camp site updated successfully"),
-//                    @ApiResponse(responseCode = "404", description = "Camp site not found")
-//            }
-//    )
-//    @PutMapping("/{id}")
-//    public ResponseEntity<BaseResponse> updateCampSite(
-//            @Parameter(description = "ID of the campsite", example = "1") @PathVariable int id,
-//            @Valid @RequestBody CampSiteRequest updatedCampSite) {
-//        try {
-//            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(),
-//                    "Camp site updated successfully",
-//                    campSiteService.updateCampSite(id, updatedCampSite)));
-//        } catch (AppException e) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new BaseResponse(HttpStatus.NOT_FOUND.value(),
-//                    "Camp site not found",
-//                    null));
-//        }
-//    }
-
     @Operation(
-            summary = "Enable a campsite",
-            description = "Set status of a campsite from NOT AVAILABLE to AVAILABLE by ID",
+            summary = "Update a campsite",
+            description = "Modify details of an existing campsite by ID",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Camp site enabled successfully"),
+                    @ApiResponse(responseCode = "200", description = "Camp site updated successfully"),
                     @ApiResponse(responseCode = "404", description = "Camp site not found")
             }
     )
-    @PutMapping("/{id}/enable")
-    public ResponseEntity<BaseResponse> enableCampSite(
-            @Parameter(description = "ID of the campsite", example = "1") @PathVariable int id) {
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<BaseResponse> updateCampSite(
+            @PathVariable int id,
+            @RequestPart("updatedCampSite") String updatedCampSiteJson,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files) {
+
+        System.out.println("Received updatedCampSite JSON: " + updatedCampSiteJson);
+        System.out.println("Received files: " + (files != null ? files.size() : 0));
+
+        CampSiteUpdateRequest updatedCampSite;
         try {
-            Optional<CampSiteResponse> response = campSiteService.enableCampSite(id);
-            return response.map(campSiteResponse -> ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(),
-                            "Camp site enabled successfully", campSiteResponse)))
-                    .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(new BaseResponse(HttpStatus.NOT_FOUND.value(),
-                            "No Camp Site found with ID: " + id + " has status Not Available.",
-                            null)));
-        } catch (AppException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new BaseResponse(HttpStatus.NOT_FOUND.value(),
-                    "Camp site not found",
-                    null));
+            updatedCampSite = new ObjectMapper().readValue(updatedCampSiteJson, CampSiteUpdateRequest.class);
+        } catch (JsonProcessingException e) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Invalid JSON format for updatedCampSite");
         }
+
+        campSiteService.updateCampSite(id, updatedCampSite, files);
+        return ResponseEntity.ok(BaseResponse.builder()
+                .statusCode(HttpStatus.OK.value())
+                .message("CampSite updated successfully")
+                .build());
     }
+
 
     //DELETE
     @Operation(
@@ -186,18 +151,5 @@ public class CampSiteController {
         return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Camp site deleted successfully", null));
     }
 
-    @Operation(
-            summary = "Search campsites by name or city",
-            description = "Filter campsites based on name or city",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Search results returned successfully")
-            }
-    )
-    @GetMapping("/filterbynameorcity/{filterCondition}")
-    public ResponseEntity<BaseResponse> searchCampSiteByNameOrCity(
-            @Parameter(description = "Search keyword (camp name or city)", example = "Hanoi") @PathVariable String
-                    filterCondition) {
-        BaseResponse response = campSiteService.searchCampSiteByNameOrCity(filterCondition);
-        return ResponseEntity.status(response.getStatusCode()).body(response);
-    }
+
 }

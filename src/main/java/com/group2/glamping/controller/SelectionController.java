@@ -13,11 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -46,8 +43,6 @@ public class SelectionController {
             @RequestParam String description,
             @Parameter(description = "Price of the selection", required = true)
             @RequestParam double price,
-            @Parameter(description = "Image file for the selection (optional)")
-            @RequestParam(required = false) MultipartFile image,
             @Parameter(description = "Campsite ID", required = true)
             @RequestParam Integer campSiteId
     ) {
@@ -82,8 +77,6 @@ public class SelectionController {
             @RequestParam String description,
             @Parameter(description = "Updated price of the selection", required = true)
             @RequestParam double price,
-            @Parameter(description = "Updated image file for the selection (optional)")
-            @RequestParam(required = false) MultipartFile image,
             @Parameter(description = "Updated campsite ID", required = true)
             @RequestParam Integer campSiteId
     ) {
@@ -108,12 +101,14 @@ public class SelectionController {
             }
     )
     @GetMapping
-    public ResponseEntity<MappingJacksonValue> getSelections(
+    public ResponseEntity<Object> getSelections(
             @RequestParam Map<String, String> params,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(name = "fields", required = false) String fields) {
-        return ResponseEntity.ok(selectionService.getFilteredSelections(params, page, size, fields));
+            @RequestParam(name = "fields", required = false) String fields,
+            @RequestParam(name = "sortBy", required = false, defaultValue = "id") String sortBy,
+            @RequestParam(name = "direction", required = false, defaultValue = "ASC") String direction) {
+        return ResponseEntity.ok(selectionService.getFilteredSelections(params, page, size, fields, sortBy, direction));
     }
 
     // Soft Delete Selection

@@ -4,12 +4,9 @@ import com.group2.glamping.model.dto.requests.CampTypeCreateRequest;
 import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
-import org.springframework.http.converter.json.MappingJacksonValue;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public interface CampTypeService {
     Long findAvailableSlots(Integer campTypeId, LocalDateTime checkInDate, LocalDateTime checkOutDate);
@@ -18,9 +15,9 @@ public interface CampTypeService {
 
     BaseResponse updateCampType(int campTypeId, CampTypeUpdateRequest request);
 
-    PagingResponse<?> getCampTypes(Map<String, String> params, int page, int size);
+    PagingResponse<?> getCampTypes(Map<String, String> params, int page, int size, String sortBy, String direction);
 
-    MappingJacksonValue getFilteredCampTypes(Map<String, String> params, int page, int size, String fields);
+    Object getFilteredCampTypes(Map<String, String> params, int page, int size, String fields, String sortBy, String direction);
 
     BaseResponse softDeleteCampType(int campTypeId);
 

@@ -2,26 +2,44 @@ CREATE DATABASE glamping;
 
 USE glamping;
 
-CREATE TABLE `user` (
-    `id` INT PRIMARY KEY AUTO_INCREMENT,
-    `email` VARCHAR(255) DEFAULT "",
-    `password` VARCHAR(255),
-    `first_name` VARCHAR(255) DEFAULT "",
-    `last_name` VARCHAR(255) DEFAULT "",
-    `phone_number` VARCHAR(255) DEFAULT "",
-    `address` VARCHAR(255) DEFAULT "",
-    `dob` date DEFAULT CURRENT_DATE,
-    `role` ENUM('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_USER', 'ROLE_STAFF'),
+CREATE TABLE ` user `
+(
+    `
+    id `           INT PRIMARY KEY AUTO_INCREMENT, `
+    email `        VARCHAR(255) DEFAULT "", `
+    password `     VARCHAR(255), `
+    first_name `   VARCHAR(255) DEFAULT "", `
+    last_name `    VARCHAR(255) DEFAULT "", `
+    phone_number ` VARCHAR(255) DEFAULT "", `
+    address `      VARCHAR(255) DEFAULT "", `
+    dob `          date         DEFAULT
+    CURRENT_DATE, `
+    role `         ENUM(
+    'ROLE_ADMIN',
+    'ROLE_MANAGER',
+    'ROLE_USER',
+    'ROLE_STAFF'
+) ,
     `created_at` DATETIME CURRENT_DATE,
     `status` BOOLEAN DEFAULT TRUE
 );
 
-CREATE TABLE `booking` (
-    `id` INT PRIMARY KEY AUTO_INCREMENT,
-    `id_user` INT,
-    `id_camp_site` INT,
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `status` ENUM('Pending', 'Deposit', 'Accepted', 'Completed', 'Cancelled', 'Denied', 'Refund'),
+CREATE TABLE ` booking `
+(
+    `
+    id `           INT PRIMARY KEY AUTO_INCREMENT, `
+    id_user `      INT, `
+    id_camp_site ` INT, `
+    created_at `   DATETIME DEFAULT CURRENT_TIMESTAMP, `
+    status `       ENUM(
+    'Pending',
+    'Deposit',
+    'Accepted',
+    'Completed',
+    'Cancelled',
+    'Denied',
+    'Refund'
+) ,
     `check_in_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `check_out_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `total_amount` DECIMAL(10,2) DEFAULT 0.0,
@@ -32,119 +50,163 @@ CREATE TABLE `booking` (
     `message` text DEFAULT ""
 );
 
-CREATE TABLE `camp_site` (
-    `id` INT PRIMARY KEY AUTO_INCREMENT,
-    `name` VARCHAR(255) DEFAULT "",
-    `address` VARCHAR(255) DEFAULT "",
-    `city` varchar(255) DEFAULT "",
-    `latitude` DECIMAL(10,7) DEFAULT 0.0,
-    `longitude` DECIMAL(10,7) DEFAULT 0.0,
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `status` ENUM('Pending', 'Not_Available', 'Available'),
+CREATE TABLE ` camp_site `
+(
+    `
+    id `         INT PRIMARY KEY AUTO_INCREMENT, `
+    name `       VARCHAR(255)   DEFAULT "", `
+    address `    VARCHAR(255)   DEFAULT "", `
+    city `       varchar(255)   DEFAULT "", `
+    latitude `   DECIMAL(10, 7) DEFAULT 0.0, `
+    longitude `  DECIMAL(10, 7) DEFAULT 0.0, `
+    created_at ` DATETIME       DEFAULT CURRENT_TIMESTAMP, `
+    status `     ENUM(
+    'Pending',
+    'Not_Available',
+    'Available'
+) ,
     `message` text DEFAULT "",
     `deposit_rate` DECIMAL(10,2) DEFAULT 0.0,
     `id_user` INT
 );
 
-CREATE TABLE `camp` (
-    `id` INT PRIMARY KEY AUTO_INCREMENT,
-    `name` VARCHAR(255) DEFAULT "",
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `status` enum("Unavailable", "Not_Assigned", "Assigned") DEFAULT "Not_Assigned",
+CREATE TABLE ` camp `
+(
+    `
+    id `         INT PRIMARY KEY AUTO_INCREMENT, `
+    name `       VARCHAR(255) DEFAULT "", `
+    created_at ` DATETIME     DEFAULT CURRENT_TIMESTAMP, `
+    status `     enum(
+    "Unavailable",
+    "Not_Assigned",
+    "Assigned"
+) DEFAULT "Not_Assigned",
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `id_camp_type` INT
 );
 
-CREATE TABLE `payment` (
-    `id` INT PRIMARY KEY AUTO_INCREMENT,
-    `id_booking` INT,
-    `payment_method` VARCHAR(255) DEFAULT "",
-    `total_amount` DECIMAL(10,2) DEFAULT 0.0,
-    `status` ENUM('Pending', 'Completed', 'Failed'),
+CREATE TABLE ` payment `
+(
+    `
+    id `             INT PRIMARY KEY AUTO_INCREMENT, `
+    id_booking `     INT, `
+    payment_method ` VARCHAR(255)   DEFAULT "", `
+    total_amount `   DECIMAL(10, 2) DEFAULT 0.0, `
+    status `         ENUM(
+    'Pending',
+    'Completed',
+    'Failed'
+) ,
     `id_transaction` VARCHAR(255),
     `completed_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE `selection` (
-    `id` INT PRIMARY KEY AUTO_INCREMENT,
-    `name` VARCHAR(255) DEFAULT "",
-    `description` TEXT DEFAULT "",
-    `price` DECIMAL(10,2) DEFAULT 0.0,
-    `image` VARCHAR(255) DEFAULT '',
-    `status` BOOLEAN DEFAULT TRUE,
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `id_camp_site` INT
+CREATE TABLE ` selection `
+(
+    `
+    id `           INT PRIMARY KEY AUTO_INCREMENT, `
+    name `         VARCHAR(255)   DEFAULT "", `
+    description `  TEXT           DEFAULT "", `
+    price `        DECIMAL(10, 2) DEFAULT 0.0, `
+    image `        VARCHAR(255)   DEFAULT '', `
+    status `       BOOLEAN        DEFAULT TRUE, `
+    updated_at `   DATETIME       DEFAULT CURRENT_TIMESTAMP, `
+    id_camp_site ` INT
 );
 
-CREATE TABLE `booking_selection` (
-    `id_booking` INT,
-    `id_selection` INT,
-    `name` VARCHAR(255 ),
-    `quantity` DECIMAL(10,2) DEFAULT 0,
-    PRIMARY KEY (`id_booking`, `id_selection`)
+CREATE TABLE ` booking_selection `
+(
+    `
+    id_booking `   INT, `
+    id_selection ` INT, `
+    name `         VARCHAR(255), `
+    quantity `     DECIMAL(10, 2) DEFAULT 0,
+    PRIMARY KEY (` id_booking `, ` id_selection `)
 );
 
-CREATE TABLE `facility` (
-    `id` INT PRIMARY KEY AUTO_INCREMENT,
-    `name` VARCHAR(255),
-    `description` TEXT,
-    `image` VARCHAR(255) DEFAULT '',
-    `status` BOOLEAN DEFAULT TRUE
+CREATE TABLE ` facility `
+(
+    `
+    id `          INT PRIMARY KEY AUTO_INCREMENT, `
+    name `        VARCHAR(255), `
+    description ` TEXT, `
+    image `       VARCHAR(255) DEFAULT '', `
+    status `      BOOLEAN      DEFAULT TRUE
 );
 
-CREATE TABLE `camp_type_facility` (
-    `id_facility` INT,
-    `id_camp_type` INT,
-    PRIMARY KEY (`id_facility`, `id_camp_type`)
+CREATE TABLE ` camp_type_facility `
+(
+    `
+    id_facility `  INT, `
+    id_camp_type ` INT,
+    PRIMARY KEY (` id_facility `, ` id_camp_type `)
 );
 
-CREATE TABLE `image` (
-    `id` INT PRIMARY KEY AUTO_INCREMENT,
-    `id_camp_site` INT,
-    `path` VARCHAR(255)
+CREATE TABLE ` image `
+(
+    `
+    id `           INT PRIMARY KEY AUTO_INCREMENT, `
+    id_camp_site ` INT, `
+    path `         VARCHAR(255)
 );
 
-CREATE TABLE `report` (
-    `id` INT PRIMARY KEY AUTO_INCREMENT,
-    `id_camp_site` INT,
-    `id_user` INT,
-    `status` enum('Pending', 'Resolved', 'Denied') DEFAULT 'PENDING',
+CREATE TABLE ` report `
+(
+    `
+    id `           INT PRIMARY KEY AUTO_INCREMENT, `
+    id_camp_site ` INT, `
+    id_user `      INT, `
+    status `       enum(
+    'Pending',
+    'Resolved',
+    'Denied'
+) DEFAULT 'PENDING',
     `created_at` DATETIME,
     `message` TEXT,
     `report_type` VARCHAR(255)
 );
 
-CREATE TABLE `booking_detail` (
-    `id` INT PRIMARY KEY AUTO_INCREMENT,
-    `id_booking` INT,
-    `id_camp_type` INT,
-    `id_camp` INT,
-    `check_in_at` DATETIME,
-    `check_out_at` DATETIME,
-    `amount` DECIMAL(10,2) DEFAULT 0.0,
-    `created_at` DATETIME,
-    `add_on` DECIMAL(10,2) DEFAULT 0.0,
-    `status` ENUM('Waiting', 'Check_In', 'Check_Out') DEFAULT 'WAITING'
+CREATE TABLE ` booking_detail `
+(
+    `
+    id `           INT PRIMARY KEY AUTO_INCREMENT, `
+    id_booking `   INT, `
+    id_camp_type ` INT, `
+    id_camp `      INT, `
+    check_in_at `  DATETIME, `
+    check_out_at ` DATETIME, `
+    amount `       DECIMAL(10, 2) DEFAULT 0.0, `
+    created_at `   DATETIME, `
+    add_on `       DECIMAL(10, 2) DEFAULT 0.0, `
+    status `       ENUM(
+    'Waiting',
+    'Check_In',
+    'Check_Out'
+) DEFAULT 'WAITING'
 );
 
-CREATE TABLE `camp_type` (
-    `id` INT PRIMARY KEY AUTO_INCREMENT,
-    `type` VARCHAR(255),
-    `capacity` INT DEFAULT 0,
-    `price` DECIMAL(10,2) DEFAULT 0.0,
-    `weekend_rate` DECIMAL(10,2) DEFAULT 0.0,
-    `updated_at` DATETIME,
-    `id_camp_site` INT,
-    `quantity` INT DEFAULT 0,
-    `image` varchar(255),
-    `status` BOOLEAN DEFAULT TRUE
+CREATE TABLE ` camp_type `
+(
+    `
+    id `           INT PRIMARY KEY AUTO_INCREMENT, `
+    type `         VARCHAR(255), `
+    capacity `     INT            DEFAULT 0, `
+    price `        DECIMAL(10, 2) DEFAULT 0.0, `
+    weekend_rate ` DECIMAL(10, 2) DEFAULT 0.0, `
+    updated_at `   DATETIME, `
+    id_camp_site ` INT, `
+    quantity `     INT            DEFAULT 0, `
+    image `        varchar(255), `
+    status `       BOOLEAN        DEFAULT TRUE
 );
 
-CREATE TABLE `custom_price` (
-	`id` INT PRIMARY KEY AUTO_INCREMENT,
-	`id_camp_type` INT,
-	`date` date,
-	`price` DECIMAL(10,2) DEFAULT 0.0
+CREATE TABLE ` custom_price `
+(
+    `
+    id `           INT PRIMARY KEY AUTO_INCREMENT, `
+    id_camp_type ` INT, `
+    date `         date, `
+    price `        DECIMAL(10, 2) DEFAULT 0.0
 );
 
 
@@ -157,242 +219,268 @@ CREATE TABLE `custom_price` (
 --     `id_camp_site` INT
 -- );
 
-CREATE TABLE `booking_detail_order` (
-    `id` INT PRIMARY KEY,
-    `name` varchar(255),
-    `quantity` INT DEFAULT 0,
-    `price` DECIMAL(10,2) DEFAULT 0.0,
-    `total_amount` DECIMAL(10,2) DEFAULT 0.0, 
-    `note` text,
-    `id_booking_detail` INT
+CREATE TABLE ` booking_detail_order `
+(
+    `
+    id `                INT PRIMARY KEY, `
+    name `              varchar(255), `
+    quantity `          INT            DEFAULT 0, `
+    price `             DECIMAL(10, 2) DEFAULT 0.0, `
+    total_amount `      DECIMAL(10, 2) DEFAULT 0.0, `
+    note `              text, `
+    id_booking_detail ` INT
 );
 
-CREATE TABLE `utility` (
-    `id` INT PRIMARY KEY AUTO_INCREMENT,
-    `name` VARCHAR(255),
-    `image` VARCHAR(255) DEFAULT '',
-    `status` BOOLEAN DEFAULT TRUE
+CREATE TABLE ` utility `
+(
+    `
+    id `     INT PRIMARY KEY AUTO_INCREMENT, `
+    name `   VARCHAR(255), `
+    image `  VARCHAR(255) DEFAULT '', `
+    status ` BOOLEAN      DEFAULT TRUE
 );
 
-CREATE TABLE `camp_site_utility` (
-    `id_camp_site` INT,
-    `id_utility` INT,
-    PRIMARY KEY (`id_camp_site`, `id_utility`)
+CREATE TABLE ` camp_site_utility `
+(
+    `
+    id_camp_site ` INT, `
+    id_utility `   INT,
+    PRIMARY KEY (` id_camp_site `, ` id_utility `)
 );
 
-CREATE TABLE place_type(
-	`id` int AUTO_INCREMENT,
-	`name` varchar(255),
-	`status` boolean DEFAULT true,
-	`image` varchar(255) DEFAULT '',
-	
-	PRIMARY KEY (`id`)
+CREATE TABLE place_type
+(
+    `
+    id `     int AUTO_INCREMENT, `
+    name `   varchar(255), `
+    status ` boolean      DEFAULT true, `
+    image `  varchar(255) DEFAULT '',
+
+    PRIMARY KEY (` id `)
 );
 
-CREATE TABLE camp_site_place_type(
-	`id_camp_site` int,
-	`id_place_type` int,
-	
-	PRIMARY KEY (`id_camp_site`, `id_place_type`)
+CREATE TABLE camp_site_place_type
+(
+    `
+    id_camp_site `  int, `
+    id_place_type ` int,
+
+    PRIMARY KEY (` id_camp_site `, ` id_place_type `)
 );
 
-CREATE TABLE verification_token(
-	`id` int PRIMARY KEY AUTO_INCREMENT,
-	`token` varchar(255),
-	`create_at` datetime DEFAULT CURRENT_TIMESTAMP,
-	`expires_at` datetime NOT NULL,
-	`id_user` int
+CREATE TABLE verification_token
+(
+    `
+    id `         int PRIMARY KEY AUTO_INCREMENT, `
+    token `      varchar(255), `
+    create_at `  datetime DEFAULT CURRENT_TIMESTAMP, `
+    expires_at ` datetime NOT NULL, `
+    id_user `    int
 );
 
 
 
+ALTER TABLE ` booking `
+    ADD FOREIGN KEY (` id_user `) REFERENCES ` user ` (` id `);
 
-ALTER TABLE `booking`
-    ADD FOREIGN KEY (`id_user`) REFERENCES `user` (`id`);
+ALTER TABLE ` booking `
+    ADD FOREIGN KEY (` id_camp_site `) REFERENCES ` camp_site ` (` id `);
 
-ALTER TABLE `booking`
-    ADD FOREIGN KEY (`id_camp_site`) REFERENCES `camp_site` (`id`);
+ALTER TABLE ` camp_site `
+    ADD FOREIGN KEY (` id_user `) REFERENCES ` user ` (` id `);
 
-ALTER TABLE `camp_site`
-    ADD FOREIGN KEY (`id_user`) REFERENCES `user` (`id`);
+ALTER TABLE ` payment `
+    ADD FOREIGN KEY (` id_booking `) REFERENCES ` booking ` (` id `);
 
-ALTER TABLE `payment`
-    ADD FOREIGN KEY (`id_booking`) REFERENCES `booking` (`id`);
+ALTER TABLE ` booking_selection `
+    ADD FOREIGN KEY (` id_booking `) REFERENCES ` booking ` (` id `);
 
-ALTER TABLE `booking_selection`
-    ADD FOREIGN KEY (`id_booking`) REFERENCES `booking` (`id`);
+ALTER TABLE ` booking_selection `
+    ADD FOREIGN KEY (` id_selection `) REFERENCES ` selection ` (` id `);
 
-ALTER TABLE `booking_selection`
-    ADD FOREIGN KEY (`id_selection`) REFERENCES `selection` (`id`);
+ALTER TABLE ` camp_type_facility `
+    ADD FOREIGN KEY (` id_camp_type `) REFERENCES ` camp_type ` (` id `);
 
-ALTER TABLE `camp_type_facility`
-    ADD FOREIGN KEY (`id_camp_type`) REFERENCES `camp_type` (`id`);
+ALTER TABLE ` camp_type_facility `
+    ADD FOREIGN KEY (` id_facility `) REFERENCES ` facility ` (` id `);
 
-ALTER TABLE `camp_type_facility`
-    ADD FOREIGN KEY (`id_facility`) REFERENCES `facility` (`id`);
+ALTER TABLE ` image `
+    ADD FOREIGN KEY (` id_camp_site `) REFERENCES ` camp_site ` (` id `);
 
-ALTER TABLE `image`
-    ADD FOREIGN KEY (`id_camp_site`) REFERENCES `camp_site` (`id`);
+ALTER TABLE ` report `
+    ADD FOREIGN KEY (` id_camp_site `) REFERENCES ` camp_site ` (` id `);
 
-ALTER TABLE `report`
-    ADD FOREIGN KEY (`id_camp_site`) REFERENCES `camp_site` (`id`);
+ALTER TABLE ` report `
+    ADD FOREIGN KEY (` id_user `) REFERENCES ` user ` (` id `);
 
-ALTER TABLE `report`
-    ADD FOREIGN KEY (`id_user`) REFERENCES `user` (`id`);
+ALTER TABLE ` booking_detail `
+    ADD FOREIGN KEY (` id_camp_type `) REFERENCES ` camp_type ` (` id `);
 
-ALTER TABLE `booking_detail`
-    ADD FOREIGN KEY (`id_camp_type`) REFERENCES `camp_type` (`id`);
+ALTER TABLE ` booking_detail `
+    ADD FOREIGN KEY (` id_booking `) REFERENCES ` booking ` (` id `);
 
-ALTER TABLE `booking_detail`
-    ADD FOREIGN KEY (`id_booking`) REFERENCES `booking` (`id`);
+ALTER TABLE ` camp_type `
+    ADD FOREIGN KEY (` id_camp_site `) REFERENCES ` camp_site ` (` id `);
 
-ALTER TABLE `camp_type`
-    ADD FOREIGN KEY (`id_camp_site`) REFERENCES `camp_site` (`id`);
-
-ALTER TABLE `booking_detail_order`
-    ADD FOREIGN KEY (`id_booking_detail`) REFERENCES `booking_detail` (`id`);
-
-
-ALTER TABLE `camp_site_utility`
-    ADD FOREIGN KEY (`id_camp_site`) REFERENCES `camp_site` (`id`);
-
-ALTER TABLE `camp_site_utility`
-    ADD FOREIGN KEY (`id_utility`) REFERENCES `utility` (`id`);
-
-ALTER TABLE `camp`
-    ADD FOREIGN KEY (`id_camp_type`) REFERENCES `camp_type` (`id`);
-
-ALTER TABLE `camp_site_place_type`
-	ADD FOREIGN KEY (`id_camp_site`) REFERENCES `camp_site` (`id`);
-
-ALTER TABLE `camp_site_place_type`
-	ADD FOREIGN KEY (`id_place_type`) REFERENCES `place_type` (`id`);
+ALTER TABLE ` booking_detail_order `
+    ADD FOREIGN KEY (` id_booking_detail `) REFERENCES ` booking_detail ` (` id `);
 
 
-ALTER TABLE `booking_detail`
-	ADD FOREIGN KEY (`id_camp`) REFERENCES `camp` (`id`);
+ALTER TABLE ` camp_site_utility `
+    ADD FOREIGN KEY (` id_camp_site `) REFERENCES ` camp_site ` (` id `);
 
-ALTER TABLE `selection`
-	ADD FOREIGN KEY (`id_camp_site`) REFERENCES `camp_site` (`id`);
+ALTER TABLE ` camp_site_utility `
+    ADD FOREIGN KEY (` id_utility `) REFERENCES ` utility ` (` id `);
 
-ALTER TABLE `custom_price`
-	ADD FOREIGN KEY (`id_camp_type`) REFERENCES `camp_type` (`id`);
+ALTER TABLE ` camp `
+    ADD FOREIGN KEY (` id_camp_type `) REFERENCES ` camp_type ` (` id `);
 
-ALTER TABLE `verification_token` 
-	ADD FOREIGN KEY (`id_user`) REFERENCES `user` (`id`);
+ALTER TABLE ` camp_site_place_type `
+    ADD FOREIGN KEY (` id_camp_site `) REFERENCES ` camp_site ` (` id `);
+
+ALTER TABLE ` camp_site_place_type `
+    ADD FOREIGN KEY (` id_place_type `) REFERENCES ` place_type ` (` id `);
+
+
+ALTER TABLE ` booking_detail `
+    ADD FOREIGN KEY (` id_camp `) REFERENCES ` camp ` (` id `);
+
+ALTER TABLE ` selection `
+    ADD FOREIGN KEY (` id_camp_site `) REFERENCES ` camp_site ` (` id `);
+
+ALTER TABLE ` custom_price `
+    ADD FOREIGN KEY (` id_camp_type `) REFERENCES ` camp_type ` (` id `);
+
+ALTER TABLE ` verification_token `
+    ADD FOREIGN KEY (` id_user `) REFERENCES ` user ` (` id `);
 
 
 -- Insert Data into `user` Table
-INSERT INTO `user` (`id`, `email`, `password`, `first_name`, `last_name`, `phone_number`, `address`, `role`, `created_at`, `status`, `dob`)
-VALUES
-    (1, 'admin@example.com', 'admin123', 'Admin', 'User', '1234567890', '123 Admin St', 'ROLE_ADMIN', NOW(), true, '2025-01-01'),
-    (2, 'manager@example.com', 'manager123', 'Manager', 'User', '1234567891', '456 Manager Ave', 'ROLE_MANAGER', NOW(), true,'2025-01-01'),
-    (3, 'user@example.com', 'user123', 'John', 'Doe', '1234567892', '789 User Rd', 'ROLE_USER', NOW(), true, '2025-01-01'),
-    (4, 'staff@example.com', 'staff123', 'Jane', 'Doe', '1234567893', '123 Staff Blvd', 'ROLE_STAFF', NOW(), true, '2025-01-01');
+INSERT INTO ` user ` (` id `, ` email `, ` password `, ` first_name `, ` last_name `, ` phone_number `, ` address `, `
+                        role `, ` created_at `, ` status `, ` dob `)
+VALUES (1, 'admin@example.com', 'admin123', 'Admin', 'User', '1234567890', '123 Admin St', 'ROLE_ADMIN', NOW(), true,
+        '2025-01-01'),
+       (2, 'manager@example.com', 'manager123', 'Manager', 'User', '1234567891', '456 Manager Ave', 'ROLE_MANAGER',
+        NOW(), true, '2025-01-01'),
+       (3, 'user@example.com', 'user123', 'John', 'Doe', '1234567892', '789 User Rd', 'ROLE_USER', NOW(), true,
+        '2025-01-01'),
+       (4, 'staff@example.com', 'staff123', 'Jane', 'Doe', '1234567893', '123 Staff Blvd', 'ROLE_STAFF', NOW(), true,
+        '2025-01-01');
 
 -- Insert Data into `camp_site` Table
-INSERT INTO `camp_site` (`id`, `name`, `address`, `city`, `latitude`, `longitude`, `created_at`, `status`, `id_user`)
-VALUES
-    (1, 'Sa Đéc Glamping', '353 ĐT848, Tân Khánh Đông, Sa Đéc, Đồng Tháp 81000', 'Đồng Tháp',10.3349541, 105.7379137, NOW(), 'Available', 1),
-    (2, 'Panorama Glamping', 'ngay cây xăng, Ấp Mít Nài, Phú Quý, Định Quán, Đồng Nai 700000', 'Đồng Nai',11.1555707, 107.1929866, NOW(), 'Available', 2),
-    (3, 'The Hammock Glamping', 'PRMG+XX5, Đại Phước, Nhơn Trạch, Đồng Nai', 'Đồng Nai',10.7348901, 106.8223435, NOW(),  'Available', 3),
-    (4, 'Lạc Glamping', '1460/2 Đường tỉnh 767, ấp 1 xã Mã Đà, TT. Vĩnh An, Vĩnh Cửu, Đồng Nai, Việt Nam', 'Đồng Nai',11.1099978, 107.0403904, NOW(),  'Available', 4),
-    (5, 'Tropical eglamping', 'Unnamed Road, La Ngà, Định Quán, Đồng Nai', 'Đồng Nai',11.1674325, 107.2004535, NOW(), 'Available', 4);
+INSERT INTO ` camp_site ` (` id `, ` name `, ` address `, ` city `, ` latitude `, ` longitude `, ` created_at `, `
+                             status `, ` id_user `)
+VALUES (1, 'Sa Đéc Glamping', '353 ĐT848, Tân Khánh Đông, Sa Đéc, Đồng Tháp 81000', 'Đồng Tháp', 10.3349541,
+        105.7379137, NOW(), 'Available', 1),
+       (2, 'Panorama Glamping', 'ngay cây xăng, Ấp Mít Nài, Phú Quý, Định Quán, Đồng Nai 700000', 'Đồng Nai',
+        11.1555707, 107.1929866, NOW(), 'Available', 2),
+       (3, 'The Hammock Glamping', 'PRMG+XX5, Đại Phước, Nhơn Trạch, Đồng Nai', 'Đồng Nai', 10.7348901, 106.8223435,
+        NOW(), 'Available', 3),
+       (4, 'Lạc Glamping', '1460/2 Đường tỉnh 767, ấp 1 xã Mã Đà, TT. Vĩnh An, Vĩnh Cửu, Đồng Nai, Việt Nam',
+        'Đồng Nai', 11.1099978, 107.0403904, NOW(), 'Available', 4),
+       (5, 'Tropical eglamping', 'Unnamed Road, La Ngà, Định Quán, Đồng Nai', 'Đồng Nai', 11.1674325, 107.2004535,
+        NOW(), 'Available', 4);
 
 -- Insert Data into `camp_type` Table
-INSERT INTO `camp_type` (`id`, `type`, `capacity`, `price`, `weekend_rate`, `updated_at`, `id_camp_site`, `quantity`)
-VALUES
-    (1, 'Tent', 4, 100.00, 120.00, NOW(), 1, 3),
-    (2, 'Glamping', 2, 250.00, 280.00, NOW(), 2, 2),
-    (3, 'Eco-Cabin', 3, 180.00, 200.00, NOW(), 3, 1),
-    (4, 'RV', 6, 120.00, 150.00, NOW(), 4, 2),
-    (5, 'Safari Tent', 5, 220.00, 250.00, NOW(), 5, 1);
+INSERT INTO ` camp_type ` (` id `, ` type `, ` capacity `, ` price `, ` weekend_rate `, ` updated_at `, `
+                             id_camp_site `, ` quantity `)
+VALUES (1, 'Tent', 4, 100.00, 120.00, NOW(), 1, 3),
+       (2, 'Glamping', 2, 250.00, 280.00, NOW(), 2, 2),
+       (3, 'Eco-Cabin', 3, 180.00, 200.00, NOW(), 3, 1),
+       (4, 'RV', 6, 120.00, 150.00, NOW(), 4, 2),
+       (5, 'Safari Tent', 5, 220.00, 250.00, NOW(), 5, 1);
 
 -- Insert Data into `camp` Table (generated from camp_type quantity)
 -- For "Tent" (quantity = 3)
-INSERT INTO `camp` (`id`, `name`, `created_at`, `updated_at`, `id_camp_type`)
-VALUES
-    (1, 'Tent Camp 1', NOW(), NOW(), 1),
-    (2, 'Tent Camp 2', NOW(), NOW(), 1),
-    (3, 'Tent Camp 3', NOW(), NOW(), 1);
+INSERT INTO ` camp ` (` id `, ` name `, ` created_at `, ` updated_at `, ` id_camp_type `)
+VALUES (1, 'Tent Camp 1', NOW(), NOW(), 1),
+       (2, 'Tent Camp 2', NOW(), NOW(), 1),
+       (3, 'Tent Camp 3', NOW(), NOW(), 1);
 
 -- For "Glamping" (quantity = 2)
-INSERT INTO `camp` (`id`, `name`, `created_at`, `updated_at`, `id_camp_type`)
-VALUES
-    (4, 'Glamping Tent 1', NOW(), NOW(), 2),
-    (5, 'Glamping Tent 2', NOW(), NOW(), 2);
+INSERT INTO ` camp ` (` id `, ` name `, ` created_at `, ` updated_at `, ` id_camp_type `)
+VALUES (4, 'Glamping Tent 1', NOW(), NOW(), 2),
+       (5, 'Glamping Tent 2', NOW(), NOW(), 2);
 
 -- For "Eco-Cabin" (quantity = 1)
-INSERT INTO `camp` (`id`, `name`, `created_at`, `updated_at`, `id_camp_type`)
-VALUES
-    (6, 'Eco-Cabin 1', NOW(), NOW(), 3);
+INSERT INTO ` camp ` (` id `, ` name `, ` created_at `, ` updated_at `, ` id_camp_type `)
+VALUES (6, 'Eco-Cabin 1', NOW(), NOW(), 3);
 
 -- For "RV" (quantity = 2)
-INSERT INTO `camp` (`id`, `name`, `created_at`, `updated_at`, `id_camp_type`)
-VALUES
-    (7, 'RV Park 1', NOW(), NOW(), 4),
-    (8, 'RV Park 2', NOW(), NOW(), 4);
+INSERT INTO ` camp ` (` id `, ` name `, ` created_at `, ` updated_at `, ` id_camp_type `)
+VALUES (7, 'RV Park 1', NOW(), NOW(), 4),
+       (8, 'RV Park 2', NOW(), NOW(), 4);
 
 -- For "Safari Tent" (quantity = 1)
-INSERT INTO `camp` (`id`, `name`, `created_at`, `updated_at`, `id_camp_type`)
-VALUES
-    (9, 'Safari Tent 1', NOW(), NOW(), 5);
+INSERT INTO ` camp ` (` id `, ` name `, ` created_at `, ` updated_at `, ` id_camp_type `)
+VALUES (9, 'Safari Tent 1', NOW(), NOW(), 5);
 
 -- Insert Data into `booking` Table
-INSERT INTO `booking` (`id`, `id_user`, `id_camp_site`, `created_at`, `status`, `total_amount`)
-VALUES
-    (1, 3, 1, NOW(), 'Pending', 300.00),
-    (2, 4, 2, NOW(), 'Accepted', 500.00),
-    (3, 2, 3, NOW(), 'Pending', 180.00),
-    (4, 1, 4, NOW(), 'Completed', 240.00),
-    (5, 4, 5, NOW(), 'Cancelled', 220.00);
+INSERT INTO ` booking ` (` id `, ` id_user `, ` id_camp_site `, ` created_at `, ` status `, ` total_amount `)
+VALUES (1, 3, 1, NOW(), 'Pending', 300.00),
+       (2, 4, 2, NOW(), 'Accepted', 500.00),
+       (3, 2, 3, NOW(), 'Pending', 180.00),
+       (4, 1, 4, NOW(), 'Completed', 240.00),
+       (5, 4, 5, NOW(), 'Cancelled', 220.00);
 
 -- Insert Data into `payment` Table
-INSERT INTO `payment` (`id`, `id_booking`, `payment_method`, `total_amount`, `status`, `id_transaction`, `completed_at`)
-VALUES
-    (1, 1, 'Credit Card', 300.00, 'Completed', 'TXN12345', NOW()),
-    (2, 2, 'PayPal', 500.00, 'Pending', 'TXN67890', NULL),
-    (3, 3, 'Debit Card', 180.00, 'Failed', 'TXN11223', NULL),
-    (4, 4, 'Credit Card', 240.00, 'Completed', 'TXN44556', NOW()),
-    (5, 5, 'Credit Card', 220.00, 'Completed', 'TXN78901', NOW());
+INSERT INTO ` payment ` (` id `, ` id_booking `, ` payment_method `, ` total_amount `, ` status `, ` id_transaction `, `
+                           completed_at `)
+VALUES (1, 1, 'Credit Card', 300.00, 'Completed', 'TXN12345', NOW()),
+       (2, 2, 'PayPal', 500.00, 'Pending', 'TXN67890', NULL),
+       (3, 3, 'Debit Card', 180.00, 'Failed', 'TXN11223', NULL),
+       (4, 4, 'Credit Card', 240.00, 'Completed', 'TXN44556', NOW()),
+       (5, 5, 'Credit Card', 220.00, 'Completed', 'TXN78901', NOW());
 
 -- Insert Data into `facility` Table
-INSERT INTO `facility` (`name`, `description`)
-VALUES
-    ('WiFi', 'High-speed internet access'),
-    ('Hot Tub', 'Relaxing hot water pool'),
-    ('Private toilet', 'Toilet in camp'),
-    ('Air-conditioner', 'There is air-conditioner in camp'),
-    ('Online Payment', 'Can payment through Visa'),
-    ('No-smoking', 'Camp for no smoking'),
-    ('Smoking', 'Camp allowed for smoking'),
-    ('Socket', 'There are sockets in camp'),
-    ('Public toilet', 'There is a toilet near camp'),
-    ('Private bathroom', 'A bathroom in camp'),
-    ('Public bathroom', 'There is a bathroom near camp'),
-    ('Outside pool', 'A beautiful swimming pool next to the camp');
+INSERT INTO ` facility ` (` name `, ` description `)
+VALUES ('WiFi', 'High-speed internet access'),
+       ('Hot Tub', 'Relaxing hot water pool'),
+       ('Private toilet', 'Toilet in camp'),
+       ('Air-conditioner', 'There is air-conditioner in camp'),
+       ('Online Payment', 'Can payment through Visa'),
+       ('No-smoking', 'Camp for no smoking'),
+       ('Smoking', 'Camp allowed for smoking'),
+       ('Socket', 'There are sockets in camp'),
+       ('Public toilet', 'There is a toilet near camp'),
+       ('Private bathroom', 'A bathroom in camp'),
+       ('Public bathroom', 'There is a bathroom near camp'),
+       ('Outside pool', 'A beautiful swimming pool next to the camp');
 
 -- Insert Data into `camp_type_facility` Table
-INSERT INTO `camp_type_facility` (`id_facility`, `id_camp_type`)
-VALUES
-    (1, 1), (2, 1), (3, 1), (4, 1), (5, 1), (6, 1), (8, 1),
-    (1, 2), (2, 2), (4, 2), (5, 2), (6, 2), (8, 2),
-    (1, 3), (3, 3), (5, 3), (6, 3), (8, 3);
+INSERT INTO ` camp_type_facility ` (` id_facility `, ` id_camp_type `)
+VALUES (1, 1),
+       (2, 1),
+       (3, 1),
+       (4, 1),
+       (5, 1),
+       (6, 1),
+       (8, 1),
+       (1, 2),
+       (2, 2),
+       (4, 2),
+       (5, 2),
+       (6, 2),
+       (8, 2),
+       (1, 3),
+       (3, 3),
+       (5, 3),
+       (6, 3),
+       (8, 3);
 
 -- Insert Data into `image` Table
-INSERT INTO `image` (`id`, `id_camp_site`, `path`)
-VALUES
-    (1, 1, '/images/mountain_base.jpg'),
-    (2, 2, '/images/lake_side.jpg'),
-    (3, 3, '/images/forest_cabin.jpg'),
-    (4, 4, '/images/desert_rv.jpg'),
-    (5, 5, '/images/savanna_safari.jpg');
+INSERT INTO ` image ` (` id `, ` id_camp_site `, ` path `)
+VALUES (1, 1, '/images/mountain_base.jpg'),
+       (2, 2, '/images/lake_side.jpg'),
+       (3, 3, '/images/forest_cabin.jpg'),
+       (4, 4, '/images/desert_rv.jpg'),
+       (5, 5, '/images/savanna_safari.jpg');
 
 -- Insert Data into `report` Table
-INSERT INTO `report` (`id`, `id_camp_site`, `id_user`, `status`, `created_at`, `message`, `report_type`)
-VALUES
-    (1, 1, 3, 'Resolved', NOW(), 'Eco-cabin was wonderful but the WiFi didn\'t work well.', 'Suggestion'),
-    (2, 2, 2, 'Resolved', NOW(), 'Great camping experience. Would return again!', 'Complaint');
+INSERT INTO ` report ` (` id `, ` id_camp_site `, ` id_user `, ` status `, ` created_at `, ` message `, ` report_type `)
+VALUES (1, 1, 3, 'Resolved', NOW(), 'Eco-cabin was wonderful but the WiFi didn\'t work well.', 'Suggestion'),
+    (2, 2, 2, 'Resolved', NOW(), 'Great camping experience. Would
+return again!', 'Complaint');
 
 -- Insert Data into `booking_detail` Table
 INSERT INTO `booking_detail` (`id`, `id_booking`, `id_camp_type`, `check_in_at`, `check_out_at`, `amount`, `created_at`, `add_on`)
@@ -420,10 +508,12 @@ VALUES
 INSERT INTO `selection` (`name`, `description`, `price`, `image`, `status`, `updated_at`, `id_camp_site`)
 VALUES
     ('Kayak Rental', 'Rent a kayak for exploring the nearby river. Includes safety gear.', 25.00, 'kayak.jpg', TRUE, NOW(), 1),
-    ('BBQ Setup', 'BBQ grill setup with charcoal, utensils, and seating for a great outdoor meal.', 30.00, 'bbq.jpg', TRUE, NOW(), 1),
+    ('BBQ Setup', 'BBQ grill setup
+with charcoal, utensils, and seating for a great outdoor meal.', 30.00, 'bbq.jpg', TRUE, NOW(), 1),
     ('Guided Hiking Tour', 'Join our expert guides on a scenic hike through the mountains.', 50.00, 'hiking.jpg', TRUE, NOW(), 2),
     ('Fishing Gear Rental', 'Includes fishing rod, bait, and accessories for a great fishing experience.', 15.00, 'fishing.jpg', TRUE, NOW(), 3),
-    ('Bonfire Setup', 'Cozy bonfire setup with firewood, seating, and marshmallows.', 20.00, 'bonfire.jpg', TRUE, NOW(), 4),
+    ('Bonfire Setup', 'Cozy bonfire setup
+with firewood, seating, and marshmallows.', 20.00, 'bonfire.jpg', TRUE, NOW(), 4),
     ('Mountain Biking Rental', 'Rent a mountain bike to explore the rugged trails.', 35.00, 'bike.jpg', TRUE, NOW(), 4),
     ('Canoe Rental', 'Rent a canoe for a relaxing paddle on the lake.', 30.00, 'canoe.jpg', TRUE, NOW(), 5),
     ('Survival Training', 'Learn essential survival skills from our expert instructors.', 60.00, 'survival.jpg', TRUE, NOW(), 5),
@@ -435,7 +525,11 @@ VALUES
 -- JOIN camp c ON c.id_camp_type = ct.id
 -- LEFT JOIN booking_detail bd ON bd.id_camp = c.id
 -- AND (
---     (DATE(bd.check_in_at) < '2025-01-20' AND DATE(bd.check_out_at) > '2025-01-19')
+--     (DATE(bd.check_in_at) < '
+             2025-01-20
+             ' AND DATE(bd.check_out_at) > '
+             2025-01-19
+             ')
 -- )
 -- WHERE ct.id = 1
 -- AND (bd.id IS NULL)
@@ -446,7 +540,10 @@ FROM camp_type ct
 JOIN booking_detail bd 
 ON bd.id_camp_type = ct.id
 AND(
-	(DATE(bd.check_in_at) < '2025-02-05' AND DATE(bd.check_out_at) > '2025-02-06')
+	(DATE(bd.check_in_at) < '
+             2025-02-05
+             ' AND DATE(bd.check_out_at) > '
+             2025-02-06')
 )
 WHERE ct.id = 1
 GROUP BY ct.id

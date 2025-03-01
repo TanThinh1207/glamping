@@ -1,14 +1,10 @@
 package com.group2.glamping.service.impl;
 
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.BookingRequest;
-import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.BookingResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
-import com.group2.glamping.model.dto.response.UtilityResponse;
 import com.group2.glamping.model.entity.*;
 import com.group2.glamping.model.entity.id.IdBookingSelection;
 import com.group2.glamping.model.enums.BookingDetailStatus;
@@ -19,19 +15,22 @@ import com.group2.glamping.repository.*;
 import com.group2.glamping.service.interfaces.BookingService;
 import com.group2.glamping.service.interfaces.EmailService;
 import com.group2.glamping.service.interfaces.PaymentService;
+import com.group2.glamping.utils.ResponseFilterUtil;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -127,45 +126,6 @@ public class BookingServiceImpl implements BookingService {
         return Optional.of(bookingMapper.toDto(resp));
     }
 
-    //Retrieve Pending Bookings
-    @Override
-    public List<BookingResponse> getPendingBookingsByCampSiteId(Integer campSiteId) {
-        List<Booking> bookings = bookingRepository.findPendingBookingsByCampSiteId(campSiteId);
-
-        // Nếu danh sách booking trống, trả về danh sách rỗng
-        if (bookings.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return bookings.stream()
-                .map(bookingMapper::toDto)
-                .collect(Collectors.toList());
-    }
-
-    //Retrieve Completed Bookings
-    @Override
-    public List<BookingResponse> getCompletedBookingsByCampSiteId(Integer campSiteId) {
-        List<Booking> bookings = bookingRepository.findCompletedBookingsByCampSiteId(campSiteId);
-
-        // Nếu danh sách booking trống, trả về danh sách rỗng
-        if (bookings.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return bookings.stream()
-                .map(bookingMapper::toDto)
-                .collect(Collectors.toList());
-    }
-
-    //Retrieve bookings by Id
-    @Override
-    public BookingResponse getBookingById(Integer bookingId) {
-        Optional<Booking> bookingOptional = bookingRepository.findById(bookingId);
-        return bookingOptional.map(bookingMapper::toDto).orElse(null);
-
-    }
-
-
     //Accept Bookings
     @Override
     public BookingResponse acceptBookings(Integer bookingId) {
@@ -208,7 +168,7 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public PagingResponse<?> getBookings(Map<String, String> params, int page, int size) {
+    public PagingResponse<?> getBookings(Map<String, String> params, int page, int size, String sortBy, String direction) {
         Specification<Booking> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -229,10 +189,11 @@ public class BookingServiceImpl implements BookingService {
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
 
-        Pageable pageable = PageRequest.of(page, size);
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
         Page<Booking> bookingPage = bookingRepository.findAll(spec, pageable);
         List<BookingResponse> bookingResponses = bookingPage.getContent().stream()
-                .map(bookingMapper::toDto)  // Fix lỗi gọi hàm mapping
+                .map(bookingMapper::toDto)
                 .toList();
 
         return new PagingResponse<>(
@@ -245,25 +206,9 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public MappingJacksonValue getFilteredBookings(Map<String, String> params, int page, int size, String fields) {
-        PagingResponse<?> bookings = getBookings(params, page, size); // Fix lỗi gọi sai hàm
-
-        SimpleFilterProvider filters = new SimpleFilterProvider();
-        if (fields != null && !fields.isEmpty()) {
-            filters.addFilter("dynamicFilter", SimpleBeanPropertyFilter.filterOutAllExcept(fields.split(",")));
-        } else {
-            filters.addFilter("dynamicFilter", SimpleBeanPropertyFilter.serializeAll());
-        }
-
-        MappingJacksonValue mapping = new MappingJacksonValue(BaseResponse.builder()
-                .statusCode(HttpStatus.OK.value())
-                .data(bookings)
-                .message("Retrieve all bookings successfully") // Fix message
-                .build());
-
-        mapping.setFilters(filters);
-
-        return mapping;
+    public Object getFilteredBookings(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
+        PagingResponse<?> bookings = getBookings(params, page, size, sortBy, direction);
+        return ResponseFilterUtil.getFilteredResponse(fields, bookings, "Retrieve booking list successfully");
     }
 
 

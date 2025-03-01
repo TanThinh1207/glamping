@@ -11,18 +11,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -59,9 +54,9 @@ public class BookingController {
                         .data(null)
                         .build()));
     }
-    // </editor-fold>
 
-    // <editor-fold default state="collapsed" desc="Retrieve Bookings">
+
+    // Retrieve Bookings
     @Operation(
             summary = "Get list of bookings",
             description = "Retrieve a paginated list of bookings with optional filtering and field selection",
@@ -72,12 +67,14 @@ public class BookingController {
     )
 
     @GetMapping
-    public ResponseEntity<MappingJacksonValue> getBookings(
+    public ResponseEntity<Object> getBookings(
             @RequestParam Map<String, String> params,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(name = "fields", required = false) String fields) {
-        return ResponseEntity.ok(bookingService.getFilteredBookings(params, page, size, fields));
+            @RequestParam(name = "fields", required = false) String fields,
+            @RequestParam(name = "sortBy", required = false, defaultValue = "id") String sortBy,
+            @RequestParam(name = "direction", required = false, defaultValue = "ASC") String direction) {
+        return ResponseEntity.ok(bookingService.getFilteredBookings(params, page, size, fields, sortBy, direction));
     }
     // </editor-fold>
 
@@ -99,7 +96,6 @@ public class BookingController {
     ) {
         try {
             BookingResponse response;
-
             if (status.equalsIgnoreCase("accept")) {
                 response = bookingService.acceptBookings(bookingId);
             } else if (status.equalsIgnoreCase("deny")) {

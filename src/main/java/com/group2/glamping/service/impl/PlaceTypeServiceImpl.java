@@ -1,26 +1,21 @@
 package com.group2.glamping.service.impl;
 
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.group2.glamping.model.dto.requests.PlaceTypeRequest;
-import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.dto.response.PlaceTypeResponse;
-import com.group2.glamping.model.dto.response.UtilityResponse;
 import com.group2.glamping.model.entity.PlaceType;
 import com.group2.glamping.repository.PlaceTypeRepository;
 import com.group2.glamping.service.interfaces.PlaceTypeService;
 import com.group2.glamping.service.interfaces.S3Service;
+import com.group2.glamping.utils.ResponseFilterUtil;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +29,7 @@ public class PlaceTypeServiceImpl implements PlaceTypeService {
     private final S3Service s3Service;
 
     @Override
-    public PlaceTypeResponse createPlaceType(PlaceTypeRequest request, MultipartFile image) {
+    public PlaceTypeResponse createPlaceType(PlaceTypeRequest request) {
         if (request.id() != null) {
             throw new RuntimeException("ID must be null when creating a new place type");
         }
@@ -43,48 +38,47 @@ public class PlaceTypeServiceImpl implements PlaceTypeService {
                 .status(true)
                 .build();
 
-        placeType.setImage(s3Service.uploadFile(image, "PlaceType", "place_type_" + placeType.getId()));
+//        placeType.setImage(s3Service.uploadFile(image, "PlaceType", "place_type_" + placeType.getId()));
         placeTypeRepository.save(placeType);
         return convertToResponse(placeType);
     }
 
     @Override
-    public PlaceTypeResponse updatePlaceType(PlaceTypeRequest request, MultipartFile image) {
+    public PlaceTypeResponse updatePlaceType(PlaceTypeRequest request) {
         if (request.id() == null) {
             throw new RuntimeException("ID is required for update");
         }
         PlaceType placeType = placeTypeRepository.findById(request.id())
                 .orElseThrow(() -> new RuntimeException("Place type not found"));
         placeType.setName(request.name());
-        if (image != null && !image.isEmpty()) {
-            String filename = image.getOriginalFilename();
-            placeType.setImage(filename);
-        }
-        placeType.setImage(s3Service.uploadFile(image, "PlaceType", "place_type_" + placeType.getId()));
+//        if (image != null && !image.isEmpty()) {
+//            String filename = image.getOriginalFilename();
+//            placeType.setImage(filename);
+//        }
+//        placeType.setImage(s3Service.uploadFile(image, "PlaceType", "place_type_" + placeType.getId()));
         placeTypeRepository.save(placeType);
         return convertToResponse(placeType);
     }
 
     @Override
-    public PagingResponse<?> getPlaceTypes(Map<String, String> params, int page, int size) {
+    public PagingResponse<?> getPlaceTypes(Map<String, String> params, int page, int size, String sortBy, String direction) {
         Specification<PlaceType> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
             params.forEach((key, value) -> {
                 switch (key) {
-                    case "name":
-                        predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
-                        break;
-                    case "status":
-                        predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
-                        break;
+                    case "id" -> predicates.add(criteriaBuilder.equal(root.get("id"), value));
+                    case "name" -> predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
+                    case "status" ->
+                            predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
                 }
             });
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
 
-        Pageable pageable = PageRequest.of(page, size);
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
         Page<PlaceType> placeTypePage = placeTypeRepository.findAll(spec, pageable);
         List<PlaceTypeResponse> placeTypeResponses = placeTypePage.getContent().stream()
                 .map(this::convertToResponse)
@@ -100,25 +94,14 @@ public class PlaceTypeServiceImpl implements PlaceTypeService {
     }
 
     @Override
-    public MappingJacksonValue getFilteredPlaceTypes(Map<String, String> params, int page, int size, String fields) {
-        PagingResponse<?> placeTypes = getPlaceTypes(params, page, size);
+    public Object getFilteredPlaceTypes(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
+        PagingResponse<?> placeTypes = getPlaceTypes(params, page, size, sortBy, direction);
 
-        SimpleFilterProvider filters = new SimpleFilterProvider()
-                .addFilter("dynamicFilter", fields != null && !fields.isEmpty() ?
-                        SimpleBeanPropertyFilter.filterOutAllExcept(fields.split(",")) :
-                        SimpleBeanPropertyFilter.serializeAll());
-
-        MappingJacksonValue mapping = new MappingJacksonValue(BaseResponse.builder()
-                .statusCode(HttpStatus.OK.value())
-                .data(placeTypes)
-                .message("Retrieve all place types successfully")
-                .build());
-        mapping.setFilters(filters);
-
-        return mapping;
+        return ResponseFilterUtil.getFilteredResponse(fields, placeTypes, "Retrieve list successfully");
     }
 
-        @Override
+
+    @Override
     public PlaceTypeResponse deletePlaceType(Integer id) {
         PlaceType placeType = placeTypeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Place type not found"));
@@ -131,7 +114,7 @@ public class PlaceTypeServiceImpl implements PlaceTypeService {
         return PlaceTypeResponse.builder()
                 .id(placeType.getId())
                 .name(placeType.getName())
-                .imagePath(placeType.getImage())
+                .imagePath(s3Service.generatePresignedUrl(placeType.getImage()))
                 .status(placeType.isStatus())
                 .build();
     }

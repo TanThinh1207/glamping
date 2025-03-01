@@ -1,36 +1,25 @@
 package com.group2.glamping.service.impl;
 
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.group2.glamping.model.dto.requests.FacilityRequest;
-import com.group2.glamping.model.dto.response.BaseResponse;
-import com.group2.glamping.model.dto.response.CampSiteResponse;
 import com.group2.glamping.model.dto.response.FacilityResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
-import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.model.entity.Facility;
-import com.group2.glamping.model.entity.PlaceType;
-import com.group2.glamping.model.entity.Utility;
 import com.group2.glamping.repository.FacilityRepository;
 import com.group2.glamping.service.interfaces.FacilityService;
 import com.group2.glamping.service.interfaces.S3Service;
-import jakarta.persistence.criteria.Join;
+import com.group2.glamping.utils.ResponseFilterUtil;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +28,7 @@ public class FacilityServiceImpl implements FacilityService {
     private final S3Service s3Service;
 
     @Override
-    public FacilityResponse createFacility(FacilityRequest request, MultipartFile file) {
+    public FacilityResponse createFacility(FacilityRequest request) {
         if (request.id() != null) {
             throw new RuntimeException("ID must be null when creating a new facility");
         }
@@ -47,13 +36,13 @@ public class FacilityServiceImpl implements FacilityService {
         facility.setName(request.name());
         facility.setDescription(request.description());
         facility.setStatus(true);
-        facility.setImageUrl(s3Service.uploadFile(file, "Facility", "facility" + facility.getId()));
+//        facility.setImageUrl(s3Service.uploadFile(file, "Facility", "facility" + facility.getId()));
         facilityRepository.save(facility);
         return convertToResponse(facility);
     }
 
     @Override
-    public FacilityResponse updateFacility(FacilityRequest request, MultipartFile file) {
+    public FacilityResponse updateFacility(FacilityRequest request) {
         if (request.id() == null) {
             throw new RuntimeException("ID is required for update");
         }
@@ -61,28 +50,31 @@ public class FacilityServiceImpl implements FacilityService {
                 .orElseThrow(() -> new RuntimeException("Facility not found"));
         facility.setName(request.name());
         facility.setDescription(request.description());
-        facility.setImageUrl(s3Service.uploadFile(file, "Facility", "facility" + facility.getId()));
+//        facility.setImageUrl(s3Service.uploadFile(file, "Facility", "facility" + facility.getId()));
 
         facilityRepository.save(facility);
         return convertToResponse(facility);
     }
 
     @Override
-    public PagingResponse<?> getFacilities(Map<String, String> params, int page, int size) {
+    public PagingResponse<?> getFacilities(Map<String, String> params, int page, int size, String sortBy, String direction) {
         Specification<Facility> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
             params.forEach((key, value) -> {
                 switch (key) {
+                    case "id" -> predicates.add(criteriaBuilder.equal(root.get("id"), value));
                     case "name" -> predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
-                    case "status" -> predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
+                    case "status" ->
+                            predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
                 }
             });
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
 
-        Pageable pageable = PageRequest.of(page, size);
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
         Page<Facility> facilityPage = facilityRepository.findAll(spec, pageable);
         List<FacilityResponse> facilityResponses = facilityPage.getContent().stream()
                 .map(this::convertToResponse)
@@ -98,22 +90,9 @@ public class FacilityServiceImpl implements FacilityService {
     }
 
     @Override
-    public MappingJacksonValue getFilteredFacilities(Map<String, String> params, int page, int size, String fields) {
-        PagingResponse<?> facilities = getFacilities(params, page, size);
-
-        SimpleFilterProvider filters = new SimpleFilterProvider()
-                .addFilter("dynamicFilter", fields != null && !fields.isEmpty() ?
-                        SimpleBeanPropertyFilter.filterOutAllExcept(fields.split(",")) :
-                        SimpleBeanPropertyFilter.serializeAll());
-
-        MappingJacksonValue mapping = new MappingJacksonValue(BaseResponse.builder()
-                .statusCode(HttpStatus.OK.value())
-                .data(facilities)
-                .message("Retrieve all facilities successfully")
-                .build());
-        mapping.setFilters(filters);
-
-        return mapping;
+    public Object getFilteredFacilities(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
+        PagingResponse<?> facilities = getFacilities(params, page, size, sortBy, direction);
+        return ResponseFilterUtil.getFilteredResponse(fields, facilities, "Retrieve list successfully");
     }
 
 
@@ -131,7 +110,7 @@ public class FacilityServiceImpl implements FacilityService {
                 facility.getId(),
                 facility.getName(),
                 facility.getDescription(),
-                facility.getImageUrl(),
+                s3Service.generatePresignedUrl(facility.getImageUrl()),
                 facility.isStatus()
         );
     }

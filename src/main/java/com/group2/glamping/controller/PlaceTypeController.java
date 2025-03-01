@@ -15,11 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -43,16 +40,14 @@ public class PlaceTypeController {
     )
     public ResponseEntity<BaseResponse> createPlaceType(
             @Parameter(description = "Name of the place type", required = true)
-            @RequestParam String name,
-            @Parameter(description = "Image file for the place type (optional)")
-            @RequestParam(required = false) MultipartFile image
+            @RequestParam String name
     ) {
         try {
             PlaceTypeRequest request = PlaceTypeRequest.builder()
                     .id(null)
                     .name(name)
                     .build();
-            PlaceTypeResponse response = placeTypeService.createPlaceType(request, image);
+            PlaceTypeResponse response = placeTypeService.createPlaceType(request);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Place type created successfully", response));
         } catch (Exception e) {
             logger.error("Error while creating place type: {}", e.getMessage(), e);
@@ -74,13 +69,11 @@ public class PlaceTypeController {
     )
     public ResponseEntity<BaseResponse> updatePlaceType(
             @Parameter(description = "ID of the place type to update", required = true)
-            @Valid @RequestBody PlaceTypeRequest request,
-            @Parameter(description = "Updated image file for the place type (optional)")
-            @RequestParam(required = false) MultipartFile image
+            @Valid @RequestBody PlaceTypeRequest request
 
     ) {
         try {
-            PlaceTypeResponse response = placeTypeService.updatePlaceType(request, image);
+            PlaceTypeResponse response = placeTypeService.updatePlaceType(request);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Place type updated successfully", response));
         } catch (AppException e) {
             logger.error(e.getMessage());
@@ -106,12 +99,14 @@ public class PlaceTypeController {
             }
     )
     @GetMapping
-    public ResponseEntity<MappingJacksonValue> getPlaceTypes(
+    public ResponseEntity<Object> getPlaceTypes(
             @RequestParam Map<String, String> params,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(name = "fields", required = false) String fields) {
-        return ResponseEntity.ok(placeTypeService.getFilteredPlaceTypes(params, page, size, fields));
+            @RequestParam(name = "fields", required = false) String fields,
+            @RequestParam(name = "sortBy", required = false, defaultValue = "id") String sortBy,
+            @RequestParam(name = "direction", required = false, defaultValue = "ASC") String direction) {
+        return ResponseEntity.ok(placeTypeService.getFilteredPlaceTypes(params, page, size, fields, sortBy, direction));
     }
 
 

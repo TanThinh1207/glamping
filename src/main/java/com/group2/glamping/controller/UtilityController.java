@@ -13,11 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -41,9 +38,7 @@ public class UtilityController {
     )
     public ResponseEntity<BaseResponse> createUtility(
             @Parameter(description = "Name of the utility", example = "Swimming Pool", required = true)
-            @RequestParam String name,
-            @Parameter(description = "Image file for the utility (optional)")
-            @RequestParam(required = false) MultipartFile image) {
+            @RequestParam String name) {
         try {
             UtilityRequest request = new UtilityRequest(null, name);
             UtilityResponse response = utilityService.createUtility(request);
@@ -70,9 +65,7 @@ public class UtilityController {
             @Parameter(description = "ID of the utility to update", example = "1", required = true)
             @RequestParam Integer id,
             @Parameter(description = "New name of the utility", example = "Updated Swimming Pool")
-            @RequestParam(required = false) String name,
-            @Parameter(description = "New image file for the utility (optional)")
-            @RequestParam(required = false) MultipartFile image) {
+            @RequestParam(required = false) String name) {
         try {
             UtilityRequest request = new UtilityRequest(id, name);
             UtilityResponse response = utilityService.updateUtility(request);
@@ -97,12 +90,14 @@ public class UtilityController {
             }
     )
     @GetMapping
-    public ResponseEntity<MappingJacksonValue> getUtilities(
+    public ResponseEntity<Object> getUtilities(
             @RequestParam Map<String, String> params,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(name = "fields", required = false) String fields) {
-        return ResponseEntity.ok(utilityService.getFilteredUtilities(params, page, size, fields));
+            @RequestParam(name = "fields", required = false) String fields,
+            @RequestParam(name = "sortBy", required = false, defaultValue = "id") String sortBy,
+            @RequestParam(name = "direction", required = false, defaultValue = "ASC") String direction) {
+        return ResponseEntity.ok(utilityService.getFilteredUtilities(params, page, size, fields, sortBy, direction));
     }
 
 

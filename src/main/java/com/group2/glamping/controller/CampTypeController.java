@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -51,12 +50,14 @@ public class CampTypeController {
             }
     )
     @GetMapping
-    public ResponseEntity<MappingJacksonValue> getCampTypes(
+    public ResponseEntity<Object> getCampTypes(
             @RequestParam Map<String, String> params,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(name = "fields", required = false) String fields) {
-        return ResponseEntity.ok(campTypeService.getFilteredCampTypes(params, page, size, fields));
+            @RequestParam(name = "fields", required = false) String fields,
+            @RequestParam(name = "sortBy", required = false, defaultValue = "id") String sortBy,
+            @RequestParam(name = "direction", required = false, defaultValue = "ASC") String direction) {
+        return ResponseEntity.ok(campTypeService.getFilteredCampTypes(params, page, size, fields, sortBy, direction));
     }
 
     //UPDATE
@@ -73,7 +74,7 @@ public class CampTypeController {
     @DeleteMapping("/{campTypeId}")
     public ResponseEntity<BaseResponse> deleteCampType(@PathVariable int campTypeId) {
         BaseResponse response = campTypeService.softDeleteCampType(campTypeId);
-        return ResponseEntity.status((int) response.getStatusCode()).body(response);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }
 

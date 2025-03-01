@@ -13,9 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -42,13 +40,11 @@ public class FacilityController {
             @Parameter(description = "Name of the facility", required = true)
             @RequestParam String name,
             @Parameter(description = "Description of the facility", required = true)
-            @RequestParam String description,
-            @Parameter(description = "Image file for the facility (optional)")
-            @RequestParam(required = false) MultipartFile image
+            @RequestParam String description
     ) {
         try {
             FacilityRequest request = new FacilityRequest(null, name, description);
-            FacilityResponse response = facilityService.createFacility(request, image);
+            FacilityResponse response = facilityService.createFacility(request);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Facility created successfully", response));
         } catch (Exception e) {
             logger.error("Error while creating facility: {}", e.getMessage(), e);
@@ -74,13 +70,11 @@ public class FacilityController {
             @Parameter(description = "Updated name of the facility", required = true)
             @RequestParam String name,
             @Parameter(description = "Updated description of the facility", required = true)
-            @RequestParam String description,
-            @Parameter(description = "Updated image file for the facility (optional)")
-            @RequestParam(required = false) MultipartFile image
+            @RequestParam String description
     ) {
         try {
             FacilityRequest request = new FacilityRequest(id, name, description);
-            FacilityResponse response = facilityService.updateFacility(request, image);
+            FacilityResponse response = facilityService.updateFacility(request);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Facility updated successfully", response));
         } catch (Exception e) {
             logger.error("Error while updating facility: {}", e.getMessage(), e);
@@ -99,12 +93,14 @@ public class FacilityController {
             }
     )
     @GetMapping
-    public ResponseEntity<MappingJacksonValue> getFacilities(
+    public ResponseEntity<Object> getFacilities(
             @RequestParam Map<String, String> params,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(name = "fields", required = false) String fields) {
-        return ResponseEntity.ok(facilityService.getFilteredFacilities(params, page, size, fields));
+            @RequestParam(name = "fields", required = false) String fields,
+            @RequestParam(name = "sortBy", required = false, defaultValue = "id") String sortBy,
+            @RequestParam(name = "direction", required = false, defaultValue = "ASC") String direction) {
+        return ResponseEntity.ok(facilityService.getFilteredFacilities(params, page, size, fields, sortBy, direction));
     }
 
     // Delete Facility (Soft Delete)

@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: glampe-app
+    restart: always
+    env_file:
+      - production.env
+    environment:
+      JDBC_DATABASE_HOST: ${JDBC_DATABASE_HOST}
+      JDBC_DATABASE_USERNAME: ${JDBC_DATABASE_USERNAME}
+      JDBC_DATABASE_NAME: ${JDBC_DATABASE_NAME}
+      JDBC_DATABASE_PASSWORD: ${JDBC_DATABASE_PASSWORD}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      AWS_ACCESSKEY: ${AWS_ACCESSKEY}
+      AWS_SECRETKEY: ${AWS_SECRETKEY}
+    ports:
+      - "8080:8080"
