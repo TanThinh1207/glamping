@@ -1,5 +1,6 @@
 package com.group2.glamping.model.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.group2.glamping.model.entity.Camp;
 import com.group2.glamping.model.enums.CampStatus;
 import lombok.AllArgsConstructor;
@@ -17,9 +18,11 @@ public class CampResponse {
 
     private int campId;
     private String campName;
-    private LocalDateTime created_at;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createdAt;
     private CampStatus status;
-    private LocalDateTime updated_at;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime updatedAt;
 
     public static CampResponse fromEntity(Camp camp) {
         if (camp == null) {
@@ -29,9 +32,9 @@ public class CampResponse {
         return CampResponse.builder()
                 .campId(camp.getId())
                 .campName(camp.getName())
-                .created_at(camp.getCreatedTime())
+                .createdAt(camp.getCreatedTime())
                 .status(camp.getStatus())
-                .updated_at(camp.getUpdatedTime())
+                .updatedAt(camp.getUpdatedTime())
                 .build();
     }
 }

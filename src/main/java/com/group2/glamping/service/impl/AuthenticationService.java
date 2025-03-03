@@ -5,11 +5,14 @@ import com.group2.glamping.auth.JwtService;
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.response.AuthenticationResponse;
+import com.group2.glamping.model.dto.response.UserResponse;
 import com.group2.glamping.model.entity.User;
+import com.group2.glamping.model.enums.Role;
 import com.group2.glamping.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -34,6 +37,7 @@ public class AuthenticationService {
             return AuthenticationResponse.builder()
                     .message("Old user")
                     .isNew(false)
+                    .user(new UserResponse(user))
                     .accessToken(jwtToken)
                     .build();
         }
@@ -41,6 +45,8 @@ public class AuthenticationService {
 
         User newUser = User.builder()
                 .email(email)
+                .role(Role.ROLE_USER)
+                .createdTime(LocalDateTime.now())
 //                .password(passwordEncoder.encode(email))
                 .status(true)
                 .build();
@@ -51,6 +57,7 @@ public class AuthenticationService {
         return AuthenticationResponse.builder()
                 .isNew(true)
                 .message("New user")
+                .user(new UserResponse(newUser))
                 .accessToken(jwtToken)
                 .build();
     }

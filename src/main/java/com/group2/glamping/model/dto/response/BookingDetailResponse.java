@@ -1,5 +1,6 @@
 package com.group2.glamping.model.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.group2.glamping.model.entity.BookingDetail;
 import com.group2.glamping.model.enums.BookingDetailStatus;
 import lombok.AllArgsConstructor;
@@ -15,8 +16,11 @@ public class BookingDetailResponse {
 
     CampTypeResponse campTypeResponse;
     CampResponse campResponse;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime checkInAt;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime checkOutAt;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime createdAt;
     BookingDetailStatus status;
 

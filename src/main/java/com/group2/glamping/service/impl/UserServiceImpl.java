@@ -49,6 +49,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         user.setFirstname(userUpdateRequest.firstName());
         user.setLastname(userUpdateRequest.lastName());
+        user.setPhoneNumber(userUpdateRequest.phone());
 //        user.setPassword(userUpdateRequest.phone());
         user.setDob(userUpdateRequest.dob());
         user.setStatus(userUpdateRequest.status());

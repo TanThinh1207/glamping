@@ -1,5 +1,6 @@
 package com.group2.glamping.model.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.group2.glamping.model.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,6 +20,7 @@ public class UserResponse {
     private String lastname;
     private String address;
     private String phone;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthday;
     private boolean status;
 
@@ -30,7 +32,7 @@ public class UserResponse {
         this.lastname = user.getLastname();
         this.address = user.getAddress();
         this.phone = user.getPhoneNumber();
-        this.birthday = (user.getDob() != null) ? user.getDob().toLocalDate() : null;
+        this.birthday = user.getDob();
         this.status = user.isStatus();
     }
 }
