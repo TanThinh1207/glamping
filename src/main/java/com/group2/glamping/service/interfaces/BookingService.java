@@ -22,4 +22,7 @@ public interface BookingService {
 
     void confirmPaymentSuccess(Integer orderId);
 
+    BookingResponse checkInBooking(Integer bookingId);
+
+    BookingResponse checkOutBooking(Integer bookingId);
 }

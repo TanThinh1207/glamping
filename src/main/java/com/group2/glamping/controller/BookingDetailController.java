@@ -21,38 +21,6 @@ public class BookingDetailController {
     private static final Logger logger = LoggerFactory.getLogger(BookingDetailController.class);
     private final BookingDetailService bookingDetailService;
 
-    // <editor-fold default state="collapsed" desc="Checkin">
-    @PutMapping("/{bookingDetailId}/check-in")
-    @Operation(
-            summary = "Checkin",
-            description = "Checkin by booking detail id.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Check in successfully"),
-                    @ApiResponse(responseCode = "404", description = "No booking detail found"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
-    public ResponseEntity<BaseResponse> checkinBookingDetail(
-            @PathVariable Integer bookingDetailId
-    ) {
-        try {
-            BookingDetailResponse response = bookingDetailService.checkInBookingDetail(bookingDetailId);
-            if (response == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new BaseResponse(HttpStatus.NOT_FOUND.value(),
-                                "No Booking Details found with Id: " + bookingDetailId, null));
-            }
-
-            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Check in successfully", response));
-        } catch (Exception e) {
-            logger.error("Error while checking in booking detail with ID {}: {}", bookingDetailId, e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                            "An unexpected error occurred. Please try again later.", null));
-        }
-    }
-    // </editor-fold>
-
     // <editor-fold default state="collapsed" desc="Assign camp">
     @PutMapping("/{bookingDetailId}/assign-camp")
     @Operation(
