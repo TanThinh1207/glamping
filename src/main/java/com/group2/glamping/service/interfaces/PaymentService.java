@@ -6,6 +6,7 @@ import com.group2.glamping.model.entity.Payment;
 import com.group2.glamping.model.enums.PaymentStatus;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +17,10 @@ public interface PaymentService {
     Double getPaidAmountByBooking(Integer orderId);
 
     PaymentResponse createVnPayPayment(HttpServletRequest request);
+
+    PaymentResponse refundPayment(Integer paymentId, BigDecimal refundAmount, String reason);
+
+    void updatePaymentStatus(Integer paymentId, PaymentStatus status);
 
     List<PaymentBaseResponse> findAll();
 

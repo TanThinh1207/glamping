@@ -124,7 +124,7 @@ public class S3ServiceImpl implements S3Service {
     @Override
     public String generatePresignedUrl(String fileName) {
         if (fileName == null || fileName.trim().isEmpty()) {
-            throw new IllegalArgumentException("File name cannot be empty or null");
+            return "No image";
         }
 
         try {

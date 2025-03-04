@@ -165,8 +165,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
 
-
-
     @Override
     public PagingResponse<?> getBookings(Map<String, String> params, int page, int size, String sortBy, String direction) {
         Specification<Booking> spec = (root, query, criteriaBuilder) -> {
@@ -213,11 +211,11 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public void confirmPaymentSuccess(Integer bookingId) {
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+    public void confirmPaymentSuccess(Integer paymentId) {
+        Booking booking = bookingRepository.findById(paymentId).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
         Payment payment = Payment.builder()
                 .booking(booking)
-                .paymentMethod("VN-Pay")
+                .paymentMethod("VNPay")
                 .completedTime(LocalDateTime.now())
                 .status(PaymentStatus.Completed)
                 .totalAmount(booking.getTotalAmount() * 0.3)

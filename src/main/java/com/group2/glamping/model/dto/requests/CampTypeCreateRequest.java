@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -16,8 +18,8 @@ public class CampTypeCreateRequest {
     int capacity;
     double price;
     double weekendRate;
-    double holidayRate;
     int quantity;
     int campSiteId;
+    List<Integer> facilities;
 }
 

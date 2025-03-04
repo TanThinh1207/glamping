@@ -1,9 +1,12 @@
 package com.group2.glamping.controller;
 
 import com.group2.glamping.exception.AppException;
+import com.group2.glamping.model.dto.requests.PaymentRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.PaymentBaseResponse;
+import com.group2.glamping.model.dto.response.StripeResponse;
 import com.group2.glamping.model.enums.PaymentStatus;
+import com.group2.glamping.service.impl.StripeService;
 import com.group2.glamping.service.interfaces.BookingService;
 import com.group2.glamping.service.interfaces.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +27,15 @@ public class PaymentController {
 
     private final PaymentService paymentService;
     private final BookingService bookingService;
+    private final StripeService stripeService;
+
+
+    @PostMapping("/stripe/checkout")
+    public ResponseEntity<StripeResponse> payStripe(@RequestBody PaymentRequest stripeRequest) throws AppException {
+        StripeResponse stripeResponse = stripeService.pay(stripeRequest);
+        return new ResponseEntity<>(stripeResponse, HttpStatus.OK);
+    }
+
 
     @GetMapping()
     public ResponseEntity<BaseResponse> findAll() {
@@ -52,6 +65,20 @@ public class PaymentController {
                 BaseResponse.builder()
                         .message("Success")
                         .data(paymentService.createVnPayPayment(request))
+                        .statusCode(HttpStatus.OK.value())
+                        .build(),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/refund")
+    public ResponseEntity<BaseResponse> refund(@RequestParam Integer paymentId,
+                                               @RequestParam BigDecimal refundAmount,
+                                               @RequestParam String reason) {
+        return new ResponseEntity<>(
+                BaseResponse.builder()
+                        .message("Success")
+                        .data(paymentService.refundPayment(paymentId, refundAmount, reason))
                         .statusCode(HttpStatus.OK.value())
                         .build(),
                 HttpStatus.OK

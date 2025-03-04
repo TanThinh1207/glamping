@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record CampTypeUpdateRequest(
 
@@ -37,7 +38,10 @@ public record CampTypeUpdateRequest(
         int quantity,
 
         @Schema(description = "Camp type status (active/inactive)", example = "true")
-        boolean status
+        boolean status,
+
+        @Schema(description = "")
+        List<Integer> facilities
 
 //        @Schema(description = "Image file for the camp type")
 //        MultipartFile file
