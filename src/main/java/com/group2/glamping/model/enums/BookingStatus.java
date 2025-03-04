@@ -7,5 +7,7 @@ public enum BookingStatus {
     Completed,
     Cancelled,
     Denied,
-    Refund
+    Refund,
+    Check_In,
+    Check_Out
 }

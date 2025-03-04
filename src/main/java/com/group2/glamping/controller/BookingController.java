@@ -80,9 +80,10 @@ public class BookingController {
     @PutMapping("/{bookingId}/update-status")
     @Operation(
             summary = "Update booking status",
-            description = "Update booking status (Accepted or Denied) based on booking ID.",
+            description = "Update booking status (Accepted, Denied, Checked-in, Checked-out) based on booking ID.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Booking status updated successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid request data"),
                     @ApiResponse(responseCode = "404", description = "No Booking found"),
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
@@ -93,20 +94,30 @@ public class BookingController {
             @RequestParam(required = false) String deniedReason
     ) {
         try {
-            BookingResponse response;
-            if (status.equalsIgnoreCase("accept")) {
-                response = bookingService.acceptBookings(bookingId);
-            } else if (status.equalsIgnoreCase("deny")) {
-                if (deniedReason == null || deniedReason.isBlank()) {
+            BookingResponse response = null;
+
+            switch (status.toLowerCase()) {
+                case "accept":
+                    response = bookingService.acceptBookings(bookingId);
+                    break;
+                case "deny":
+                    if (deniedReason == null || deniedReason.isBlank()) {
+                        return ResponseEntity.badRequest()
+                                .body(new BaseResponse(HttpStatus.BAD_REQUEST.value(),
+                                        "Denied reason is required when setting status to Denied", null));
+                    }
+                    response = bookingService.denyBookings(bookingId, deniedReason);
+                    break;
+                case "checkin":
+                    response = bookingService.checkInBooking(bookingId);
+                    break;
+                case "checkout":
+                    response = bookingService.checkOutBooking(bookingId);
+                    break;
+                default:
                     return ResponseEntity.badRequest()
                             .body(new BaseResponse(HttpStatus.BAD_REQUEST.value(),
-                                    "Denied reason is required when setting status to Denied", null));
-                }
-                response = bookingService.denyBookings(bookingId, deniedReason);
-            } else {
-                return ResponseEntity.badRequest()
-                        .body(new BaseResponse(HttpStatus.BAD_REQUEST.value(),
-                                "Invalid status. Only 'Accepted' or 'Denied' are allowed.", null));
+                                    "Invalid status. Only 'accept', 'deny', 'checkin', or 'checkout' are allowed.", null));
             }
 
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(),

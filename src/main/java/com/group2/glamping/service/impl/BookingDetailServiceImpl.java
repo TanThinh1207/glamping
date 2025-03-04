@@ -3,9 +3,13 @@ package com.group2.glamping.service.impl;
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.response.BookingDetailResponse;
+import com.group2.glamping.model.entity.Booking;
 import com.group2.glamping.model.entity.BookingDetail;
 import com.group2.glamping.model.entity.Camp;
+import com.group2.glamping.model.enums.BookingDetailStatus;
+import com.group2.glamping.model.enums.BookingStatus;
 import com.group2.glamping.repository.BookingDetailRepository;
+import com.group2.glamping.repository.BookingRepository;
 import com.group2.glamping.repository.CampRepository;
 import com.group2.glamping.service.interfaces.BookingDetailService;
 import com.group2.glamping.service.interfaces.S3Service;
@@ -20,19 +24,9 @@ import java.time.LocalDateTime;
 @Transactional
 public class BookingDetailServiceImpl implements BookingDetailService {
     private final BookingDetailRepository bookingDetailRepository;
+    private final BookingRepository bookingRepository;
     private final CampRepository campRepository;
     private final S3Service s3Service;
-
-    @Override
-    public BookingDetailResponse checkInBookingDetail(Integer bookingDetailId) {
-        BookingDetail bookingDetail = bookingDetailRepository.findById(bookingDetailId)
-                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_DETAIL_NOT_FOUND));
-
-        bookingDetail.setCheckInTime(LocalDateTime.now());
-        bookingDetailRepository.save(bookingDetail); // Ensure changes are saved
-
-        return BookingDetailResponse.fromEntity(bookingDetail, s3Service);
-    }
 
     @Override
     public BookingDetailResponse assignCamp(Integer bookingDetailId, Integer campId) {

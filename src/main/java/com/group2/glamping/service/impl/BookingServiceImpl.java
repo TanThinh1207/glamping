@@ -3,6 +3,7 @@ package com.group2.glamping.service.impl;
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.BookingRequest;
+import com.group2.glamping.model.dto.response.BookingDetailResponse;
 import com.group2.glamping.model.dto.response.BookingResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.entity.*;
@@ -233,6 +234,44 @@ public class BookingServiceImpl implements BookingService {
         paymentService.save(payment);
         booking.setStatus(BookingStatus.Deposit);
         bookingRepository.save(booking);
+    }
+
+    @Override
+    public BookingResponse checkInBooking(Integer bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        List<BookingDetail> bookingDetails = bookingDetailRepository.findBookingDetails(booking.getId());
+
+        for (BookingDetail detail : bookingDetails) {
+            detail.setCheckInTime(LocalDateTime.now());
+            detail.setStatus(BookingDetailStatus.Check_In);
+        }
+
+        bookingDetailRepository.saveAll(bookingDetails);
+
+        booking.setStatus(BookingStatus.Check_In);
+        bookingRepository.save(booking);
+
+        return bookingMapper.toDto(booking);
+    }
+
+    @Override
+    public BookingResponse checkOutBooking(Integer bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        List<BookingDetail> bookingDetails = bookingDetailRepository.findBookingDetails(booking.getId());
+
+        for (BookingDetail detail : bookingDetails) {
+            detail.setCheckInTime(LocalDateTime.now());
+            detail.setStatus(BookingDetailStatus.Check_Out);
+        }
+
+        bookingDetailRepository.saveAll(bookingDetails);
+
+        booking.setStatus(BookingStatus.Check_Out);
+        bookingRepository.save(booking);
+
+        return bookingMapper.toDto(booking);
     }
 }
 
