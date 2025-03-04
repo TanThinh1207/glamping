@@ -8,6 +8,7 @@ import com.group2.glamping.model.entity.Camp;
 import com.group2.glamping.repository.BookingDetailRepository;
 import com.group2.glamping.repository.CampRepository;
 import com.group2.glamping.service.interfaces.BookingDetailService;
+import com.group2.glamping.service.interfaces.S3Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,10 +18,10 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class BookingDetailServiceImpl implements BookingDetailService
-{
+public class BookingDetailServiceImpl implements BookingDetailService {
     private final BookingDetailRepository bookingDetailRepository;
     private final CampRepository campRepository;
+    private final S3Service s3Service;
 
     @Override
     public BookingDetailResponse checkInBookingDetail(Integer bookingDetailId) {
@@ -30,7 +31,7 @@ public class BookingDetailServiceImpl implements BookingDetailService
         bookingDetail.setCheckInTime(LocalDateTime.now());
         bookingDetailRepository.save(bookingDetail); // Ensure changes are saved
 
-        return BookingDetailResponse.fromEntity(bookingDetail);
+        return BookingDetailResponse.fromEntity(bookingDetail, s3Service);
     }
 
     @Override
@@ -44,6 +45,6 @@ public class BookingDetailServiceImpl implements BookingDetailService
         bookingDetail.setCamp(camp);
         bookingDetailRepository.save(bookingDetail); // Ensure changes are saved
 
-        return BookingDetailResponse.fromEntity(bookingDetail);
+        return BookingDetailResponse.fromEntity(bookingDetail, s3Service);
     }
 }

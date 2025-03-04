@@ -3,6 +3,7 @@ package com.group2.glamping.model.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.group2.glamping.model.entity.BookingDetail;
 import com.group2.glamping.model.enums.BookingDetailStatus;
+import com.group2.glamping.service.interfaces.S3Service;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
@@ -24,13 +25,13 @@ public class BookingDetailResponse {
     LocalDateTime createdAt;
     BookingDetailStatus status;
 
-    public static BookingDetailResponse fromEntity(BookingDetail bookingDetail) {
+    public static BookingDetailResponse fromEntity(BookingDetail bookingDetail, S3Service s3Service) {
         if (bookingDetail == null) {
             return null;
         }
 
         return BookingDetailResponse.builder()
-                .campTypeResponse(CampTypeResponse.fromEntity(bookingDetail.getCampType()))
+                .campTypeResponse(CampTypeResponse.fromEntity(bookingDetail.getCampType(), s3Service))
                 .campResponse(CampResponse.fromEntity(bookingDetail.getCamp()))
                 .checkInAt(bookingDetail.getCheckInTime())
                 .checkOutAt(bookingDetail.getCheckOutTime())

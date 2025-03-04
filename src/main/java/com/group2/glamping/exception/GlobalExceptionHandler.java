@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(BaseResponse.builder()
                         .statusCode(9999)
-                        .message("Internal Server Error: " + ex.getMessage())
+                        .message("Internal Server Error: " + ex.getMessage() + ex)
                         .data(null)
                         .build());
     }

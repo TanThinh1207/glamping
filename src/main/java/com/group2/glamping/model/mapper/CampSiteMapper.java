@@ -81,7 +81,7 @@ public class CampSiteMapper {
                                 return new UtilityResponse(
                                         utility.getId(),
                                         utility.getName(),
-                                        utility.getImageUrl(), //s3Service.generatePresignedUrl(utility.getImageUrl()) khi nào có data của Utility sẽ sử dụng được
+                                        s3Service.generatePresignedUrl(utility.getImageUrl()),
                                         utility.isStatus()
                                 );
                             }
@@ -114,19 +114,20 @@ public class CampSiteMapper {
     private List<CampTypeResponse> mapCampType(CampSite campSite) {
         return (campSite.getCampTypes() != null) ?
                 campSite.getCampTypes().stream()
-                        .map(placeType -> {
-                            if (placeType != null) {
+                        .map(campType -> {
+                            if (campType != null) {
                                 return new CampTypeResponse(
-                                        placeType.getId(),
-                                        placeType.getType(),
-                                        placeType.getCapacity(),
-                                        placeType.getPrice(),
-                                        placeType.getWeekendRate(),
+                                        campType.getId(),
+                                        campType.getType(),
+                                        campType.getCapacity(),
+                                        campType.getPrice(),
+                                        campType.getWeekendRate(),
                                         LocalDateTime.now(),
-                                        placeType.getQuantity(),
-                                        placeType.isStatus(),
+                                        campType.getQuantity(),
+                                        campType.isStatus(),
                                         campSite.getId(),
-                                        placeType.getImage() == null || placeType.getImage().isEmpty() ? "" : s3Service.generatePresignedUrl(placeType.getImage())
+                                        campType.getImage(),
+                                        FacilityResponse.fromEntity(campType.getFacilities(), s3Service)
                                 );
                             }
                             return null;

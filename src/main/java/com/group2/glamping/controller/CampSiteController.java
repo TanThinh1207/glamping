@@ -67,10 +67,11 @@ public class CampSiteController {
     @PostMapping
     public ResponseEntity<BaseResponse> createCampSite(@RequestBody CampSiteRequest campSiteRequest) {
         try {
-            logger.info("Parsed campSiteRequest: {}", campSiteRequest);
+//            logger.info("Parsed campSiteRequest: {}", campSiteRequest);
             return ResponseEntity.ok().body(BaseResponse.builder()
                     .statusCode(HttpStatus.OK.value())
-                    .data(campSiteService.saveCampSite(campSiteRequest))
+                    .data(campSiteService.saveCampSite(campSiteRequest)
+                            .orElseThrow(() -> new IllegalArgumentException("Failed to save camp site")))
                     .message("Camp Site created successfully")
                     .build());
 

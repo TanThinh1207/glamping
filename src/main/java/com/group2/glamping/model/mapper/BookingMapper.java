@@ -7,6 +7,7 @@ import com.group2.glamping.model.dto.response.UserResponse;
 import com.group2.glamping.model.entity.Booking;
 import com.group2.glamping.model.entity.BookingDetail;
 import com.group2.glamping.model.entity.BookingSelection;
+import com.group2.glamping.service.interfaces.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 public class BookingMapper {
 
     private final CampSiteMapper campSiteMapper;
-
+    private final S3Service s3Service;
 
     public BookingResponse toDto(Booking booking) {
         if (booking == null) {
@@ -42,9 +43,10 @@ public class BookingMapper {
 
     private List<BookingDetailResponse> mapBookingDetails(List<BookingDetail> bookingDetails) {
         return (bookingDetails != null) ? bookingDetails.stream()
-                .map(BookingDetailResponse::fromEntity)
+                .map(detail -> BookingDetailResponse.fromEntity(detail, s3Service))
                 .collect(Collectors.toList()) : Collections.emptyList();
     }
+
 
     private List<BookingSelectionResponse> mapBookingSelections(List<BookingSelection> bookingSelections) {
         return (bookingSelections != null) ? bookingSelections.stream()

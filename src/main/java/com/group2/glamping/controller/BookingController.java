@@ -2,9 +2,7 @@ package com.group2.glamping.controller;
 
 import com.group2.glamping.model.dto.requests.BookingRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
-import com.group2.glamping.model.dto.response.BookingDetailResponse;
 import com.group2.glamping.model.dto.response.BookingResponse;
-import com.group2.glamping.model.enums.BookingStatus;
 import com.group2.glamping.service.interfaces.BookingDetailService;
 import com.group2.glamping.service.interfaces.BookingService;
 import io.swagger.v3.oas.annotations.Operation;
