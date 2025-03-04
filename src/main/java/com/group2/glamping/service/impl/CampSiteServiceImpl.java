@@ -42,6 +42,7 @@ public class CampSiteServiceImpl implements CampSiteService {
     private final CampTypeRepository campTypeRepository;
     //    private final S3Service s3Service;
     private final CampSiteMapper campSiteMapper;
+    private final FacilityRepository facilityRepository;
 
     @Override
     public Optional<CampSiteResponse> saveCampSite(CampSiteRequest campSiteUpdateRequest) {
@@ -76,8 +77,7 @@ public class CampSiteServiceImpl implements CampSiteService {
                                                            List<SelectionRequest> campSiteSelections,
                                                            List<Integer> campSiteUtilities,
                                                            List<Integer> campSitePlaceTypes,
-                                                           List<CampTypeUpdateRequest> campTypeList
-    ) {
+                                                           List<CampTypeUpdateRequest> campTypeList) {
 
         // Check Host
         campSite.setUser(userService.findById(hostId)
@@ -113,7 +113,7 @@ public class CampSiteServiceImpl implements CampSiteService {
                             existingCampType.setUpdatedTime(LocalDateTime.now());
                             existingCampType.setQuantity(request.quantity());
                             existingCampType.setStatus(request.status());
-
+                            existingCampType.setFacilities(facilityRepository.findAllById(request.facilities()));
                             return campTypeRepository.save(existingCampType);
                         })
                         .orElseGet(() -> {
@@ -126,6 +126,7 @@ public class CampSiteServiceImpl implements CampSiteService {
                                     .quantity(request.quantity())
                                     .status(request.status())
                                     .campSite(campSite)
+                                    .facilities(facilityRepository.findAllById(request.facilities()))
                                     .build();
                             return campTypeRepository.save(newCampType);
                         }))

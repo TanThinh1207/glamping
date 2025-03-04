@@ -4,6 +4,9 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -68,4 +71,23 @@ public class VNPayUtil {
                                         , StandardCharsets.US_ASCII))
                 .collect(Collectors.joining("&"));
     }
+
+    public static String sendPostRequest(String urlString, Map<String, String> params) throws Exception {
+        URL url = new URL(urlString);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        connection.setDoOutput(true);
+
+        String postData = VNPayUtil.getPaymentURL(params, true);
+        try (OutputStream os = connection.getOutputStream()) {
+            os.write(postData.getBytes(StandardCharsets.UTF_8));
+            os.flush();
+        }
+
+        try (java.util.Scanner scanner = new java.util.Scanner(connection.getInputStream(), StandardCharsets.UTF_8)) {
+            return scanner.useDelimiter("\\A").hasNext() ? scanner.next() : "";
+        }
+    }
+
 }

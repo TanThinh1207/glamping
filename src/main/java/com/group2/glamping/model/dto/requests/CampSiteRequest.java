@@ -44,7 +44,10 @@ public record CampSiteRequest(
         List<Integer> utilityIds,
 
         @Schema(description = "List of camp types associated with the campsite")
-        List<CampTypeUpdateRequest> campTypeList
+        List<CampTypeUpdateRequest> campTypeList,
+
+        @Schema(description = "List of facility ids")
+        List<Integer> facilityIds
 
 ) {
 }

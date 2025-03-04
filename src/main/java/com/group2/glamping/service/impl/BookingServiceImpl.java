@@ -17,6 +17,7 @@ import com.group2.glamping.service.interfaces.BookingService;
 import com.group2.glamping.service.interfaces.EmailService;
 import com.group2.glamping.service.interfaces.PaymentService;
 import com.group2.glamping.utils.ResponseFilterUtil;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,10 +29,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -166,8 +164,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
 
-
-
     @Override
     public PagingResponse<?> getBookings(Map<String, String> params, int page, int size, String sortBy, String direction) {
         Specification<Booking> spec = (root, query, criteriaBuilder) -> {
@@ -183,6 +179,18 @@ public class BookingServiceImpl implements BookingService {
                         break;
                     case "status":
                         predicates.add(criteriaBuilder.equal(root.get("status"), value));
+                        break;
+                    case "campSiteId":
+                        Join<Booking, CampSite> campSiteJoin = root.join("campSite");
+
+                        if (value.contains(",")) {
+                            List<Long> campSiteIds = Arrays.stream(value.split(","))
+                                    .map(Long::parseLong)
+                                    .toList();
+                            predicates.add(campSiteJoin.get("id").in(campSiteIds));
+                        } else {
+                            predicates.add(criteriaBuilder.equal(campSiteJoin.get("id"), Long.parseLong(value)));
+                        }
                         break;
                 }
             });
@@ -214,11 +222,11 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public void confirmPaymentSuccess(Integer bookingId) {
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+    public void confirmPaymentSuccess(Integer paymentId) {
+        Booking booking = bookingRepository.findById(paymentId).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
         Payment payment = Payment.builder()
                 .booking(booking)
-                .paymentMethod("VN-Pay")
+                .paymentMethod("VNPay")
                 .completedTime(LocalDateTime.now())
                 .status(PaymentStatus.Completed)
                 .totalAmount(booking.getTotalAmount() * 0.3)

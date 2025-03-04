@@ -3,12 +3,14 @@ package com.group2.glamping.model.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.group2.glamping.model.entity.CampType;
+import com.group2.glamping.service.interfaces.S3Service;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -27,8 +29,9 @@ public class CampTypeResponse {
     boolean status;
     int campSiteId;
     String image;
+    List<FacilityResponse> facilities;
 
-    public static CampTypeResponse fromEntity(CampType campType) {
+    public static CampTypeResponse fromEntity(CampType campType, S3Service s3Service) {
         if (campType == null) {
             return null;
         }
@@ -42,7 +45,7 @@ public class CampTypeResponse {
                 .updatedAt(campType.getUpdatedTime())
                 .quantity(campType.getQuantity())
                 .status(campType.isStatus())
-                .image(campType.getImage())
+                .facilities(FacilityResponse.fromEntity(campType.getFacilities(), s3Service))
                 .build();
     }
 }

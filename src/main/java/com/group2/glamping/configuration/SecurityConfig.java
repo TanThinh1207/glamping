@@ -42,7 +42,7 @@ public class SecurityConfig {
             "/api/v1/auth/**", "/api/campsites/**", "/api/bookings/**", "/api/payments/**",
             "/home/**", "/home", "/api/s3/**",
             "/", "/login", "/payment",
-            "/confirm-payment" // sau khi có link FE sẽ đổi sang link fe
+            "/confirm-payment", "/refund" // sau khi có link FE sẽ đổi sang link fe
 
     };
 
