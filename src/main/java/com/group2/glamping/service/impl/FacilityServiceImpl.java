@@ -106,12 +106,15 @@ public class FacilityServiceImpl implements FacilityService {
     }
 
     private FacilityResponse convertToResponse(Facility facility) {
-        return new FacilityResponse(
-                facility.getId(),
-                facility.getName(),
-                facility.getDescription(),
-                s3Service.generatePresignedUrl(facility.getImageUrl()),
-                facility.isStatus()
-        );
+        return FacilityResponse.builder()
+                .id(facility.getId())
+                .name(facility.getName())
+                .description(facility.getDescription())
+                .status(facility.isStatus())
+                .image(
+                        facility.getImageUrl() == null || facility.getImageUrl().isEmpty() ?
+                                s3Service.generatePresignedUrl("Facility/FACILITY__1741050569490_Empty.png") :
+                                s3Service.generatePresignedUrl(facility.getImageUrl()))
+                .build();
     }
 }

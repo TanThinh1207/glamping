@@ -11,6 +11,7 @@ import com.group2.glamping.model.entity.CampType;
 import com.group2.glamping.repository.CampSiteRepository;
 import com.group2.glamping.repository.CampTypeRepository;
 import com.group2.glamping.service.interfaces.CampTypeService;
+import com.group2.glamping.service.interfaces.S3Service;
 import com.group2.glamping.utils.ResponseFilterUtil;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class CampTypeServiceImpl implements CampTypeService {
 
     private final CampTypeRepository campTypeRepository;
     private final CampSiteRepository campSiteRepository;
+    private final S3Service s3Service;
 
     @Override
     public Long findAvailableSlots(Integer idCampType, LocalDateTime checkInDate, LocalDateTime checkOutDate) {
@@ -230,6 +232,9 @@ public class CampTypeServiceImpl implements CampTypeService {
                 .quantity(campType.getQuantity())
                 .status(campType.isStatus())
                 .campSiteId(campType.getCampSite().getId())
+                .image(campType.getImage() == null || campType.getImage().isEmpty() ?
+                        "" :
+                        s3Service.generatePresignedUrl(campType.getImage()))
                 .build();
 
     }

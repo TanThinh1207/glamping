@@ -144,7 +144,9 @@ public class SelectionServiceImpl implements SelectionService {
         response.setName(selection.getName());
         response.setDescription(selection.getDescription());
         response.setPrice(selection.getPrice());
-        response.setImage(s3Service.generatePresignedUrl(selection.getImageUrl()));
+        response.setImage(selection.getImageUrl() == null || selection.getImageUrl().isEmpty() ?
+                "" :
+                s3Service.generatePresignedUrl(selection.getImageUrl()));
         response.setStatus(selection.isStatus());
         return response;
     }

@@ -138,7 +138,9 @@ public class UtilityServiceImpl implements UtilityService {
         return UtilityResponse.builder()
                 .id(utility.getId())
                 .name(utility.getName())
-                .imagePath(s3Service.generatePresignedUrl(utility.getImageUrl()))
+                .imagePath(utility.getImageUrl() == null || utility.getImageUrl().isEmpty() ?
+                        "" :
+                        s3Service.generatePresignedUrl(utility.getImageUrl()))
                 .status(utility.isStatus())
                 .build();
     }

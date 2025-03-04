@@ -114,7 +114,9 @@ public class PlaceTypeServiceImpl implements PlaceTypeService {
         return PlaceTypeResponse.builder()
                 .id(placeType.getId())
                 .name(placeType.getName())
-                .imagePath(s3Service.generatePresignedUrl(placeType.getImage()))
+                .imagePath(placeType.getImage() == null || placeType.getImage().isEmpty() ?
+                        "" :
+                        s3Service.generatePresignedUrl(placeType.getImage()))
                 .status(placeType.isStatus())
                 .build();
     }

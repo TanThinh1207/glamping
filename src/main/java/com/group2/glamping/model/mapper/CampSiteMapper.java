@@ -125,7 +125,8 @@ public class CampSiteMapper {
                                         LocalDateTime.now(),
                                         placeType.getQuantity(),
                                         placeType.isStatus(),
-                                        campSite.getId()
+                                        campSite.getId(),
+                                        placeType.getImage() == null || placeType.getImage().isEmpty() ? "" : s3Service.generatePresignedUrl(placeType.getImage())
                                 );
                             }
                             return null;

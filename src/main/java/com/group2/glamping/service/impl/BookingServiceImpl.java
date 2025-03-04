@@ -133,7 +133,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = new Booking();
         if (existedBooking.isPresent()) {
             booking = existedBooking.get();
-            if (booking.getStatus() == BookingStatus.Pending) {
+            if (booking.getStatus() == BookingStatus.Deposit) {
                 booking.setStatus(BookingStatus.Accepted);
             }
             bookingRepository.save(booking);
@@ -181,7 +181,7 @@ public class BookingServiceImpl implements BookingService {
                         predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
                         break;
                     case "status":
-                        predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
+                        predicates.add(criteriaBuilder.equal(root.get("status"), value));
                         break;
                 }
             });

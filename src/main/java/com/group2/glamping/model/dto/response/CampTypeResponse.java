@@ -26,6 +26,7 @@ public class CampTypeResponse {
     int quantity;
     boolean status;
     int campSiteId;
+    String image;
 
     public static CampTypeResponse fromEntity(CampType campType) {
         if (campType == null) {
@@ -41,6 +42,7 @@ public class CampTypeResponse {
                 .updatedAt(campType.getUpdatedTime())
                 .quantity(campType.getQuantity())
                 .status(campType.isStatus())
+                .image(campType.getImage())
                 .build();
     }
 }
