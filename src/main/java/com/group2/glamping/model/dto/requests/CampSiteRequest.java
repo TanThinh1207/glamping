@@ -2,7 +2,6 @@ package com.group2.glamping.model.dto.requests;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -35,19 +34,16 @@ public record CampSiteRequest(
         @NotBlank(message = "City cannot be empty")
         String city,
 
-        @Schema(description = "Image file for the campsite (optional)")
-        List<MultipartFile> file,
+        @Schema(description = "List of place types id associated with the campsite")
+        List<Integer> placeTypeIds,
 
-        @Schema(description = "List of place types associated with the campsite (Admin only)")
-        List<Integer> campSitePlaceTypes,
-
-        @Schema(description = "List of selections associated with the campsite (Host only)")
+        @Schema(description = "List of selections associated with the campsite")
         List<SelectionRequest> campSiteSelections,
 
-        @Schema(description = "List of utilities provided at the campsite (Admin only)")
-        List<Integer> campSiteUtilities,
+        @Schema(description = "List of utilities provided at the campsite")
+        List<Integer> utilityIds,
 
-        @Schema(description = "List of camp types associated with the campsite (Host only)")
+        @Schema(description = "List of camp types associated with the campsite")
         List<CampTypeUpdateRequest> campTypeList
 
 ) {

@@ -58,8 +58,8 @@ public class CampSiteServiceImpl implements CampSiteService {
                 campSiteUpdateRequest.latitude(),
                 campSiteUpdateRequest.longitude(),
                 campSiteUpdateRequest.campSiteSelections(),
-                campSiteUpdateRequest.campSiteUtilities(),
-                campSiteUpdateRequest.campSitePlaceTypes(),
+                campSiteUpdateRequest.placeTypeIds(),
+                campSiteUpdateRequest.utilityIds(),
                 campSiteUpdateRequest.campTypeList());
     }
 

@@ -32,7 +32,6 @@ import java.util.Map;
 public class CampSiteController {
 
     private final CampSiteService campSiteService;
-    private final ObjectMapper objectMapper;
 
     private static final Logger logger = LoggerFactory.getLogger(CampSiteController.class);
 
@@ -65,15 +64,13 @@ public class CampSiteController {
                     @ApiResponse(responseCode = "400", description = "Invalid input or bad request")
             }
     )
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BaseResponse> createCampSite(@RequestBody String campSiteRequest) {
+    @PostMapping
+    public ResponseEntity<BaseResponse> createCampSite(@RequestBody CampSiteRequest campSiteRequest) {
         try {
-            CampSiteRequest request = objectMapper.readValue(campSiteRequest, CampSiteRequest.class);
-
-            logger.info("Parsed campSiteRequest: {}", request);
+            logger.info("Parsed campSiteRequest: {}", campSiteRequest);
             return ResponseEntity.ok().body(BaseResponse.builder()
                     .statusCode(HttpStatus.OK.value())
-                    .data(campSiteService.saveCampSite(request))
+                    .data(campSiteService.saveCampSite(campSiteRequest))
                     .message("Camp Site created successfully")
                     .build());
 
@@ -84,14 +81,6 @@ public class CampSiteController {
                     .data(null)
                     .statusCode(e.getErrorCode().getCode())
                     .build());
-        } catch (JsonProcessingException e) {
-            logger.error("Error parsing campSiteRequest JSON: {}", campSiteRequest, e);
-            return ResponseEntity.badRequest().body(BaseResponse.builder()
-                    .message("Invalid JSON format")
-                    .data(null)
-                    .statusCode(HttpStatus.BAD_REQUEST.value())
-                    .build());
-
         } catch (Exception e) {
             logger.error("Unexpected error while creating campsite", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(BaseResponse.builder()
