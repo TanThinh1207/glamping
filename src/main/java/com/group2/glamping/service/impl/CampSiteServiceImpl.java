@@ -58,6 +58,7 @@ public class CampSiteServiceImpl implements CampSiteService {
                 campSiteUpdateRequest.city(),
                 campSiteUpdateRequest.latitude(),
                 campSiteUpdateRequest.longitude(),
+                campSiteUpdateRequest.description(),
                 campSiteUpdateRequest.campSiteSelections(),
                 campSiteUpdateRequest.placeTypeIds(),
                 campSiteUpdateRequest.utilityIds(),
@@ -74,6 +75,7 @@ public class CampSiteServiceImpl implements CampSiteService {
                                                            String city,
                                                            double latitude,
                                                            double longitude,
+                                                           String description,
                                                            List<SelectionRequest> campSiteSelections,
                                                            List<Integer> campSiteUtilities,
                                                            List<Integer> campSitePlaceTypes,
@@ -91,6 +93,9 @@ public class CampSiteServiceImpl implements CampSiteService {
         campSite.setStatus(CampSiteStatus.Pending);
         campSite.setCreatedTime(LocalDateTime.now());
         campSite.setCity(city);
+        campSite.setDescription(description);
+
+        campSiteRepository.save(campSite);
 
         // Selection
         List<Selection> selections = campSiteSelections.stream()

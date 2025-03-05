@@ -34,6 +34,10 @@ public record CampSiteRequest(
         @NotBlank(message = "City cannot be empty")
         String city,
 
+        @Schema(description = "Description of the campsite", example = "HiHi")
+        @NotBlank(message = "Description cannot be empty")
+        String description,
+
         @Schema(description = "List of place types id associated with the campsite")
         List<Integer> placeTypeIds,
 
@@ -44,10 +48,7 @@ public record CampSiteRequest(
         List<Integer> utilityIds,
 
         @Schema(description = "List of camp types associated with the campsite")
-        List<CampTypeUpdateRequest> campTypeList,
-
-        @Schema(description = "List of facility ids")
-        List<Integer> facilityIds
+        List<CampTypeUpdateRequest> campTypeList
 
 ) {
 }

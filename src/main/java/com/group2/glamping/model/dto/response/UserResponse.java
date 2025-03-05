@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,7 +39,7 @@ public class UserResponse {
         this.phone = user.getPhoneNumber();
         this.birthday = user.getDob();
         this.status = user.isStatus();
-        this.campSiteIds = user.getCampSiteList().stream()
+        this.campSiteIds = user.getCampSiteList() == null ? new ArrayList<>() : user.getCampSiteList().stream()
                 .map(CampSite::getId)
                 .collect(Collectors.toList());
     }

@@ -51,6 +51,9 @@ public class CampSite {
     @Column(name = "deposit_rate", columnDefinition = "DOUBLE DEFAULT 0.0", nullable = false)
     private Double depositRate;
 
+    @Column(name = "description")
+    private String description;
+
     @ManyToOne
     @JoinColumn(name = "id_user")
     private User user;

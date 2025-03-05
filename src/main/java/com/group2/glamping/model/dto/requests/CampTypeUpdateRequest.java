@@ -26,9 +26,6 @@ public record CampTypeUpdateRequest(
         @Positive(message = "Weekend rate must be a positive number")
         double weekendRate,
 
-        @Schema(description = "Holiday price rate", example = "150.0")
-        @Positive(message = "Holiday rate must be a positive number")
-        double holidayRate,
 
         @Schema(description = "Last update time", example = "2024-02-10T12:00:00")
         LocalDateTime updatedAt,
@@ -43,8 +40,6 @@ public record CampTypeUpdateRequest(
         @Schema(description = "")
         List<Integer> facilities
 
-//        @Schema(description = "Image file for the camp type")
-//        MultipartFile file
 
 ) {
 }
