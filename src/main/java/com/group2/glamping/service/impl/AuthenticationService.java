@@ -9,6 +9,7 @@ import com.group2.glamping.model.dto.response.UserResponse;
 import com.group2.glamping.model.entity.User;
 import com.group2.glamping.model.enums.Role;
 import com.group2.glamping.repository.UserRepository;
+import com.stripe.exception.StripeException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +23,9 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     //    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final StripeService stripeService;
 
-    public AuthenticationResponse verify(String email) throws AppException {
+    public AuthenticationResponse verify(String email) throws AppException, StripeException {
         Optional<User> userOptional = userRepository.findByEmail(email);
 
         if (userOptional.isPresent()) {
@@ -53,6 +55,7 @@ public class AuthenticationService {
 
         userRepository.save(newUser); // Lưu user mới vào database
         String jwtToken = jwtService.generateToken(newUser);
+        stripeService.createHostAccount(email);
 
         return AuthenticationResponse.builder()
                 .isNew(true)

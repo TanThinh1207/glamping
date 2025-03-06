@@ -36,6 +36,12 @@ public class PaymentController {
         return new ResponseEntity<>(stripeResponse, HttpStatus.OK);
     }
 
+//    @PostMapping("/stripe/refund")
+//    public ResponseEntity<BaseResponse> refundStripe(@RequestParam String hostStripeAccountId,
+//                                                     @RequestParam long amountInCents,
+//                                                     @RequestParam long platformFeeInCents) throws AppException {
+//
+//    }
 
     @GetMapping()
     public ResponseEntity<BaseResponse> findAll() {

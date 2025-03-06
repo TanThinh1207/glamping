@@ -4,7 +4,13 @@ import com.group2.glamping.model.dto.requests.PaymentRequest;
 import com.group2.glamping.model.dto.response.StripeResponse;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
+import com.stripe.model.Account;
+import com.stripe.model.Refund;
+import com.stripe.model.Transfer;
 import com.stripe.model.checkout.Session;
+import com.stripe.param.AccountCreateParams;
+import com.stripe.param.RefundCreateParams;
+import com.stripe.param.TransferCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -52,6 +58,51 @@ public class StripeService {
                 .sessionId(session.getId())
                 .sessionUrl(session.getUrl())
                 .build();
+    }
+
+    // Create Connected Account for Host
+    public Account createHostAccount(String email) throws StripeException {
+        AccountCreateParams params =
+                AccountCreateParams.builder()
+                        .setType(AccountCreateParams.Type.EXPRESS)
+                        .setCountry("US")
+                        .setEmail(email)
+                        .setCapabilities(
+                                AccountCreateParams.Capabilities.builder()
+                                        .setTransfers(AccountCreateParams.Capabilities.Transfers.builder().setRequested(true).build())
+                                        .build()
+                        )
+                        .build();
+
+        return Account.create(params);
+    }
+
+    // Transfer payout to Host
+    public void transferToHost(String hostStripeAccountId, long amountInCents, long platformFeeInCents) throws StripeException {
+        long hostAmount = amountInCents - platformFeeInCents;
+
+        TransferCreateParams params =
+                TransferCreateParams.builder()
+                        .setAmount(hostAmount)
+                        .setCurrency("VND")
+                        .setDestination(hostStripeAccountId)
+                        .setDescription("Payout for completed booking")
+                        .build();
+
+        Transfer transfer = Transfer.create(params);
+        System.out.println("Transfer successful: " + transfer.getId());
+    }
+
+    // Refund payment to Customer
+    public void refundPayment(String chargeId, double amount) throws StripeException {
+        RefundCreateParams params =
+                RefundCreateParams.builder()
+                        .setCharge(chargeId)
+                        .setAmount((long) amount)
+                        .build();
+
+        Refund refund = Refund.create(params);
+        System.out.println("Refund successful: " + refund.getId());
     }
 
 }
