@@ -1,7 +1,6 @@
 package com.group2.glamping.controller;
 
 import com.group2.glamping.service.interfaces.BookingService;
-import com.group2.glamping.service.interfaces.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequiredArgsConstructor
 public class HomeController {
 
-    private final PaymentService paymentService;
     private final BookingService bookingService;
 
     @GetMapping("/home")
