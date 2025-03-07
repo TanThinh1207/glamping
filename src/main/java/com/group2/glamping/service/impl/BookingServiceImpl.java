@@ -3,7 +3,6 @@ package com.group2.glamping.service.impl;
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.BookingRequest;
-import com.group2.glamping.model.dto.response.BookingDetailResponse;
 import com.group2.glamping.model.dto.response.BookingResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.entity.*;
@@ -231,7 +230,7 @@ public class BookingServiceImpl implements BookingService {
                 .status(PaymentStatus.Completed)
                 .totalAmount(booking.getTotalAmount() * 0.3)
                 .build();
-        paymentService.save(payment);
+        paymentService.savePayment(payment);
         booking.setStatus(BookingStatus.Deposit);
         bookingRepository.save(booking);
     }
