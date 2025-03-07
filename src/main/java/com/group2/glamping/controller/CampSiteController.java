@@ -8,9 +8,7 @@ import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.CampSiteRequest;
 import com.group2.glamping.model.dto.requests.CampSiteUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
-import com.group2.glamping.service.impl.StripeService;
 import com.group2.glamping.service.interfaces.CampSiteService;
-import com.stripe.exception.StripeException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -37,8 +35,6 @@ public class CampSiteController {
 
     private static final Logger logger = LoggerFactory.getLogger(CampSiteController.class);
 
-    private final StripeService stripeService;
-
     @Operation(
             summary = "Get list of campsites",
             description = "Retrieve a paginated list of campsites with optional filtering, field selection, and sorting",
@@ -55,8 +51,7 @@ public class CampSiteController {
             @RequestParam(name = "fields", required = false) String fields,
             @RequestParam(name = "sortBy", required = false, defaultValue = "id") String sortBy,
             @RequestParam(name = "direction", required = false, defaultValue = "ASC") String direction
-    ) throws StripeException {
-        stripeService.createHostAccount("nguyenchauthanhbinh1@gmail.com");
+    ) {
         return ResponseEntity.ok(campSiteService.getFilteredCampSites(params, page, size, fields, sortBy, direction));
     }
 

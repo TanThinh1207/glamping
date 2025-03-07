@@ -3,10 +3,7 @@ package com.group2.glamping.service.impl;
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.entity.*;
-import com.group2.glamping.repository.CampSiteRepository;
-import com.group2.glamping.repository.FacilityRepository;
-import com.group2.glamping.repository.SelectionRepository;
-import com.group2.glamping.repository.UtilityRepository;
+import com.group2.glamping.repository.*;
 import com.group2.glamping.service.interfaces.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,14 +33,16 @@ public class S3ServiceImpl implements S3Service {
     private final SelectionRepository selectionRepository;
     private final UtilityRepository utilityRepository;
     private final FacilityRepository facilityRepository;
+    private final CampTypeRepository campTypeRepository;
 
     @Value("${aws.s3.bucketName}")
     private String bucketName;
 
     @Override
-    public String uploadCampSiteFiles(List<MultipartFile> files, int id) {
+    public List<String> uploadCampSiteFiles(List<MultipartFile> files, int id) {
         try {
-            String fileName = "";
+            List<String> fileNames = new ArrayList<>();
+            String fileName;
             String folderName = "CampSite";
             CampSite campsite = campSiteRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.CAMP_SITE_NOT_FOUND));
             String prefix = campsite.getName() + "/CAMPSITE";
@@ -60,10 +59,11 @@ public class S3ServiceImpl implements S3Service {
                 image.setPath(fileName);
                 image.setCampSite(campsite);
                 images.add(image);
+                fileNames.add(fileName);
             }
             campsite.getImageList().addAll(images);
             campSiteRepository.save(campsite);
-            return fileName;
+            return fileNames;
         } catch (IOException e) {
             throw new AppException(ErrorCode.S3_ERROR);
         }
@@ -103,6 +103,14 @@ public class S3ServiceImpl implements S3Service {
                     fileName = folderName + "/" + prefix + "_" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
                     utility.setImageUrl(fileName);
                     utilityRepository.save(utility);
+                }
+                case "campType" -> {
+                    folderName = "CampType";
+                    prefix = "CAMPTYPE_";
+                    CampType campType = campTypeRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.UTILITY_NOT_FOUND));
+                    fileName = folderName + "/" + prefix + "_" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
+                    campType.setImage(fileName);
+                    campTypeRepository.save(campType);
                 }
                 default -> throw new AppException(ErrorCode.INVALID_REQUEST, "The provided fileType is not supported.");
             }

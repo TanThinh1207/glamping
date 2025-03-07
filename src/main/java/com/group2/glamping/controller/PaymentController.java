@@ -1,23 +1,19 @@
 package com.group2.glamping.controller;
 
 import com.group2.glamping.exception.AppException;
+import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.PaymentRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
-import com.group2.glamping.model.dto.response.PaymentBaseResponse;
 import com.group2.glamping.model.dto.response.StripeResponse;
-import com.group2.glamping.model.enums.PaymentStatus;
 import com.group2.glamping.service.impl.StripeService;
 import com.group2.glamping.service.interfaces.BookingService;
-import com.group2.glamping.service.interfaces.PaymentService;
-import jakarta.servlet.http.HttpServletRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -25,133 +21,86 @@ import java.util.Optional;
 @CrossOrigin
 public class PaymentController {
 
-    private final PaymentService paymentService;
+
     private final BookingService bookingService;
     private final StripeService stripeService;
 
 
+    @Operation(
+            summary = "Process a Stripe payment",
+            description = "Initiate a payment using Stripe's API. This endpoint processes a payment request and returns a Stripe response.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Payment processed successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid payment request"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
     @PostMapping("/stripe/checkout")
-    public ResponseEntity<StripeResponse> payStripe(@RequestBody PaymentRequest stripeRequest) throws AppException {
+    public ResponseEntity<StripeResponse> payStripe(
+            @Parameter(
+                    description = "Payment request containing payment details",
+                    required = true
+            )
+            @RequestBody PaymentRequest stripeRequest) throws AppException {
         StripeResponse stripeResponse = stripeService.pay(stripeRequest);
         return new ResponseEntity<>(stripeResponse, HttpStatus.OK);
     }
 
-//    @PostMapping("/stripe/refund")
-//    public ResponseEntity<BaseResponse> refundStripe(@RequestParam String hostStripeAccountId,
-//                                                     @RequestParam long amountInCents,
-//                                                     @RequestParam long platformFeeInCents) throws AppException {
-//
-//    }
+    @Operation(
+            summary = "Transfer funds to a host",
+            description = "Transfer a specified amount to a host's Stripe account",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Transfer successful"),
+                    @ApiResponse(responseCode = "400", description = "Invalid input or bad request"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    @PostMapping("/transfer")
+    public ResponseEntity<BaseResponse> transferToHost(
+            @Parameter(description = "Stripe account ID of the host", example = "acct_1QzvMNPRMkwRnnIv")
+            @RequestParam String hostStripeAccountId,
 
-    @GetMapping()
-    public ResponseEntity<BaseResponse> findAll() {
-        List<PaymentBaseResponse> payments = paymentService.findAll();
-        return ResponseEntity.ok(
-                BaseResponse.builder()
-                        .message("Find all payments successfully")
-                        .data(payments)
-                        .statusCode(HttpStatus.OK.value())
-                        .build()
-
-        );
-    }
-
-    @GetMapping("/{bookingId}")
-    public ResponseEntity<?> getPaidAmountByBookingId(@PathVariable int bookingId) {
-        return ResponseEntity.ok(BaseResponse.builder()
-                .data(paymentService.getPaidAmountByBooking(bookingId))
-                .statusCode(HttpStatus.OK.value())
-                .message("Paid amount by booking id successfully")
-        );
-    }
-
-    @GetMapping("/vn-pay")
-    public ResponseEntity<BaseResponse> pay(HttpServletRequest request) {
-        return new ResponseEntity<>(
-                BaseResponse.builder()
-                        .message("Success")
-                        .data(paymentService.createVnPayPayment(request))
-                        .statusCode(HttpStatus.OK.value())
-                        .build(),
-                HttpStatus.OK
-        );
-    }
-
-    @GetMapping("/refund")
-    public ResponseEntity<BaseResponse> refund(@RequestParam Integer paymentId,
-                                               @RequestParam BigDecimal refundAmount,
-                                               @RequestParam String reason) {
-        return new ResponseEntity<>(
-                BaseResponse.builder()
-                        .message("Success")
-                        .data(paymentService.refundPayment(paymentId, refundAmount, reason))
-                        .statusCode(HttpStatus.OK.value())
-                        .build(),
-                HttpStatus.OK
-        );
-    }
-
-    @GetMapping("/vn-pay-callback")
-    public ResponseEntity<BaseResponse> payCallbackHandler(
-            @RequestParam String vnp_ResponseCode,
-            @RequestParam Integer bookingId) {
-        if (vnp_ResponseCode.equals("00")) {
-            // Payment successful
-            bookingService.confirmPaymentSuccess(bookingId);
-            return new ResponseEntity<>(
-                    BaseResponse.builder()
-                            .message("Payment successful")
-                            .data(null)
-                            .statusCode(HttpStatus.OK.value())
-                            .build(),
-                    HttpStatus.OK
-            );
-        } else {
-            // Payment failed
-            return new ResponseEntity<>(
-                    BaseResponse.builder()
-                            .message("Payment failed")
-                            .data(null)
-                            .statusCode(HttpStatus.BAD_REQUEST.value())
-                            .build(),
-                    HttpStatus.BAD_REQUEST
-            );
-        }
-    }
-
-    @GetMapping("/info/{bookingId}")
-    public ResponseEntity<?> findPaymentByOrderId(@PathVariable Integer bookingId) {
+            @Parameter(description = "Amount to transfer (in cents)", example = "1000")
+            @RequestParam long amount
+    ) {
         try {
-            Optional<PaymentBaseResponse> paymentResponse = paymentService.findPaymentByBookingId(bookingId);
-            return new ResponseEntity<>(
-                    BaseResponse.builder()
-                            .message("Payment details fetched successfully")
-                            .data(paymentResponse.orElse(null))
-                            .statusCode(HttpStatus.OK.value())
-                            .build(),
-                    HttpStatus.OK
-            );
-        } catch (AppException e) {
-            return new ResponseEntity<>(
-                    BaseResponse.builder()
-                            .message(e.getMessage())
-                            .data(null)
-                            .statusCode(HttpStatus.NOT_FOUND.value())
-                            .build(),
-                    HttpStatus.NOT_FOUND
-            );
+
+            stripeService.transferToHost(hostStripeAccountId, amount);
+            return ResponseEntity.ok(BaseResponse.builder()
+                    .statusCode(HttpStatus.OK.value())
+                    .message("Transfer successful")
+                    .build());
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION, "Transfer failed: " + e.getMessage());
         }
     }
 
-    @GetMapping("/status")
-    public ResponseEntity<BaseResponse> findPaymentByStatus(@RequestParam PaymentStatus status) {
-        List<PaymentBaseResponse> paymentResponse = paymentService.findByStatus(status);
-        return ResponseEntity.ok(
-                BaseResponse.builder()
-                        .message("Find payments by status successfully")
-                        .data(paymentResponse)
-                        .statusCode(HttpStatus.OK.value())
-                        .build()
-        );
+    @Operation(
+            summary = "Refund a payment to a customer",
+            description = "Refund a specified amount to a customer for a given charge",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Refund successful"),
+                    @ApiResponse(responseCode = "400", description = "Invalid input or bad request"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    @PostMapping("/refund")
+    public ResponseEntity<BaseResponse> refundPayment(
+            @Parameter(description = "Charge ID of the payment to refund", example = "ch_1QzvMNPRMkwRnnIv")
+            @RequestParam String chargeId,
+
+            @Parameter(description = "Amount to refund (in cents)", example = "500")
+            @RequestParam double amount
+    ) {
+        try {
+            stripeService.refundPayment(chargeId, amount);
+            return ResponseEntity.ok(BaseResponse.builder()
+                    .statusCode(HttpStatus.OK.value())
+                    .message("Refund successful")
+                    .build());
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION, "Refund failed: " + e.getMessage());
+        }
     }
+
 }

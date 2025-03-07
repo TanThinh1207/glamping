@@ -2,7 +2,6 @@ package com.group2.glamping.service.impl;
 
 import com.group2.glamping.model.dto.requests.PaymentRequest;
 import com.group2.glamping.model.dto.response.StripeResponse;
-import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Account;
 import com.stripe.model.Refund;
@@ -12,17 +11,30 @@ import com.stripe.param.AccountCreateParams;
 import com.stripe.param.RefundCreateParams;
 import com.stripe.param.TransferCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+
+import static com.group2.glamping.utils.CurrencyConverter.convertVndToUsd;
+import static com.stripe.Stripe.apiKey;
 
 @Service
 public class StripeService {
     @Value("${stripe.secretKey}")
     private String secretKey;
 
+    @Value("${exchange.api.key}")
+    private String exchangeApiKey;
+
+
+    @PostConstruct
+    public void init() {
+        apiKey = secretKey; // Initialize Stripe with your API key
+    }
 
     public StripeResponse pay(PaymentRequest paymentRequest) {
-        Stripe.apiKey = secretKey;
 
         SessionCreateParams.LineItem.PriceData.ProductData productData = SessionCreateParams.LineItem.PriceData.ProductData.builder()
                 .setName(paymentRequest.getName())
@@ -42,6 +54,7 @@ public class StripeService {
                 .setSuccessUrl("http://localhost:8080/success")
                 .setCancelUrl("http://localhost:8080/cancel")
                 .addLineItem(lineItem)
+                .putMetadata("bookingId", String.valueOf(paymentRequest.getBookingId()))
                 .build();
 
         Session session = null;
@@ -61,7 +74,7 @@ public class StripeService {
     }
 
     // Create Connected Account for Host
-    public Account createHostAccount(String email) throws StripeException {
+    public void createHostAccount(String email) throws StripeException {
         AccountCreateParams params =
                 AccountCreateParams.builder()
                         .setType(AccountCreateParams.Type.EXPRESS)
@@ -69,28 +82,48 @@ public class StripeService {
                         .setEmail(email)
                         .setCapabilities(
                                 AccountCreateParams.Capabilities.builder()
-                                        .setTransfers(AccountCreateParams.Capabilities.Transfers.builder().setRequested(true).build())
+                                        .setTransfers(
+                                                AccountCreateParams.Capabilities.Transfers.builder()
+                                                        .setRequested(true)
+                                                        .build()
+                                        )
                                         .build()
                         )
                         .build();
 
-        return Account.create(params);
+        Account.create(params);
     }
 
     // Transfer payout to Host
-    public void transferToHost(String hostStripeAccountId, long amountInCents, long platformFeeInCents) throws StripeException {
-        long hostAmount = amountInCents - platformFeeInCents;
+    public void transferToHost(String hostStripeAccountId, long amountVnd) throws StripeException, IOException {
+        try {
+            // Step 1: Deduct 10% fee from the amount (in VND)
+            long hostAmountVnd = (long) (amountVnd * 0.9);
+            System.out.println("Amount after 10% fee (VND): " + hostAmountVnd);
 
-        TransferCreateParams params =
-                TransferCreateParams.builder()
-                        .setAmount(hostAmount)
-                        .setCurrency("VND")
-                        .setDestination(hostStripeAccountId)
-                        .setDescription("Payout for completed booking")
-                        .build();
+            // Step 2: Convert VND to USD (in cents)
+            long amountUsdCents = (long) convertVndToUsd(hostAmountVnd, exchangeApiKey);
+            System.out.println("Converted amount (USD cents): " + amountUsdCents);
 
-        Transfer transfer = Transfer.create(params);
-        System.out.println("Transfer successful: " + transfer.getId());
+            // Step 3: Create transfer parameters
+            TransferCreateParams params =
+                    TransferCreateParams.builder()
+                            .setAmount(amountUsdCents) // Amount in USD cents
+                            .setCurrency("usd") // Currency is USD
+                            .setDestination(hostStripeAccountId) // Host's Stripe account ID
+                            .setDescription("Payout for completed booking") // Description of the transfer
+                            .build();
+
+            // Step 4: Execute the transfer
+            Transfer transfer = Transfer.create(params);
+            System.out.println("Transfer successful: " + transfer.getId());
+        } catch (StripeException e) {
+            System.err.println("Stripe transfer failed: " + e.getMessage());
+            throw e;
+        } catch (IOException e) {
+            System.err.println("Currency conversion failed: " + e.getMessage());
+            throw e;
+        }
     }
 
     // Refund payment to Customer
