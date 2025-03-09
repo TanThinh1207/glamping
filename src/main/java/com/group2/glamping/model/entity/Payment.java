@@ -39,4 +39,7 @@ public class Payment {
 
     @Column(name = "completed_at")
     private LocalDateTime completedTime;
+
+    @Column(name = "session_id")
+    private String sessionId;
 }

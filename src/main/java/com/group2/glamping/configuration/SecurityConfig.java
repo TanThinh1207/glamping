@@ -40,7 +40,7 @@ public class SecurityConfig {
             "/api/camp-types/**", "/api/selections/**", "/api/facilities/**", "/api/utilities/**",
             "/api/place-types/**", "/mail/**", "/api/users/**", "/api/campsites/**", "/api/booking-details/**",
             "/api/v1/auth/**", "/api/campsites/**", "/api/bookings/**", "/api/payments/**",
-            "/home/**", "/home", "/api/s3/**",
+            "/home/**", "/home", "/api/s3/**", "/oauth2/authorization/google",
             "/", "/login", "/payment",
             "/confirm-payment", "/refund" // sau khi có link FE sẽ đổi sang link fe
 
@@ -61,13 +61,7 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                         .accessDeniedHandler(customAccessDeniedHandler))
-//                .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-//                .oauth2Login(oauth2 -> oauth2
-//                        .userInfoEndpoint(userInfo -> userInfo.userService(oauth2UserService()))
-//                        .successHandler(customAuthenticationSuccessHandler)
-//                )
-//                .formLogin(Customizer.withDefaults())
                 .build();
     }
 

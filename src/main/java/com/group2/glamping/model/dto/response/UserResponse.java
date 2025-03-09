@@ -42,5 +42,9 @@ public class UserResponse {
         this.campSiteIds = user.getCampSiteList() == null ? new ArrayList<>() : user.getCampSiteList().stream()
                 .map(CampSite::getId)
                 .collect(Collectors.toList());
+
+
+
+
     }
 }

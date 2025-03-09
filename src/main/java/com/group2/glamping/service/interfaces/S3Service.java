@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface S3Service {
 
-    String uploadCampSiteFiles(List<MultipartFile> files, int id);
+    List<String> uploadCampSiteFiles(List<MultipartFile> files, int id);
 
     String uploadFile(MultipartFile file, String fileType, int campSiteId);
 

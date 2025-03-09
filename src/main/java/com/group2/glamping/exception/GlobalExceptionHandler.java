@@ -2,6 +2,7 @@ package com.group2.glamping.exception;
 
 import com.google.firebase.FirebaseException;
 import com.group2.glamping.model.dto.response.BaseResponse;
+import com.stripe.exception.StripeException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -38,6 +39,17 @@ public class GlobalExceptionHandler {
                 .status(ex.getErrorCode().ordinal())
                 .body(BaseResponse.builder()
                         .statusCode(ex.getErrorCode().ordinal())
+                        .message(ex.getMessage())
+                        .data(null)
+                        .build());
+    }
+
+    @ExceptionHandler(StripeException.class)
+    public ResponseEntity<BaseResponse> handleStripeException(StripeException ex) {
+        return ResponseEntity
+                .status(ex.getStatusCode())
+                .body(BaseResponse.builder()
+                        .statusCode(ex.getStatusCode())
                         .message(ex.getMessage())
                         .data(null)
                         .build());

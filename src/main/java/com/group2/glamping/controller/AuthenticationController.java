@@ -8,6 +8,7 @@ import com.group2.glamping.model.dto.requests.VerifyTokenRequest;
 import com.group2.glamping.model.dto.response.AuthenticationResponse;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.service.impl.AuthenticationService;
+import com.stripe.exception.StripeException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -46,6 +47,12 @@ public class AuthenticationController {
                     .body(BaseResponse.builder()
                             .statusCode(HttpStatus.UNAUTHORIZED.value())
                             .message("Firebase Authentication failed: " + e.getMessage())
+                            .build());
+        } catch (StripeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(BaseResponse.builder()
+                            .statusCode(HttpStatus.UNAUTHORIZED.value())
+                            .message("Stripe exception failed: " + e.getMessage())
                             .build());
         }
     }
