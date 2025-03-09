@@ -75,6 +75,9 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<FcmToken> fcmTokenList;
 
+    @Column(name = "connection_id")
+    private String connectionId;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
