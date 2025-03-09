@@ -30,7 +30,9 @@ public enum ErrorCode {
     INVALID_REQUEST(10018, "Invalid request", HttpStatus.BAD_REQUEST),
     FACILITY_NOT_FOUND(10019, "Facility not found", HttpStatus.NOT_FOUND),
     BOOKING_DETAIL_NOT_FOUND(10020, "Booking detail not found", HttpStatus.NOT_FOUND),
-    CAMP_NOT_FOUND(10021, "Camp not found", HttpStatus.NOT_FOUND);
+    CAMP_NOT_FOUND(10021, "Camp not found", HttpStatus.NOT_FOUND),
+    PAYMENT_NOT_FOUND(10022, "Payment not found", HttpStatus.NOT_FOUND),
+    PAYMENT_FAILED(10023, "Payment failed", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final int code;
     private final String message;
