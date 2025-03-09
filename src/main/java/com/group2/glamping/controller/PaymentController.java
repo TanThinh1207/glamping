@@ -87,10 +87,10 @@ public class PaymentController {
     )
     @PostMapping("/refund")
     public ResponseEntity<BaseResponse> refundPayment(
-            @Parameter(description = "Charge ID of the payment to refund", example = "ch_1QzvMNPRMkwRnnIv")
+            @Parameter(description = "ID of the booking to refund", example = "1")
             @RequestParam Integer bookingId,
 
-            @Parameter(description = "Amount to refund (in cents)", example = "500")
+            @Parameter(description = "Amount to refund (in vnd)", example = "500000")
             @RequestParam double amount
     ) {
         try {
