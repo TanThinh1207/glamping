@@ -44,7 +44,5 @@ public class UserResponse {
                 .collect(Collectors.toList());
 
 
-
-
     }
 }

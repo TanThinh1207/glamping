@@ -6,10 +6,12 @@ import com.group2.glamping.model.dto.requests.PaymentRequest;
 import com.group2.glamping.model.dto.response.StripeResponse;
 import com.group2.glamping.model.entity.Booking;
 import com.group2.glamping.model.entity.Payment;
+import com.group2.glamping.model.entity.User;
 import com.group2.glamping.model.enums.BookingStatus;
 import com.group2.glamping.model.enums.PaymentStatus;
 import com.group2.glamping.repository.BookingRepository;
 import com.group2.glamping.repository.PaymentRepository;
+import com.group2.glamping.repository.UserRepository;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Account;
 import com.stripe.model.Refund;
@@ -23,9 +25,12 @@ import com.stripe.param.checkout.SessionRetrieveParams;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import static com.group2.glamping.utils.CurrencyConverter.convertVndToUsd;
 import static com.stripe.Stripe.apiKey;
@@ -47,15 +52,16 @@ public class StripeService {
 
     public final PaymentRepository paymentRepository;
     public final BookingRepository bookingRepository;
+    public final UserRepository userRepository;
 
     public StripeResponse pay(PaymentRequest paymentRequest) {
 
         SessionCreateParams.LineItem.PriceData.ProductData productData = SessionCreateParams.LineItem.PriceData.ProductData.builder()
-                .setName(paymentRequest.getName())
+                .setName(paymentRequest.name())
                 .build();
         SessionCreateParams.LineItem.PriceData priceData = SessionCreateParams.LineItem.PriceData.builder()
-                .setCurrency(paymentRequest.getCurrency() == null ? "USD" : paymentRequest.getCurrency())
-                .setUnitAmount((long) paymentRequest.getAmount())
+                .setCurrency(paymentRequest.currency() == null ? "USD" : paymentRequest.currency())
+                .setUnitAmount((long) paymentRequest.amount())
                 .setProductData(productData)
                 .build();
         SessionCreateParams.LineItem lineItem = SessionCreateParams.LineItem.builder()
@@ -65,20 +71,26 @@ public class StripeService {
 
         SessionCreateParams params = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
-                .setSuccessUrl("http://localhost:8080/api/stripe/success")
-                .setCancelUrl("http://localhost:8080/api/stripe/cancel")
+                .setSuccessUrl("http://localhost:8080/api/payments/success?session_id={CHECKOUT_SESSION_ID}")
+                .setCancelUrl("http://localhost:8080/api/payments/cancel?session_id={CHECKOUT_SESSION_ID}")
                 .addLineItem(lineItem)
-                .putMetadata("bookingId", String.valueOf(paymentRequest.getBookingId()))
+                .putMetadata("bookingId", String.valueOf(paymentRequest.bookingId()))
+//                .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                 .build();
 
         Session session = null;
         try {
+            System.out.println("Creating Stripe session...");
             session = Session.create(params);
+            System.out.println("Stripe session created: " + session.getId());
             paymentRepository.save(Payment.builder()
-                    .booking(bookingRepository.getReferenceById(paymentRequest.getBookingId()))
+                    .booking(bookingRepository.getReferenceById(paymentRequest.bookingId()))
                     .status(PaymentStatus.Pending)
-                    .totalAmount(paymentRequest.getAmount())
+                    .totalAmount(paymentRequest.amount())
                     .paymentMethod("Stripe")
+                    .sessionId(session.getId())
+                    .url(session.getUrl())
+                    .completedTime(LocalDateTime.now())
                     .build());
         } catch (StripeException e) {
             System.out.println(e.getMessage());
@@ -110,11 +122,14 @@ public class StripeService {
                         )
                         .build();
 
-        Account.create(params);
+        Account account = Account.create(params);
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        user.setConnectionId(account.getId());
+        userRepository.save(user);
     }
 
     // Transfer payout to Host
-    public void transferToHost(String hostStripeAccountId, long amountVnd) throws StripeException, IOException {
+    public void transferToHost(int hostID, long amountVnd) throws StripeException, IOException {
         try {
             long hostAmountVnd = (long) (amountVnd * 0.9);
             System.out.println("Amount after 10% fee (VND): " + hostAmountVnd);
@@ -122,12 +137,15 @@ public class StripeService {
             long amountUsdCents = (long) convertVndToUsd(hostAmountVnd, exchangeApiKey);
             System.out.println("Converted amount (USD cents): " + amountUsdCents);
 
+            User user = userRepository.findById(hostID).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+
             TransferCreateParams params =
                     TransferCreateParams.builder()
-                            .setAmount(amountUsdCents) // Amount in USD cents
-                            .setCurrency("usd") // Currency is USD
-                            .setDestination(hostStripeAccountId) // Host's Stripe account ID
-                            .setDescription("Payout for completed booking") // Description of the transfer
+                            .setAmount(amountUsdCents)
+                            .setCurrency("usd")
+                            .setDestination(user.getConnectionId())
+                            .setDescription("Payout for completed booking")
                             .build();
 
             Transfer transfer = Transfer.create(params);
@@ -142,14 +160,14 @@ public class StripeService {
     }
 
     // Refund payment to Customer
-    public void refundPayment(String chargeId, double amount) throws StripeException {
+    public void refundPayment(int bookingId, double amount) throws StripeException {
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        String chargeId = booking.getPaymentList().getFirst().getTransactionId();
         RefundCreateParams params =
                 RefundCreateParams.builder()
                         .setCharge(chargeId)
                         .setAmount((long) amount)
                         .build();
-        Payment payment = paymentRepository.findByTransactionId(chargeId).orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
-        Booking booking = payment.getBooking();
         booking.setStatus(BookingStatus.Refund);
         bookingRepository.save(booking);
         Refund refund = Refund.create(params);
@@ -174,6 +192,9 @@ public class StripeService {
 
         payment.setStatus(paymentStatus);
 
+        if (session.getPaymentIntent() != null) {
+            payment.setTransactionId(session.getPaymentIntent());
+        }
         paymentRepository.save(payment);
 
         if (paymentStatus == PaymentStatus.Completed) {
@@ -182,6 +203,55 @@ public class StripeService {
             booking.setStatus(BookingStatus.Cancelled);
         }
         bookingRepository.save(booking);
+    }
+
+    public void cancelPayment(String sessionId) throws StripeException {
+        Session session = getSessionDetails(sessionId);
+
+        if (!"expired".equals(session.getStatus())) {
+            session.expire();
+            System.out.println("Session expired: " + session.getStatus());
+        }
+
+        int bookingId = Integer.parseInt(session.getMetadata().get("bookingId"));
+
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+        Payment payment = paymentRepository.findBySessionId(sessionId)
+                .orElseGet(() -> Payment.builder()
+                        .sessionId(sessionId)
+                        .booking(booking)
+                        .paymentMethod("Stripe")
+                        .totalAmount(session.getAmountTotal() / 100.0)
+                        .build());
+
+        payment.setStatus(PaymentStatus.Failed);
+        booking.setStatus(BookingStatus.Cancelled);
+        bookingRepository.save(booking);
+    }
+
+    @Scheduled(fixedRate = 86400000)
+    public void cancelExpiredPayments() {
+        LocalDateTime timeLimit = LocalDateTime.now().minusHours(24);
+        List<Payment> expiredPayments = paymentRepository.findPaymentsOlderThan24Hours(timeLimit, PaymentStatus.Pending);
+
+        for (Payment payment : expiredPayments) {
+            try {
+                Session session = getSessionDetails(payment.getSessionId());
+                if (session.getStatus().equals("expired")) {
+                    Booking booking = payment.getBooking();
+                    booking.setStatus(BookingStatus.Cancelled);
+                    bookingRepository.save(booking);
+
+                    payment.setStatus(PaymentStatus.Failed);
+                    paymentRepository.save(payment);
+
+                    System.out.println("Payment and booking updated as expired for session: " + session.getId());
+                }
+            } catch (StripeException e) {
+                System.err.println("Error checking session status: " + e.getMessage());
+            }
+        }
     }
 
     public Session getSessionDetails(String sessionId) throws StripeException {

@@ -40,6 +40,9 @@ public class Payment {
     @Column(name = "completed_at")
     private LocalDateTime completedTime;
 
-    @Column(name = "session_id")
+    @Column(name = "id_session")
     private String sessionId;
+
+    @Column(name = "url")
+    private String url;
 }

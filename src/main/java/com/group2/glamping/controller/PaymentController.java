@@ -7,7 +7,6 @@ import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.StripeResponse;
 import com.group2.glamping.model.enums.PaymentStatus;
 import com.group2.glamping.service.impl.StripeService;
-import com.group2.glamping.service.interfaces.BookingService;
 import com.stripe.exception.StripeException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,8 +24,6 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin
 public class PaymentController {
 
-
-    private final BookingService bookingService;
     private final StripeService stripeService;
 
 
@@ -39,7 +36,7 @@ public class PaymentController {
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
-    @PostMapping("/stripe/checkout")
+    @PostMapping("/checkout")
     public ResponseEntity<StripeResponse> payStripe(
             @Parameter(
                     description = "Payment request containing payment details",
@@ -61,15 +58,15 @@ public class PaymentController {
     )
     @PostMapping("/transfer")
     public ResponseEntity<BaseResponse> transferToHost(
-            @Parameter(description = "Stripe account ID of the host", example = "acct_1QzvMNPRMkwRnnIv")
-            @RequestParam String hostStripeAccountId,
+            @Parameter(description = " ID of the host", example = "1")
+            @RequestParam Integer hostId,
 
             @Parameter(description = "Amount to transfer (in cents)", example = "1000")
             @RequestParam long amount
     ) {
         try {
 
-            stripeService.transferToHost(hostStripeAccountId, amount);
+            stripeService.transferToHost(hostId, amount);
             return ResponseEntity.ok(BaseResponse.builder()
                     .statusCode(HttpStatus.OK.value())
                     .message("Transfer successful")
@@ -91,13 +88,13 @@ public class PaymentController {
     @PostMapping("/refund")
     public ResponseEntity<BaseResponse> refundPayment(
             @Parameter(description = "Charge ID of the payment to refund", example = "ch_1QzvMNPRMkwRnnIv")
-            @RequestParam String chargeId,
+            @RequestParam Integer bookingId,
 
             @Parameter(description = "Amount to refund (in cents)", example = "500")
             @RequestParam double amount
     ) {
         try {
-            stripeService.refundPayment(chargeId, amount);
+            stripeService.refundPayment(bookingId, amount);
             return ResponseEntity.ok(BaseResponse.builder()
                     .statusCode(HttpStatus.OK.value())
                     .message("Refund successful")
@@ -107,20 +104,27 @@ public class PaymentController {
         }
     }
 
+    @Operation(
+            summary = "Handle successful payment",
+            description = "This endpoint is called when a payment is successfully completed. It updates the payment status to 'Completed' in the database.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Payment status updated successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid session ID or bad request"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error or Stripe API failure")
+            }
+    )
     @GetMapping("/success")
     public ResponseEntity<BaseResponse> handleSuccess(
             @Parameter(description = "Stripe session ID", example = "cs_test_xxxxxxxxxxxxxxxxxxxxxxxx")
-            @RequestParam("session_id") String sessionId) throws StripeException {
+            @RequestParam("session_id") String sessionId) {
         try {
-            // Update payment status to "Completed"
             stripeService.updatePaymentStatus(sessionId, PaymentStatus.Completed);
             log.info("Payment successful for session ID: {}", sessionId);
 
-            // Return a success response
             return ResponseEntity.ok(BaseResponse.builder()
                     .statusCode(HttpStatus.OK.value())
                     .message("Payment successful!")
-                    .data(sessionId) // Optionally include the session ID in the response
+                    .data(sessionId)
                     .build());
         } catch (StripeException e) {
             log.error("Failed to update payment status for session ID: {}", sessionId, e);
@@ -128,20 +132,28 @@ public class PaymentController {
         }
     }
 
+    @Operation(
+            summary = "Handle cancelled payment",
+            description = "This endpoint is called when a payment is cancelled. It updates the payment status to 'Failed' in the database.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Payment status updated successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid session ID or bad request"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error or Stripe API failure")
+            }
+    )
     @GetMapping("/cancel")
     public ResponseEntity<BaseResponse> handleCancel(
             @Parameter(description = "Stripe session ID", example = "cs_test_xxxxxxxxxxxxxxxxxxxxxxxx")
-            @RequestParam("session_id") String sessionId) throws StripeException {
+            @RequestParam("session_id") String sessionId) {
         try {
-            // Update payment status to "Failed"
-            stripeService.updatePaymentStatus(sessionId, PaymentStatus.Failed);
+            stripeService.cancelPayment(sessionId);
             log.info("Payment cancelled for session ID: {}", sessionId);
 
             // Return a success response
             return ResponseEntity.ok(BaseResponse.builder()
                     .statusCode(HttpStatus.OK.value())
                     .message("Payment cancelled!")
-                    .data(sessionId) // Optionally include the session ID in the response
+                    .data(sessionId)
                     .build());
         } catch (StripeException e) {
             log.error("Failed to update payment status for session ID: {}", sessionId, e);
