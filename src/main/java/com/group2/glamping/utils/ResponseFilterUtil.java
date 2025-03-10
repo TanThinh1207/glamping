@@ -1,34 +1,36 @@
 package com.group2.glamping.utils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import com.group2.glamping.model.dto.response.BaseResponse;
-import org.springframework.http.HttpStatus;
+import com.group2.glamping.model.dto.response.PagingResponse;
+import org.springframework.http.converter.json.MappingJacksonValue;
+
+import java.util.List;
 
 public class ResponseFilterUtil {
 
-    public static Object getFilteredResponse(String fields, Object data, String message) {
-        BaseResponse response = BaseResponse.builder()
-                .statusCode(HttpStatus.OK.value())
-                .data(data)
-                .message(message)
-                .build();
-
+    public static <T> PagingResponse<T> getFilteredResponse(String fields, PagingResponse<T> pagingResponse) {
         if (fields != null && !fields.isEmpty()) {
             try {
-                ObjectMapper mapper = new ObjectMapper();
-                SimpleFilterProvider filters = new SimpleFilterProvider()
-                        .addFilter("dynamicFilter", SimpleBeanPropertyFilter.filterOutAllExcept(fields.split(",")));
+                String[] fieldArray = fields.split(",");
 
-                mapper.setFilterProvider(filters);
+                SimpleFilterProvider filterProvider = new SimpleFilterProvider()
+                        .addFilter("dynamicFilter", SimpleBeanPropertyFilter.filterOutAllExcept(fieldArray))
+                        .setFailOnUnknownId(false);
 
-                return mapper.convertValue(response, Object.class);
+                // Wrap the content of the PagingResponse in a MappingJacksonValue
+                MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(pagingResponse.getContent());
+                mappingJacksonValue.setFilters(filterProvider);
+
+                // Update the content of the PagingResponse with the filtered data
+                pagingResponse.setContent((List<T>) mappingJacksonValue.getValue());
+
+                return pagingResponse;
             } catch (Exception e) {
                 throw new RuntimeException("Failed to filter response fields", e);
             }
         }
 
-        return response;
+        return pagingResponse;
     }
 }

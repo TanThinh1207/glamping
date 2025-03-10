@@ -1,6 +1,5 @@
 package com.group2.glamping.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.group2.glamping.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -17,7 +16,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -60,15 +59,12 @@ public class User implements UserDetails {
     @Column(name = "status")
     private boolean status;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private List<Booking> bookingList;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private List<CampSite> campSiteList;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private List<Report> reportList;
 

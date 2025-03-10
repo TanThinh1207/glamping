@@ -1,7 +1,8 @@
-package com.group2.glamping.model.dto.response;
+package com.group2.glamping.model.dto.response.filter;
 
-import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.group2.glamping.model.dto.response.FacilityResponse;
 import com.group2.glamping.model.entity.CampType;
 import com.group2.glamping.service.interfaces.S3Service;
 import lombok.AllArgsConstructor;
@@ -16,8 +17,8 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonFilter("dynamicFilter")
-public class CampTypeResponse {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class CampTypeResponseFilter {
     int id;
     String type;
     int capacity;
@@ -31,12 +32,12 @@ public class CampTypeResponse {
     String image;
     List<FacilityResponse> facilities;
 
-    public static CampTypeResponse fromEntity(CampType campType, S3Service s3Service) {
+    public static CampTypeResponseFilter fromEntity(CampType campType, S3Service s3Service) {
         if (campType == null) {
             return null;
         }
 
-        return CampTypeResponse.builder()
+        return CampTypeResponseFilter.builder()
                 .id(campType.getId())
                 .type(campType.getType())
                 .capacity(campType.getCapacity())

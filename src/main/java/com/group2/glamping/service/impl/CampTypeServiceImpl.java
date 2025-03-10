@@ -196,7 +196,7 @@ public class CampTypeServiceImpl implements CampTypeService {
     @Override
     public Object getFilteredCampTypes(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
         PagingResponse<?> campTypes = getCampTypes(params, page, size, sortBy, direction);
-        return ResponseFilterUtil.getFilteredResponse(fields, campTypes, "Retrieve filtered list successfully");
+        return ResponseFilterUtil.getFilteredResponse(fields, campTypes);
 
     }
 

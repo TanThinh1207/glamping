@@ -123,7 +123,7 @@ public class SelectionServiceImpl implements SelectionService {
     @Override
     public Object getFilteredSelections(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
         PagingResponse<?> selections = getSelections(params, page, size, sortBy, direction);
-        return ResponseFilterUtil.getFilteredResponse(fields, selections, "Retrieve filtered list successfully");
+        return ResponseFilterUtil.getFilteredResponse(fields, selections);
     }
 
 

@@ -167,9 +167,15 @@ public class BookingServiceImpl implements BookingService {
     public PagingResponse<?> getBookings(Map<String, String> params, int page, int size, String sortBy, String direction) {
         Specification<Booking> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
+            Join<Booking, CampSite> campSiteJoin = root.join("campSite");
 
             if (params.containsKey("campSiteId") && params.get("campSiteId").isEmpty()) {
                 return criteriaBuilder.and(criteriaBuilder.disjunction());
+            }
+
+            if (params.containsKey("hostId")) {
+                String hostIdValue = params.get("hostId");
+                predicates.add(criteriaBuilder.equal(campSiteJoin.get("user").get("id"), Long.parseLong(hostIdValue)));
             }
 
             params.forEach((key, value) -> {
@@ -180,11 +186,16 @@ public class BookingServiceImpl implements BookingService {
                     case "name":
                         predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
                         break;
+                    case "userId":
+                        predicates.add(criteriaBuilder.equal(root.get("id_user"), value));
+                        break;
                     case "status":
                         predicates.add(criteriaBuilder.equal(root.get("status"), value));
                         break;
+                    case "rating":
+                        predicates.add(criteriaBuilder.equal(root.get("rating"), value));
+                        break;
                     case "campSiteId":
-                        Join<Booking, CampSite> campSiteJoin = root.join("campSite");
                         if (value.contains(",")) {
                             List<Long> campSiteIds = Arrays.stream(value.split(","))
                                     .map(Long::parseLong)
@@ -218,8 +229,9 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Object getFilteredBookings(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
-        PagingResponse<?> bookings = getBookings(params, page, size, sortBy, direction);
-        return ResponseFilterUtil.getFilteredResponse(fields, bookings, "Retrieve booking list successfully");
+        PagingResponse<?> bookings = getBookings(params, page, size, sortBy, direction);System.out.println(bookings.getContent());
+        System.out.println(bookings.getContent());
+        return ResponseFilterUtil.getFilteredResponse(fields, bookings);
     }
 
 

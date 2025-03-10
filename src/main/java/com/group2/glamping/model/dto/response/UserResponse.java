@@ -1,6 +1,8 @@
 package com.group2.glamping.model.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.model.entity.User;
 import lombok.AllArgsConstructor;
@@ -17,6 +19,8 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonFilter("dynamicFilter")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserResponse {
     private int id;
     private String email;

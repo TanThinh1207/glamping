@@ -100,7 +100,7 @@ public class UtilityServiceImpl implements UtilityService {
     @Override
     public Object getFilteredUtilities(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
         PagingResponse<?> utilities = getUtilities(params, page, size, sortBy, direction);
-        return ResponseFilterUtil.getFilteredResponse(fields, utilities, "Retrieve filtered list successfully");
+        return ResponseFilterUtil.getFilteredResponse(fields, utilities);
     }
 
     @Override
