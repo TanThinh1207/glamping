@@ -11,14 +11,11 @@ import com.stripe.exception.StripeException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
 
 @Slf4j
 @RestController
@@ -117,23 +114,23 @@ public class PaymentController {
             }
     )
     @GetMapping("/success")
-    public void handleSuccess(
+    public ResponseEntity<BaseResponse> handleSuccess(
             @Parameter(description = "Stripe session ID", example = "cs_test_xxxxxxxxxxxxxxxxxxxxxxxx")
-            @RequestParam("session_id") String sessionId,
-            HttpServletResponse response) {
+            @RequestParam("session_id") String sessionId) {
         try {
             stripeService.updatePaymentStatus(sessionId, PaymentStatus.Completed);
             log.info("Payment successful for session ID: {}", sessionId);
 
-            // Redirect to frontend page (e.g., payment success page)
-            String redirectUrl = "http://localhost:4000/complete-booking";
-            response.sendRedirect(redirectUrl);
-        } catch (StripeException | IOException e) {
+            return ResponseEntity.ok(BaseResponse.builder()
+                    .statusCode(HttpStatus.OK.value())
+                    .message("Payment successful!")
+                    .data(sessionId)
+                    .build());
+        } catch (StripeException e) {
             log.error("Failed to update payment status for session ID: {}", sessionId, e);
             throw new AppException(ErrorCode.PAYMENT_FAILED, "Failed to update payment status: " + e.getMessage());
         }
     }
-
 
     @Operation(
             summary = "Handle cancelled payment",
@@ -145,18 +142,20 @@ public class PaymentController {
             }
     )
     @GetMapping("/cancel")
-    public void handleCancel(
+    public ResponseEntity<BaseResponse> handleCancel(
             @Parameter(description = "Stripe session ID", example = "cs_test_xxxxxxxxxxxxxxxxxxxxxxxx")
-            @RequestParam("session_id") String sessionId,
-            HttpServletResponse response) {
+            @RequestParam("session_id") String sessionId) {
         try {
             stripeService.cancelPayment(sessionId);
             log.info("Payment cancelled for session ID: {}", sessionId);
 
-            // Redirect to frontend page (e.g., payment failed page)
-            String redirectUrl = "http://localhost:4000/complete-booking";
-            response.sendRedirect(redirectUrl);
-        } catch (StripeException | IOException e) {
+            // Return a success response
+            return ResponseEntity.ok(BaseResponse.builder()
+                    .statusCode(HttpStatus.OK.value())
+                    .message("Payment cancelled!")
+                    .data(sessionId)
+                    .build());
+        } catch (StripeException e) {
             log.error("Failed to update payment status for session ID: {}", sessionId, e);
             throw new AppException(ErrorCode.PAYMENT_FAILED, "Failed to update payment status: " + e.getMessage());
         }

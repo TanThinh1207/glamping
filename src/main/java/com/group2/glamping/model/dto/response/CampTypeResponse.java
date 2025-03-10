@@ -1,7 +1,7 @@
 package com.group2.glamping.model.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.group2.glamping.model.entity.CampType;
 import com.group2.glamping.service.interfaces.S3Service;
 import lombok.AllArgsConstructor;
@@ -16,7 +16,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonFilter("dynamicFilter")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CampTypeResponse {
     int id;
     String type;
