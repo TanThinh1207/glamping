@@ -168,6 +168,10 @@ public class BookingServiceImpl implements BookingService {
         Specification<Booking> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
+            if (params.containsKey("campSiteId") && params.get("campSiteId").isEmpty()) {
+                return criteriaBuilder.and(criteriaBuilder.disjunction());
+            }
+
             params.forEach((key, value) -> {
                 switch (key) {
                     case "id":
@@ -181,7 +185,6 @@ public class BookingServiceImpl implements BookingService {
                         break;
                     case "campSiteId":
                         Join<Booking, CampSite> campSiteJoin = root.join("campSite");
-                        if (value.isEmpty()) break;
                         if (value.contains(",")) {
                             List<Long> campSiteIds = Arrays.stream(value.split(","))
                                     .map(Long::parseLong)

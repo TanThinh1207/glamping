@@ -238,6 +238,10 @@ public class CampSiteServiceImpl implements CampSiteService {
                         List<String> utilityNameList = Arrays.asList(value.split(","));
                         Join<CampSite, Utility> utilityJoin = root.join("utilities");
                         predicates.add(utilityJoin.get("name").in(utilityNameList));
+                    case "userId":
+                        Join<CampSite, User> userJoin = root.join("user");
+                        predicates.add(criteriaBuilder.equal(userJoin.get("id"), value));
+                        break;
                 }
             });
 
