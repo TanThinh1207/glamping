@@ -15,6 +15,7 @@ public class BookingSelectionResponse {
     int id;
     String name;
     double quantity;
+    double totalAmount;
 
     public static BookingSelectionResponse fromEntity(BookingSelection bookingSelection) {
         if (bookingSelection == null) {
@@ -27,6 +28,7 @@ public class BookingSelectionResponse {
                 .id(bookingSelection.getSelection().getId())
                 .name(bookingSelection.getSelection().getName())
                 .quantity(bookingSelection.getQuantity())
+                .totalAmount(bookingSelection.getQuantity() * bookingSelection.getSelection().getPrice())
                 .build();
 
     }

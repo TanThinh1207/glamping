@@ -45,6 +45,7 @@ public class CampSiteMapper {
                 .campSiteUtilityList(mapUtilities(campSite))
                 .campSitePlaceTypeList(mapPlaceTypes(campSite))
                 .campSiteCampTypeList(mapCampType(campSite))
+                .description(campSite.getDescription())
                 .build();
     }
 

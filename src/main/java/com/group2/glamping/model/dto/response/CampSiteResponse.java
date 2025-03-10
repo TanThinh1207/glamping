@@ -32,6 +32,7 @@ public class CampSiteResponse {
     private LocalDateTime createdTime;
     private CampSiteStatus status;
     private String message;
+    private String description;
     private Double depositRate;
     private List<ImageResponse> imageList;
     private List<SelectionResponseFilter> campSiteSelectionsList;

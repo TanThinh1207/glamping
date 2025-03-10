@@ -45,6 +45,7 @@ public class CampTypeResponse {
                 .updatedAt(campType.getUpdatedTime())
                 .quantity(campType.getQuantity())
                 .status(campType.isStatus())
+                .image(s3Service.generatePresignedUrl(campType.getImage()))
                 .facilities(FacilityResponse.fromEntity(campType.getFacilities(), s3Service))
                 .build();
     }
