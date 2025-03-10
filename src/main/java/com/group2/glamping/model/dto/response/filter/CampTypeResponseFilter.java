@@ -32,6 +32,8 @@ public class CampTypeResponseFilter {
     String image;
     List<FacilityResponse> facilities;
 
+
+    // Nguyen Chau Thanh Binh
     public static CampTypeResponseFilter fromEntity(CampType campType, S3Service s3Service) {
         if (campType == null) {
             return null;
