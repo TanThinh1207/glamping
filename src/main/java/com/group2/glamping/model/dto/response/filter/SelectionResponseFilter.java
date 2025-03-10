@@ -1,6 +1,5 @@
-package com.group2.glamping.model.dto.response;
+package com.group2.glamping.model.dto.response.filter;
 
-import com.fasterxml.jackson.annotation.JsonFilter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonFilter("dynamicFilter")
-public class SelectionResponse {
+public class SelectionResponseFilter {
 
     private int id;
     private String name;

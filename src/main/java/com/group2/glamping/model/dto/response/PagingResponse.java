@@ -21,6 +21,4 @@ public class PagingResponse<T> {
         this.currentPage = currentPage;
         this.currentPageSize = currentPageSize;
     }
-
-    // Getters and Setters
 }

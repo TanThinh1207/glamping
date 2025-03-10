@@ -1,6 +1,12 @@
 package com.group2.glamping.model.mapper;
 
-import com.group2.glamping.model.dto.response.*;
+import com.group2.glamping.model.dto.response.CampSiteResponse;
+import com.group2.glamping.model.dto.response.FacilityResponse;
+import com.group2.glamping.model.dto.response.ImageResponse;
+import com.group2.glamping.model.dto.response.filter.CampTypeResponseFilter;
+import com.group2.glamping.model.dto.response.filter.PlaceTypeResponseFilter;
+import com.group2.glamping.model.dto.response.filter.SelectionResponseFilter;
+import com.group2.glamping.model.dto.response.filter.UtilityResponseFilter;
 import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.service.interfaces.S3Service;
 import lombok.RequiredArgsConstructor;
@@ -50,13 +56,13 @@ public class CampSiteMapper {
                 Collections.emptyList();
     }
 
-    private List<SelectionResponse> mapSelections(CampSite campSite) {
+    private List<SelectionResponseFilter> mapSelections(CampSite campSite) {
 
         return (campSite.getSelections() != null) ?
                 campSite.getSelections().stream()
                         .map(selection -> {
                             if (selection != null) {
-                                return new SelectionResponse(
+                                return new SelectionResponseFilter(
                                         selection.getId(),
                                         selection.getName(),
                                         selection.getDescription(),
@@ -73,12 +79,12 @@ public class CampSiteMapper {
     }
 
 
-    private List<UtilityResponse> mapUtilities(CampSite campSite) {
+    private List<UtilityResponseFilter> mapUtilities(CampSite campSite) {
         return (campSite.getUtilities() != null) ?
                 campSite.getUtilities().stream()
                         .map(utility -> {
                             if (utility != null) {
-                                return new UtilityResponse(
+                                return new UtilityResponseFilter(
                                         utility.getId(),
                                         utility.getName(),
                                         s3Service.generatePresignedUrl(utility.getImageUrl()),
@@ -92,12 +98,12 @@ public class CampSiteMapper {
                 Collections.emptyList();
     }
 
-    private List<PlaceTypeResponse> mapPlaceTypes(CampSite campSite) {
+    private List<PlaceTypeResponseFilter> mapPlaceTypes(CampSite campSite) {
         return (campSite.getPlaceTypes() != null) ?
                 campSite.getPlaceTypes().stream()
                         .map(placeType -> {
                             if (placeType != null) {
-                                return new PlaceTypeResponse(
+                                return new PlaceTypeResponseFilter(
                                         placeType.getId(),
                                         placeType.getName(),
                                         s3Service.generatePresignedUrl(placeType.getImage()),
@@ -111,12 +117,12 @@ public class CampSiteMapper {
                 Collections.emptyList();
     }
 
-    private List<CampTypeResponse> mapCampType(CampSite campSite) {
+    private List<CampTypeResponseFilter> mapCampType(CampSite campSite) {
         return (campSite.getCampTypes() != null) ?
                 campSite.getCampTypes().stream()
                         .map(campType -> {
                             if (campType != null) {
-                                return new CampTypeResponse(
+                                return new CampTypeResponseFilter(
                                         campType.getId(),
                                         campType.getType(),
                                         campType.getCapacity(),
