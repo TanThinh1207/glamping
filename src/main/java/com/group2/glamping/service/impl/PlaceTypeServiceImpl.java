@@ -96,8 +96,7 @@ public class PlaceTypeServiceImpl implements PlaceTypeService {
     @Override
     public Object getFilteredPlaceTypes(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
         PagingResponse<?> placeTypes = getPlaceTypes(params, page, size, sortBy, direction);
-
-        return ResponseFilterUtil.getFilteredResponse(fields, placeTypes);
+        return ResponseFilterUtil.getFilteredResponse(fields, placeTypes, "Return using dynamic filter successfully");
     }
 
 

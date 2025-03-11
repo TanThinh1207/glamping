@@ -268,7 +268,7 @@ public class CampSiteServiceImpl implements CampSiteService {
     @Override
     public Object getFilteredCampSites(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
         PagingResponse<?> campSites = getCampSites(params, page, size, sortBy, direction);
-        return ResponseFilterUtil.getFilteredResponse(fields, campSites);
+        return ResponseFilterUtil.getFilteredResponse(fields, campSites,"Return using dynamic filter successfully");
     }
 
 
