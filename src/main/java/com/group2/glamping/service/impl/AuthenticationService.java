@@ -4,10 +4,13 @@ package com.group2.glamping.service.impl;
 import com.group2.glamping.auth.JwtService;
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
+import com.group2.glamping.model.dto.requests.VerifyTokenRequest;
 import com.group2.glamping.model.dto.response.AuthenticationResponse;
 import com.group2.glamping.model.dto.response.UserResponse;
+import com.group2.glamping.model.entity.FcmToken;
 import com.group2.glamping.model.entity.User;
 import com.group2.glamping.model.enums.Role;
+import com.group2.glamping.repository.FcmTokenRepository;
 import com.group2.glamping.repository.UserRepository;
 import com.stripe.exception.StripeException;
 import lombok.RequiredArgsConstructor;
@@ -21,16 +24,16 @@ import java.util.Optional;
 public class AuthenticationService {
 
     private final UserRepository userRepository;
-    //    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final StripeService stripeService;
+    private final FcmTokenRepository fcmTokenRepository;
 
-    public AuthenticationResponse verify(String email) throws AppException, StripeException {
+
+    public AuthenticationResponse verify(VerifyTokenRequest request, String email) throws AppException, StripeException {
         Optional<User> userOptional = userRepository.findByEmail(email);
-
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-
+            fcmTokenRepository.save(new FcmToken(0, request.fcmToken(), user, request.deviceid()));
             if (!user.isStatus()) {
                 throw new AppException(ErrorCode.USER_NOT_AVAILABLE);
             }
@@ -44,16 +47,14 @@ public class AuthenticationService {
                     .build();
         }
 
-
         User newUser = User.builder()
                 .email(email)
                 .role(Role.ROLE_USER)
                 .createdTime(LocalDateTime.now())
-//                .password(passwordEncoder.encode(email))
                 .status(true)
                 .build();
 
-        userRepository.save(newUser); // Lưu user mới vào database
+        userRepository.save(newUser);
         String jwtToken = jwtService.generateToken(newUser);
         stripeService.createHostAccount(email);
 
@@ -67,7 +68,4 @@ public class AuthenticationService {
 
 
 }
-
-
-
 

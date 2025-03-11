@@ -93,11 +93,11 @@ public class PaymentController {
             @Parameter(description = "ID of the booking to refund", example = "1")
             @RequestParam Integer bookingId,
 
-            @Parameter(description = "Amount to refund (in vnd)", example = "500000")
-            @RequestParam double amount
+            @Parameter(description = "Deny reason", example = "Vi m ngu nen khong cho thue")
+            @RequestParam String message
     ) {
         try {
-            stripeService.refundPayment(bookingId, amount);
+            stripeService.refundPayment(bookingId, message);
             return ResponseEntity.ok(BaseResponse.builder()
                     .statusCode(HttpStatus.OK.value())
                     .message("Refund successful")

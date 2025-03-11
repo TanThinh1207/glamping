@@ -134,7 +134,7 @@ public class UserServiceImpl implements UserService {
         if (userOptional.isPresent()) {
             User user = userOptional.get();
 
-            if (!fcmTokenRepository.existsByTokenAndUserId(fcmToken, userId)) {
+            if (!fcmTokenRepository.existsByDeviceIdAndUserId(fcmToken, userId)) {
                 FcmToken token = new FcmToken();
                 token.setToken(fcmToken);
                 token.setUser(user);
@@ -146,9 +146,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String removeFcmToken(int userId, String fcmToken) {
-        if (fcmTokenRepository.existsByTokenAndUserId(fcmToken, userId)) {
-            fcmTokenRepository.deleteByTokenAndUserId(fcmToken, userId);
+    public String removeFcmToken(int userId, String deviceId) {
+        if (fcmTokenRepository.existsByDeviceIdAndUserId(deviceId, userId)) {
+            fcmTokenRepository.deleteByDeviceIdAndUserId(deviceId, userId);
             return "FCM Token removed successfully";
         }
         return "FCM Token not found";
@@ -157,7 +157,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Object getFilteredUsers(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
         PagingResponse<?> users = getUsers(params, page, size, sortBy, direction);
-        return ResponseFilterUtil.getFilteredResponse(fields, users,"Return using dynamic filter successfully");
+        return ResponseFilterUtil.getFilteredResponse(fields, users, "Return using dynamic filter successfully");
     }
 
 }

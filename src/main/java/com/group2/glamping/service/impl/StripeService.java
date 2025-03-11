@@ -47,7 +47,7 @@ public class StripeService {
 
     @PostConstruct
     public void init() {
-        apiKey = secretKey; // Initialize Stripe with your API key
+        apiKey = secretKey;
     }
 
     public final PaymentRepository paymentRepository;
@@ -75,7 +75,6 @@ public class StripeService {
                 .setCancelUrl("http://localhost:8080/api/payments/cancel?session_id={CHECKOUT_SESSION_ID}")
                 .addLineItem(lineItem)
                 .putMetadata("bookingId", String.valueOf(paymentRequest.bookingId()))
-//                .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                 .build();
 
         Session session = null;
@@ -160,15 +159,18 @@ public class StripeService {
     }
 
     // Refund payment to Customer
-    public void refundPayment(int bookingId, double amount) throws StripeException {
+    public void refundPayment(int bookingId, String message) throws StripeException {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
-        String chargeId = booking.getPaymentList().getFirst().getTransactionId();
+        Payment payment = booking.getPaymentList().getFirst();
+        String chargeId = payment.getTransactionId();
+        double amount = payment.getTotalAmount();
         RefundCreateParams params =
                 RefundCreateParams.builder()
                         .setCharge(chargeId)
                         .setAmount((long) amount)
                         .build();
         booking.setStatus(BookingStatus.Refund);
+        booking.setMessage(message);
         bookingRepository.save(booking);
         Refund refund = Refund.create(params);
         System.out.println("Refund successful: " + refund.getId());

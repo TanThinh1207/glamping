@@ -22,4 +22,7 @@ public class FcmToken {
     @JoinColumn(name = "id_user")
     private User user;
 
+    @Column(name = "id_device")
+    private String deviceId;
+
 }

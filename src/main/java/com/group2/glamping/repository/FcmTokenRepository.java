@@ -8,7 +8,7 @@ import java.util.List;
 public interface FcmTokenRepository extends JpaRepository<FcmToken, Integer> {
     List<FcmToken> findByUserId(int userId);
 
-    boolean existsByTokenAndUserId(String token, int userId);
+    boolean existsByDeviceIdAndUserId(String deviceId, int userId);
 
-    void deleteByTokenAndUserId(String token, int userId);
+    void deleteByDeviceIdAndUserId(String deviceId, int userId);
 }
