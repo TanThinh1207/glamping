@@ -7,5 +7,5 @@ import lombok.Builder;
 public record VerifyTokenRequest(
         @NotNull String idToken,
         String fcmToken,
-        String deviceid) {
+        String deviceId) {
 }

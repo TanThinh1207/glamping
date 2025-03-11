@@ -4,6 +4,7 @@ import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.BookingRequest;
 import com.group2.glamping.model.dto.response.BookingResponse;
+import com.group2.glamping.model.dto.response.CampSiteResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.entity.*;
 import com.group2.glamping.model.entity.id.IdBookingSelection;
@@ -119,7 +120,10 @@ public class BookingServiceImpl implements BookingService {
 //            pushNotificationService.sendNotification(bookingRequest.getUserId(), "New Booking!", "A new booking has been made for your campsite.");
 //        }
 
-        pushNotificationService.sendNotification(bookingRequest.getUserId(), "New Booking!", "A new booking has been made for your campsite.");
+        CampSite cs = campSiteRepository.findById(bookingRequest.getCampSiteId()).orElseThrow(() -> new AppException(ErrorCode.CAMP_SITE_NOT_FOUND));
+        int hostId = cs.getUser().getId();
+
+        pushNotificationService.sendNotification(hostId, "New Booking!", "A new booking has been made for your campsite.");
 
         return Optional.of(bookingMapper.toDto(resp));
     }

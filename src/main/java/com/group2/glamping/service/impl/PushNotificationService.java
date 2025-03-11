@@ -19,12 +19,12 @@ public class PushNotificationService {
 
 
     public void sendNotification(int userId, String title, String body) {
+        System.out.println(userId);
         List<FcmToken> tokens = fcmTokenRepository.findByUserId(userId);
-        List<String> fcmTokens = tokens.stream().map(FcmToken::getToken).toList();
 
-        for (String token : fcmTokens) {
+        for (FcmToken token : tokens) {
             Message message = Message.builder()
-                    .setToken(token)
+                    .setToken(token.getToken())
                     .setNotification(Notification.builder()
                             .setTitle(title)
                             .setBody(body)

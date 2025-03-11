@@ -33,7 +33,9 @@ public class AuthenticationService {
         Optional<User> userOptional = userRepository.findByEmail(email);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            fcmTokenRepository.save(new FcmToken(0, request.fcmToken(), user, request.deviceid()));
+            if (!fcmTokenRepository.existsByDeviceIdAndUserId(request.deviceId(), user.getId())) {
+                fcmTokenRepository.save(new FcmToken(0, request.fcmToken(), user, request.deviceId()));
+            }
             if (!user.isStatus()) {
                 throw new AppException(ErrorCode.USER_NOT_AVAILABLE);
             }
