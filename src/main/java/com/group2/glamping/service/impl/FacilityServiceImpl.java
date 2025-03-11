@@ -92,7 +92,7 @@ public class FacilityServiceImpl implements FacilityService {
     @Override
     public Object getFilteredFacilities(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
         PagingResponse<?> facilities = getFacilities(params, page, size, sortBy, direction);
-        return ResponseFilterUtil.getFilteredResponse(fields, facilities);
+        return ResponseFilterUtil.getFilteredResponse(fields, facilities,"Return using dynamic filter successfully");
     }
 
 

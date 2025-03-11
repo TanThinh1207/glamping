@@ -231,7 +231,7 @@ public class BookingServiceImpl implements BookingService {
     public Object getFilteredBookings(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
         PagingResponse<?> bookings = getBookings(params, page, size, sortBy, direction);System.out.println(bookings.getContent());
         System.out.println(bookings.getContent());
-        return ResponseFilterUtil.getFilteredResponse(fields, bookings);
+        return ResponseFilterUtil.getFilteredResponse(fields, bookings,"Return using dynamic filter successfully");
     }
 
 

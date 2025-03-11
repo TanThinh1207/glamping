@@ -157,7 +157,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Object getFilteredUsers(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
         PagingResponse<?> users = getUsers(params, page, size, sortBy, direction);
-        return ResponseFilterUtil.getFilteredResponse(fields, users);
+        return ResponseFilterUtil.getFilteredResponse(fields, users,"Return using dynamic filter successfully");
     }
 
 }
