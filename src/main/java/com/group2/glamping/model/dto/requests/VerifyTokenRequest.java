@@ -1,10 +1,11 @@
 package com.group2.glamping.model.dto.requests;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 
-@Getter
-@Setter
-public class VerifyTokenRequest {
-    private String idToken;
+@Builder
+public record VerifyTokenRequest(
+        @NotNull String idToken,
+        String fcmToken,
+        String deviceid) {
 }

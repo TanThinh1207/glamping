@@ -27,10 +27,10 @@ public class AuthenticationController {
     private final FirebaseAuth auth;
 
     @PostMapping("/verify")
-    public ResponseEntity<BaseResponse> verifyToken(@RequestBody VerifyTokenRequest idToken) {
+    public ResponseEntity<BaseResponse> verifyToken(@RequestBody VerifyTokenRequest tokenRequest) {
         try {
-            FirebaseToken decodedToken = auth.verifyIdToken(idToken.getIdToken());
-            AuthenticationResponse resp = authenticationService.verify(decodedToken.getEmail());
+            FirebaseToken decodedToken = auth.verifyIdToken(tokenRequest.idToken());
+            AuthenticationResponse resp = authenticationService.verify(tokenRequest, decodedToken.getEmail());
             return ResponseEntity.ok(BaseResponse.builder()
                     .message("Login successful")
                     .data(resp)

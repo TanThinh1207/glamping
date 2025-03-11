@@ -26,7 +26,6 @@ public class PushNotificationService {
             Message message = Message.builder()
                     .setToken(token)
                     .setNotification(Notification.builder()
-//                            .setImage("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-YNnXzLl3_zcvyMQikTCis-2R3x_aPX-8CA&s")
                             .setTitle(title)
                             .setBody(body)
                             .build())
