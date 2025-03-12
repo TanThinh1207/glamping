@@ -41,27 +41,28 @@ public class CampTypeServiceImpl implements CampTypeService {
 
     @Override
     public Long findAvailableSlots(Integer idCampType, LocalDateTime checkInDate, LocalDateTime checkOutDate) {
-        List<Object[]> results = campTypeRepository.getRemainingCampTypes(idCampType, checkInDate, checkOutDate);
-        List<CampTypeRemainingResponse> campTypeRemainingResponses = new ArrayList<>();
-
-        for (Object[] result : results) {
-            Integer campTypeId = (Integer) result[0];
-            String type = (String) result[1];
-            Integer capacity = (Integer) result[2];
-            Long remainingQuantity = (Long) result[3];
-
-
-            CampTypeRemainingResponse response = new CampTypeRemainingResponse();
-            response.setCampTypeId(campTypeId);
-            response.setType(type);
-            response.setCapacity(capacity);
-            response.setRemainingQuantity(remainingQuantity);
-            campTypeRemainingResponses.add(response);
-        }
-
-        return campTypeRemainingResponses.stream()
-                .mapToLong(CampTypeRemainingResponse::getRemainingQuantity)
-                .sum();
+        return campTypeRepository.getRemainingCampTypes(idCampType, checkInDate, checkOutDate);
+//        List<Object[]> results = campTypeRepository.getRemainingCampTypes(idCampType, checkInDate, checkOutDate);
+//        List<CampTypeRemainingResponse> campTypeRemainingResponses = new ArrayList<>();
+//
+//        for (Object[] result : results) {
+//            Integer campTypeId = (Integer) result[0];
+//            String type = (String) result[1];
+//            Integer capacity = (Integer) result[2];
+//            Long remainingQuantity = (Long) result[3];
+//
+//
+//            CampTypeRemainingResponse response = new CampTypeRemainingResponse();
+//            response.setCampTypeId(campTypeId);
+//            response.setType(type);
+//            response.setCapacity(capacity);
+//            response.setRemainingQuantity(remainingQuantity);
+//            campTypeRemainingResponses.add(response);
+//        }
+//
+//        return campTypeRemainingResponses.stream()
+//                .mapToLong(CampTypeRemainingResponse::getRemainingQuantity)
+//                .sum();
     }
 
     //CREATE
