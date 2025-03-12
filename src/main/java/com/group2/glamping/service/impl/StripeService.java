@@ -14,6 +14,7 @@ import com.group2.glamping.repository.PaymentRepository;
 import com.group2.glamping.repository.UserRepository;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Account;
+import com.stripe.model.PaymentIntent;
 import com.stripe.model.Refund;
 import com.stripe.model.Transfer;
 import com.stripe.model.checkout.Session;
@@ -195,7 +196,9 @@ public class StripeService {
         payment.setStatus(paymentStatus);
 
         if (session.getPaymentIntent() != null) {
-            payment.setTransactionId(session.getPaymentIntent());
+            String paymentIntentId = session.getPaymentIntent();
+            PaymentIntent paymentIntent = PaymentIntent.retrieve(paymentIntentId);
+            payment.setTransactionId(paymentIntent.getLatestCharge());
         }
         paymentRepository.save(payment);
 
