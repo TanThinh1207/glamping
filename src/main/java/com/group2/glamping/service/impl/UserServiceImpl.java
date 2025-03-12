@@ -15,6 +15,7 @@ import com.group2.glamping.repository.UserRepository;
 import com.group2.glamping.service.interfaces.UserService;
 import com.group2.glamping.utils.ResponseFilterUtil;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -146,6 +147,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public String removeFcmToken(int userId, String deviceId) {
         if (fcmTokenRepository.existsByDeviceIdAndUserId(deviceId, userId)) {
             fcmTokenRepository.deleteByDeviceIdAndUserId(deviceId, userId);
