@@ -15,6 +15,7 @@ import com.group2.glamping.repository.*;
 import com.group2.glamping.service.interfaces.CampSiteService;
 import com.group2.glamping.utils.ResponseFilterUtil;
 import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -199,7 +200,7 @@ public class CampSiteServiceImpl implements CampSiteService {
     public PagingResponse<?> getCampSites(Map<String, String> params, int page, int size, String sortBy, String direction) {
         Specification<CampSite> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
-
+            root.fetch("campTypes", JoinType.LEFT); // <-- Force fetch campTypes
             params.forEach((key, value) -> {
                 switch (key) {
                     case "id":
@@ -254,7 +255,9 @@ public class CampSiteServiceImpl implements CampSiteService {
         List<CampSiteResponse> campSiteResponses = campSitePage.getContent().stream()
                 .map(campSiteMapper::toDto)
                 .toList();
-
+        campSiteResponses.forEach(campSiteResponse -> {
+            System.out.println("Camp types in response: " + campSiteResponse.getCampTypes().size());
+        });
         return new PagingResponse<>(
                 campSiteResponses,
                 campSitePage.getTotalElements(),

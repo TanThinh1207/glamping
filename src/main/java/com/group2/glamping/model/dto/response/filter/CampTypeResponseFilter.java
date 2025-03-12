@@ -1,7 +1,6 @@
 package com.group2.glamping.model.dto.response.filter;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.group2.glamping.model.dto.response.FacilityResponse;
 import com.group2.glamping.model.entity.CampType;
 import com.group2.glamping.service.interfaces.S3Service;
@@ -17,7 +16,6 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class CampTypeResponseFilter {
     int id;
     String type;
@@ -32,23 +30,28 @@ public class CampTypeResponseFilter {
     String image;
     List<FacilityResponse> facilities;
 
-
-    // Nguyen Chau Thanh Binh
     public static CampTypeResponseFilter fromEntity(CampType campType, S3Service s3Service) {
         if (campType == null) {
             return null;
         }
 
-        return CampTypeResponseFilter.builder()
-                .id(campType.getId())
-                .type(campType.getType())
-                .capacity(campType.getCapacity())
-                .price(campType.getPrice())
-                .weekendRate(campType.getWeekendRate())
-                .updatedAt(campType.getUpdatedTime())
-                .quantity(campType.getQuantity())
-                .status(campType.isStatus())
-                .facilities(FacilityResponse.fromEntity(campType.getFacilities(), s3Service))
-                .build();
+        try {
+            return CampTypeResponseFilter.builder()
+                    .id(campType.getId())
+                    .type(campType.getType())
+                    .capacity(campType.getCapacity())
+                    .price(campType.getPrice())
+                    .weekendRate(campType.getWeekendRate())
+                    .updatedAt(campType.getUpdatedTime())
+                    .quantity(campType.getQuantity())
+                    .status(campType.isStatus())
+                    .image(s3Service.generatePresignedUrl(campType.getImage()))
+                    .facilities(campType.getFacilities() != null ? FacilityResponse.fromEntity(campType.getFacilities(), s3Service) : List.of())
+                    .build();
+        } catch (Exception e) {
+            // Log the error
+            System.err.println("Error mapping CampType to CampTypeResponseFilter: " + e.getMessage());
+            return null;
+        }
     }
 }
