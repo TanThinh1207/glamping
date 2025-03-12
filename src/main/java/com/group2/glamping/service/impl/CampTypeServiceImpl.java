@@ -13,6 +13,8 @@ import com.group2.glamping.repository.CampTypeRepository;
 import com.group2.glamping.service.interfaces.CampTypeService;
 import com.group2.glamping.service.interfaces.S3Service;
 import com.group2.glamping.utils.ResponseFilterUtil;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -170,6 +172,11 @@ public class CampTypeServiceImpl implements CampTypeService {
                     case "name" -> predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
                     case "status" ->
                             predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
+                    case "campSiteId" -> {
+                        Join<CampType, CampSite> campSiteJoin = root.join("campSite", JoinType.INNER);
+                        predicates.add(criteriaBuilder.equal(campSiteJoin.get("id"), value));
+                    }
+
                 }
 
 

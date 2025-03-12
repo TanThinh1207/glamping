@@ -38,6 +38,6 @@ public class CampSiteResponse {
     private List<SelectionResponseFilter> campSiteSelectionsList;
     private List<PlaceTypeResponseFilter> campSitePlaceTypeList;
     private List<UtilityResponseFilter> campSiteUtilityList;
-    private List<CampTypeResponseFilter> campTypes;
+    private List<CampTypeResponseFilter> campSiteCampTypeList;
 
 }
