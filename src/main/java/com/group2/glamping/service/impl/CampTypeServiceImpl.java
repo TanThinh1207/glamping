@@ -3,7 +3,6 @@ package com.group2.glamping.service.impl;
 import com.group2.glamping.model.dto.requests.CampTypeCreateRequest;
 import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
-import com.group2.glamping.model.dto.response.CampTypeRemainingResponse;
 import com.group2.glamping.model.dto.response.CampTypeResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.entity.CampSite;
@@ -42,27 +41,6 @@ public class CampTypeServiceImpl implements CampTypeService {
     @Override
     public Long findAvailableSlots(Integer idCampType, LocalDateTime checkInDate, LocalDateTime checkOutDate) {
         return campTypeRepository.getRemainingCampTypes(idCampType, checkInDate, checkOutDate);
-//        List<Object[]> results = campTypeRepository.getRemainingCampTypes(idCampType, checkInDate, checkOutDate);
-//        List<CampTypeRemainingResponse> campTypeRemainingResponses = new ArrayList<>();
-//
-//        for (Object[] result : results) {
-//            Integer campTypeId = (Integer) result[0];
-//            String type = (String) result[1];
-//            Integer capacity = (Integer) result[2];
-//            Long remainingQuantity = (Long) result[3];
-//
-//
-//            CampTypeRemainingResponse response = new CampTypeRemainingResponse();
-//            response.setCampTypeId(campTypeId);
-//            response.setType(type);
-//            response.setCapacity(capacity);
-//            response.setRemainingQuantity(remainingQuantity);
-//            campTypeRemainingResponses.add(response);
-//        }
-//
-//        return campTypeRemainingResponses.stream()
-//                .mapToLong(CampTypeRemainingResponse::getRemainingQuantity)
-//                .sum();
     }
 
     //CREATE
@@ -159,6 +137,7 @@ public class CampTypeServiceImpl implements CampTypeService {
         Specification<CampType> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
+
             params.forEach((key, value) -> {
                 switch (key) {
                     case "id" -> predicates.add(criteriaBuilder.equal(root.get("id"), value));
@@ -170,6 +149,7 @@ public class CampTypeServiceImpl implements CampTypeService {
                     case "name" -> predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
                     case "status" ->
                             predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
+
                 }
 
 
@@ -180,17 +160,24 @@ public class CampTypeServiceImpl implements CampTypeService {
 
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<CampType> utilityPage = campTypeRepository.findAll(spec, pageable);
-        List<CampTypeResponse> utilityResponses = utilityPage.getContent().stream()
+        Page<CampType> campTypePage = campTypeRepository.findAll(spec, pageable);
+        List<CampTypeResponse> campTypeResponses = campTypePage.getContent().stream()
                 .map(this::convertToResponse)
                 .toList();
-
+        if (params.containsKey("checkIn") && params.containsKey("checkOut")) {
+            for (CampTypeResponse campTypeResponse : campTypeResponses) {
+                campTypeResponse.setAvailableSlot(findAvailableSlots(
+                        campTypeResponse.getId(),
+                        LocalDateTime.parse(params.get("checkIn")),
+                        LocalDateTime.parse(params.get("checkOut"))));
+            }
+        }
         return new PagingResponse<>(
-                utilityResponses,
-                utilityPage.getTotalElements(),
-                utilityPage.getTotalPages(),
-                utilityPage.getNumber(),
-                utilityPage.getNumberOfElements()
+                campTypeResponses,
+                campTypePage.getTotalElements(),
+                campTypePage.getTotalPages(),
+                campTypePage.getNumber(),
+                campTypePage.getNumberOfElements()
         );
     }
 

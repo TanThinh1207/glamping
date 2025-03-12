@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 //@Repository
@@ -50,8 +49,6 @@ public interface CampTypeRepository extends JpaRepository<CampType, Integer>, Jp
             @Param("checkInDate") LocalDateTime checkInDate,
             @Param("checkOutDate") LocalDateTime checkOutDate
     );
-
-    List<CampType> findByCampSiteId(int campSiteId);
 
     @Query("SELECT c FROM CampType c WHERE c.type = :type AND c.campSite.id = :campSiteId")
     Optional<CampType> findByTypeAndCampSiteId(@Param("type") String type, @Param("campSiteId") int campSiteId);
