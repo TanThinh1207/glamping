@@ -2,6 +2,7 @@ package com.group2.glamping.model.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.group2.glamping.model.dto.response.filter.CampSiteResponseFilter;
 import com.group2.glamping.model.enums.BookingStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,7 +21,7 @@ public class BookingResponse {
 
     int id;
     UserResponse user;
-    CampSiteResponse campSite;
+    CampSiteResponseFilter campSite;
     @JsonFormat(pattern = "yyyy-MM-dd")
     LocalDateTime checkIn;
     @JsonFormat(pattern = "yyyy-MM-dd")

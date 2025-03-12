@@ -19,6 +19,7 @@ public class BookingMapper {
 
     private final CampSiteMapper campSiteMapper;
     private final S3Service s3Service;
+    private final CampSiteFilterMapper campSiteFilterMapper;
 
     public BookingResponse toDto(Booking booking) {
         if (booking == null) {
@@ -28,7 +29,7 @@ public class BookingMapper {
         return BookingResponse.builder()
                 .id(booking.getId())
                 .user(new UserResponse(booking.getUser()))
-                .campSite(campSiteMapper.toDto(booking.getCampSite()))
+                .campSite(campSiteFilterMapper.toDto(booking.getCampSite()))
                 .checkIn(booking.getCheckInTime())
                 .checkOut(booking.getCheckOutTime())
                 .createdAt(booking.getCreatedTime())
