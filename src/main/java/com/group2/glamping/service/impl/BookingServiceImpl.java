@@ -4,7 +4,6 @@ import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.BookingRequest;
 import com.group2.glamping.model.dto.response.BookingResponse;
-import com.group2.glamping.model.dto.response.CampSiteResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.entity.*;
 import com.group2.glamping.model.entity.id.IdBookingSelection;
@@ -233,9 +232,10 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Object getFilteredBookings(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
-        PagingResponse<?> bookings = getBookings(params, page, size, sortBy, direction);System.out.println(bookings.getContent());
+        PagingResponse<?> bookings = getBookings(params, page, size, sortBy, direction);
         System.out.println(bookings.getContent());
-        return ResponseFilterUtil.getFilteredResponse(fields, bookings,"Return using dynamic filter successfully");
+        System.out.println(bookings.getContent());
+        return ResponseFilterUtil.getFilteredResponse(fields, bookings, "Return using dynamic filter successfully");
     }
 
 

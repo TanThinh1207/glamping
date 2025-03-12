@@ -31,5 +31,6 @@ public class BookingResponse {
     double totalAmount;
     List<BookingDetailResponse> bookingDetailResponseList;
     List<BookingSelectionResponse> bookingSelectionResponseList;
+    List<PaymentResponse> paymentResponseList;
 
 }

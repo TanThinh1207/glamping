@@ -1,6 +1,5 @@
 package com.group2.glamping.controller;
 
-import com.group2.glamping.model.dto.requests.FcmTokenDeleteRequest;
 import com.group2.glamping.model.dto.requests.FcmTokenRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.service.interfaces.UserService;

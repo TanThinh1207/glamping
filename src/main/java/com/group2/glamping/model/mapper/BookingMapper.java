@@ -1,12 +1,10 @@
 package com.group2.glamping.model.mapper;
 
-import com.group2.glamping.model.dto.response.BookingDetailResponse;
-import com.group2.glamping.model.dto.response.BookingResponse;
-import com.group2.glamping.model.dto.response.BookingSelectionResponse;
-import com.group2.glamping.model.dto.response.UserResponse;
+import com.group2.glamping.model.dto.response.*;
 import com.group2.glamping.model.entity.Booking;
 import com.group2.glamping.model.entity.BookingDetail;
 import com.group2.glamping.model.entity.BookingSelection;
+import com.group2.glamping.model.entity.Payment;
 import com.group2.glamping.service.interfaces.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -38,6 +36,7 @@ public class BookingMapper {
                 .totalAmount(booking.getTotalAmount())
                 .bookingDetailResponseList(mapBookingDetails(booking.getBookingDetailList()))
                 .bookingSelectionResponseList(mapBookingSelections(booking.getBookingSelectionList()))
+                .paymentResponseList(mapPayments(booking.getPaymentList()))
                 .build();
     }
 
@@ -51,6 +50,12 @@ public class BookingMapper {
     private List<BookingSelectionResponse> mapBookingSelections(List<BookingSelection> bookingSelections) {
         return (bookingSelections != null) ? bookingSelections.stream()
                 .map(BookingSelectionResponse::fromEntity)
+                .collect(Collectors.toList()) : Collections.emptyList();
+    }
+
+    private List<PaymentResponse> mapPayments(List<Payment> payments) {
+        return (payments != null) ? payments.stream()
+                .map(PaymentResponse::fromEntity)
                 .collect(Collectors.toList()) : Collections.emptyList();
     }
 }
