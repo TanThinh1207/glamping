@@ -26,6 +26,7 @@ public class PushNotificationService {
             Message message = Message.builder()
                     .setToken(token.getToken())
                     .setNotification(Notification.builder()
+                            .setImage("https://cdn.dribbble.com/userupload/36626798/file/original-83c59b604abf17b46f2dafd5dd0c7e4f.png?resize=400x0")
                             .setTitle(title)
                             .setBody(body)
                             .build())
