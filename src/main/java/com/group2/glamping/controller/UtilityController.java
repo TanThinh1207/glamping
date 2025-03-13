@@ -6,6 +6,9 @@ import com.group2.glamping.model.dto.response.UtilityResponse;
 import com.group2.glamping.service.interfaces.UtilityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -26,14 +29,32 @@ public class UtilityController {
     private final UtilityService utilityService;
     private static final Logger logger = LoggerFactory.getLogger(UtilityController.class);
 
-    // Create Utility
+    // <editor-fold default state="collapsed" desc="Create Utility">
     @PostMapping()
     @Operation(
             summary = "Create a new utility",
             description = "Creates a new utility with the provided name and optional image.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Utility created successfully"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
+                    @ApiResponse(responseCode = "200", description = "Utility created successfully",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = BaseResponse.class),
+                                    examples = @ExampleObject(value = "{\n" +
+                                            "  \"statusCode\": 200,\n" +
+                                            "  \"message\": \"Utility created successfully\",\n" +
+                                            "  \"data\": {\n" +
+                                            "    \"id\": 4,\n" +
+                                            "    \"name\": \"Swimming Pool\",\n" +
+                                            "    \"imagePath\": \"\",\n" +
+                                            "    \"status\": true\n" +
+                                            "  }\n" +
+                                            "}"))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error",
+                            content = @Content(mediaType = "application/json",
+                                    examples = @ExampleObject(value = "{\n" +
+                                            "  \"statusCode\": 500,\n" +
+                                            "  \"message\": \"An unexpected error occurred. Please try again later.\",\n" +
+                                            "  \"data\": null\n" +
+                                            "}")))
             }
     )
     public ResponseEntity<BaseResponse> createUtility(
@@ -49,16 +70,41 @@ public class UtilityController {
                     .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
         }
     }
+    // </editor-fold>
 
-    // Update Utility
+    // <editor-fold default state="collapsed" desc="Update Utility">
     @PutMapping
     @Operation(
             summary = "Update an existing utility",
             description = "Updates an existing utility with the provided ID, name, and optional image.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Utility updated successfully"),
-                    @ApiResponse(responseCode = "404", description = "Utility not found"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
+                    @ApiResponse(responseCode = "200", description = "Utility updated successfully",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = BaseResponse.class),
+                                    examples = @ExampleObject(value = "{\n" +
+                                            "  \"statusCode\": 200,\n" +
+                                            "  \"message\": \"Utility updated successfully\",\n" +
+                                            "  \"data\": {\n" +
+                                            "    \"id\": 1,\n" +
+                                            "    \"name\": \"Updated Swimming Pool\",\n" +
+                                            "    \"imagePath\": \"\",\n" +
+                                            "    \"status\": true\n" +
+                                            "  }\n" +
+                                            "}"))),
+                    @ApiResponse(responseCode = "404", description = "Utility not found",
+                            content = @Content(mediaType = "application/json",
+                                    examples = @ExampleObject(value = "{\n" +
+                                            "  \"statusCode\": 404,\n" +
+                                            "  \"message\": \"Utility not found\",\n" +
+                                            "  \"data\": null\n" +
+                                            "}"))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error",
+                            content = @Content(mediaType = "application/json",
+                                    examples = @ExampleObject(value = "{\n" +
+                                            "  \"statusCode\": 500,\n" +
+                                            "  \"message\": \"An unexpected error occurred. Please try again later.\",\n" +
+                                            "  \"data\": null\n" +
+                                            "}")))
             }
     )
     public ResponseEntity<BaseResponse> updateUtility(
@@ -79,14 +125,41 @@ public class UtilityController {
                     .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
         }
     }
+    // </editor-fold>
 
-    // Retrieve Utilities
+    // <editor-fold default state="collapsed" desc="Retrieve Utilities">
     @Operation(
             summary = "Get list of utilities",
-            description = "Retrieve a paginated list of utilities with optional filtering and field selection",
+            description = "Retrieve a paginated list of utilities with optional filtering, sorting, and field selection.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Utilities retrieved successfully"),
-                    @ApiResponse(responseCode = "400", description = "Invalid input or bad request")
+                    @ApiResponse(responseCode = "200", description = "Utilities retrieved successfully",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = BaseResponse.class),
+                                    examples = @ExampleObject(value = "{\n" +
+                                            "  \"statusCode\": 200,\n" +
+                                            "  \"message\": \"Utilities retrieved successfully\",\n" +
+                                            "  \"data\": [\n" +
+                                            "    {\n" +
+                                            "      \"id\": 1,\n" +
+                                            "      \"name\": \"Swimming Pool\",\n" +
+                                            "      \"imagePath\": \"\",\n" +
+                                            "      \"status\": true\n" +
+                                            "    },\n" +
+                                            "    {\n" +
+                                            "      \"id\": 2,\n" +
+                                            "      \"name\": \"BBQ Area\",\n" +
+                                            "      \"imagePath\": \"\",\n" +
+                                            "      \"status\": true\n" +
+                                            "    }\n" +
+                                            "  ]\n" +
+                                            "}"))),
+                    @ApiResponse(responseCode = "400", description = "Invalid input or bad request",
+                            content = @Content(mediaType = "application/json",
+                                    examples = @ExampleObject(value = "{\n" +
+                                            "  \"statusCode\": 400,\n" +
+                                            "  \"message\": \"Invalid pagination parameters\",\n" +
+                                            "  \"data\": null\n" +
+                                            "}")))
             }
     )
     @GetMapping
@@ -99,16 +172,27 @@ public class UtilityController {
             @RequestParam(name = "direction", required = false, defaultValue = "ASC") String direction) {
         return ResponseEntity.ok(utilityService.getFilteredUtilities(params, page, size, fields, sortBy, direction));
     }
+    // </editor-fold>
 
-
-    // Delete Utility (Soft Delete)
+    // <editor-fold default state="collapsed" desc="Delete Utility (Soft Delete)">
     @DeleteMapping("/{id}")
     @Operation(
             summary = "Soft delete a utility",
             description = "Marks a utility as deleted instead of removing it from the database.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Utility deleted successfully"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
+                    @ApiResponse(responseCode = "200", description = "Utility deleted successfully",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = BaseResponse.class),
+                                    examples = @ExampleObject(value = "{\n" +
+                                            "  \"statusCode\": 200,\n" +
+                                            "  \"message\": \"Utility deleted successfully\"" +
+                                            "}"))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error",
+                            content = @Content(mediaType = "application/json",
+                                    examples = @ExampleObject(value = "{\n" +
+                                            "  \"statusCode\": 500,\n" +
+                                            "  \"message\": \"An unexpected error occurred. Please try again later.\"" +
+                                            "}")))
             }
     )
     public ResponseEntity<BaseResponse> softDeleteUtility(
@@ -123,5 +207,5 @@ public class UtilityController {
                     .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
         }
     }
-
+    // </editor-fold>
 }

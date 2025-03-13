@@ -6,6 +6,8 @@ import com.group2.glamping.model.dto.response.FacilityResponse;
 import com.group2.glamping.service.interfaces.FacilityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -26,13 +28,24 @@ public class FacilityController {
     private final FacilityService facilityService;
     private static final Logger logger = LoggerFactory.getLogger(FacilityController.class);
 
-    // Create Facility
+    // <editor-fold default state="collapsed" desc="Create Facility">
     @PostMapping()
     @Operation(
             summary = "Create a new facility",
-            description = "Creates a new facility with the provided name, description, and optional image.",
+            description = "Creates a new facility with the provided name and description.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Facility created successfully"),
+                    @ApiResponse(responseCode = "200", description = "Facility created successfully",
+                            content = @Content(mediaType = "application/json",
+                                    examples = @ExampleObject(value = "{\n" +
+                                            "  \"statusCode\": 200,\n" +
+                                            "  \"message\": \"Facility created successfully\",\n" +
+                                            "  \"data\": {\n" +
+                                            "    \"id\": 5,\n" +
+                                            "    \"name\": \"Lounge Area\",\n" +
+                                            "    \"description\": \"Relaxing lounge space with comfortable seating.\",\n" +
+                                            "    \"status\": true\n" +
+                                            "  }\n" +
+                                            "}"))),
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
@@ -52,14 +65,30 @@ public class FacilityController {
                     .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
         }
     }
+    // </editor-fold>
 
-    // Update Facility
+    // <editor-fold default state="collapsed" desc="Update Facility">
     @PutMapping()
     @Operation(
             summary = "Update an existing facility",
-            description = "Updates an existing facility with the provided id, name, description, and optional image.",
+            description = """
+                Updates an existing facility based on the provided ID. 
+                Allows modifying the name and description of the facility.
+                """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Facility update request",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "Example Update Facility Request",
+                                    value = "{ \"id\": 1, \"name\": \"Luxury Pool\", \"description\": \"A high-end swimming pool with modern facilities.\" }"
+                            )
+                    )
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "Facility updated successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid input or missing parameters"),
                     @ApiResponse(responseCode = "404", description = "Facility not found"),
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
@@ -82,13 +111,33 @@ public class FacilityController {
                     .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
         }
     }
+    // </editor-fold>
 
-    // Retrieve Facilities
+    // <editor-fold default state="collapsed" desc="Get List of Facilities">
     @Operation(
             summary = "Get list of facilities",
-            description = "Retrieve a paginated list of facilities with optional filtering and field selection",
+            description = "Retrieve a paginated list of facilities with optional filtering, sorting, and field selection.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Facilities retrieved successfully"),
+                    @ApiResponse(responseCode = "200", description = "Facilities retrieved successfully",
+                            content = @Content(mediaType = "application/json",
+                                    examples = @ExampleObject(value = "{\n" +
+                                            "  \"statusCode\": 200,\n" +
+                                            "  \"message\": \"Facilities retrieved successfully\",\n" +
+                                            "  \"data\": [\n" +
+                                            "    {\n" +
+                                            "      \"id\": 1,\n" +
+                                            "      \"name\": \"Swimming Pool\",\n" +
+                                            "      \"description\": \"Large outdoor pool with heating.\",\n" +
+                                            "      \"status\": true\n" +
+                                            "    },\n" +
+                                            "    {\n" +
+                                            "      \"id\": 2,\n" +
+                                            "      \"name\": \"BBQ Area\",\n" +
+                                            "      \"description\": \"Outdoor BBQ space with seating.\",\n" +
+                                            "      \"status\": true\n" +
+                                            "    }\n" +
+                                            "  ]\n" +
+                                            "}"))),
                     @ApiResponse(responseCode = "400", description = "Invalid input or bad request")
             }
     )
@@ -102,14 +151,26 @@ public class FacilityController {
             @RequestParam(name = "direction", required = false, defaultValue = "ASC") String direction) {
         return ResponseEntity.ok(facilityService.getFilteredFacilities(params, page, size, fields, sortBy, direction));
     }
+    // </editor-fold>
 
-    // Delete Facility (Soft Delete)
+    // <editor-fold default state="collapsed" desc="Delete Facility">
     @DeleteMapping("/{id}")
     @Operation(
             summary = "Soft delete a facility",
             description = "Marks a facility as deleted (inactive) instead of removing it from the database.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Facility deleted successfully"),
+                    @ApiResponse(responseCode = "200", description = "Facility deleted successfully",
+                            content = @Content(mediaType = "application/json",
+                                    examples = @ExampleObject(value = "{\n" +
+                                            "  \"statusCode\": 200,\n" +
+                                            "  \"message\": \"Facility deleted successfully\",\n" +
+                                            "  \"data\": {\n" +
+                                            "    \"id\": 3,\n" +
+                                            "    \"name\": \"Lounge Area\",\n" +
+                                            "    \"description\": \"Relaxing lounge space with comfortable seating.\",\n" +
+                                            "    \"status\": false\n" +
+                                            "  }\n" +
+                                            "}"))),
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
@@ -126,4 +187,5 @@ public class FacilityController {
                     .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
         }
     }
+    // </editor-fold>
 }

@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -28,18 +30,30 @@ public class PlaceTypeController {
     private final PlaceTypeService placeTypeService;
     private static final Logger logger = LoggerFactory.getLogger(PlaceTypeController.class);
 
-    // Create PlaceType
+    // <editor-fold default state="collapsed" desc="Create PlaceType">
     @PostMapping()
     @Operation(
             summary = "Create a new place type",
             description = "Creates a new place type with the provided name and optional image.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Place type created successfully"),
+                    @ApiResponse(responseCode = "200", description = "Place type created successfully",
+                            content = @Content(mediaType = "application/json",
+                                    examples = @ExampleObject(value = """
+                                            {
+                                              "statusCode": 200,
+                                              "message": "Place type created successfully",
+                                              "data": {
+                                                "id": 1,
+                                                "name": "Luxury Tent",
+                                                "image": "luxury_tent.jpg"
+                                              }
+                                            }
+                                            """))),
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
     public ResponseEntity<BaseResponse> createPlaceType(
-            @Parameter(description = "Name of the place type", required = true)
+            @Parameter(description = "Name of the place type", example = "Luxury Tent", required = true)
             @RequestParam String name
     ) {
         try {
@@ -55,22 +69,44 @@ public class PlaceTypeController {
                     .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
         }
     }
+    // </editor-fold>
 
-    // Update PlaceType
+    // <editor-fold default state="collapsed" desc="Update PlaceType">
     @PutMapping()
     @Operation(
             summary = "Update an existing place type",
             description = "Updates an existing place type with the provided id, name, and optional image.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Place type updated successfully"),
-                    @ApiResponse(responseCode = "404", description = "Place type not found"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
+                    @ApiResponse(responseCode = "200", description = "Place type updated successfully",
+                            content = @Content(mediaType = "application/json",
+                                    examples = @ExampleObject(value = "{\n" +
+                                            "  \"statusCode\": 200,\n" +
+                                            "  \"message\": \"Place type updated successfully\",\n" +
+                                            "  \"data\": {\n" +
+                                            "    \"id\": 1,\n" +
+                                            "    \"name\": \"Luxury Tent\",\n" +
+                                            "    \"image\": \"luxury_tent.jpg\"\n" +
+                                            "  }\n" +
+                                            "}"))),
+                    @ApiResponse(responseCode = "404", description = "Place type not found",
+                            content = @Content(mediaType = "application/json",
+                                    examples = @ExampleObject(value = "{\n" +
+                                            "  \"statusCode\": 404,\n" +
+                                            "  \"message\": \"Place type not found\",\n" +
+                                            "  \"data\": null\n" +
+                                            "}"))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error",
+                            content = @Content(mediaType = "application/json",
+                                    examples = @ExampleObject(value = "{\n" +
+                                            "  \"statusCode\": 500,\n" +
+                                            "  \"message\": \"An unexpected error occurred. Please try again later.\",\n" +
+                                            "  \"data\": null\n" +
+                                            "}")))
             }
     )
     public ResponseEntity<BaseResponse> updatePlaceType(
             @Parameter(description = "ID of the place type to update", required = true)
             @Valid @RequestBody PlaceTypeRequest request
-
     ) {
         try {
             PlaceTypeResponse response = placeTypeService.updatePlaceType(request);
@@ -88,11 +124,21 @@ public class PlaceTypeController {
                     .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
         }
     }
+    // </editor-fold>
 
-    // Retrieve PlaceTypes
+    // <editor-fold default state="collapsed" desc="Retrieve PlaceTypes">
     @Operation(
             summary = "Get list of place types",
-            description = "Retrieve a paginated list of place types with optional filtering and field selection",
+            description = """
+                        Retrieve a paginated list of place types with optional filtering and field selection.
+                    
+                        - Optional Parameters:
+                          - `page` (default = 0): Page number
+                          - `size` (default = 10): Number of records per page
+                          - `fields`: Fields to return
+                          - `sortBy`: Sorting field (default = "id")
+                          - `direction`: Sorting order (ASC/DESC, default = "ASC")
+                    """,
             responses = {
                     @ApiResponse(responseCode = "200", description = "Place types retrieved successfully"),
                     @ApiResponse(responseCode = "400", description = "Invalid input or bad request")
@@ -108,20 +154,33 @@ public class PlaceTypeController {
             @RequestParam(name = "direction", required = false, defaultValue = "ASC") String direction) {
         return ResponseEntity.ok(placeTypeService.getFilteredPlaceTypes(params, page, size, fields, sortBy, direction));
     }
+    // </editor-fold>
 
-
-    // Soft Delete PlaceType
+    // <editor-fold default state="collapsed" desc="Soft Delete PlaceType">
     @DeleteMapping("/{id}")
     @Operation(
             summary = "Soft delete a place type",
             description = "Marks a place type as deleted (inactive) instead of removing it from the database.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Place type deleted successfully"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
+                    @ApiResponse(responseCode = "200", description = "Place type deleted successfully",
+                            content = @Content(mediaType = "application/json",
+                                    examples = @ExampleObject(value = """
+                                            {
+                                              "statusCode": 200,
+                                              "message": "Place type deleted successfully"
+                                            }
+                                            """))),
+
+                    @ApiResponse(responseCode = "500", description = "Internal server error",
+                            content = @Content(mediaType = "application/json",
+                                    examples = @ExampleObject(value = "{\n" +
+                                            "  \"statusCode\": 500,\n" +
+                                            "  \"message\": \"An unexpected error occurred. Please try again later.\"" +
+                                            "}")))
             }
     )
     public ResponseEntity<BaseResponse> deletePlaceType(
-            @Parameter(description = "ID of the place type to delete", example = "3")
+            @Parameter(description = "ID of the place type to delete", example = "3", required = true)
             @PathVariable Integer id
     ) {
         try {
@@ -133,4 +192,5 @@ public class PlaceTypeController {
                     .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
         }
     }
+    // </editor-fold>
 }

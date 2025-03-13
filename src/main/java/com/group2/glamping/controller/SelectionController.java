@@ -6,6 +6,8 @@ import com.group2.glamping.model.dto.response.SelectionResponse;
 import com.group2.glamping.service.interfaces.SelectionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -26,28 +28,32 @@ public class SelectionController {
     private final SelectionService selectionService;
     private static final Logger logger = LoggerFactory.getLogger(SelectionController.class);
 
-    // Create Selection
+    // <editor-fold desc="Create Selection">
     @PostMapping()
     @Operation(
             summary = "Create a new selection",
-            description = "Creates a new selection with the provided name, description, price, image and campsite ID.",
+            description = "Creates a new selection with the provided name, description, price, and campsite ID.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(examples = @ExampleObject(
+                            name = "Example Request",
+                            value = "{ \"name\": \"Luxury Tent\", \"description\": \"A beautiful tent with ocean view\", \"price\": 150.0, \"campSiteId\": 1 }"
+                    ))
+            ),
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Selection created successfully"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
+                    @ApiResponse(responseCode = "200", description = "Selection created successfully",
+                            content = @Content(examples = @ExampleObject(
+                                    value = "{ \"statusCode\": 200, \"message\": \"Selection created successfully\", \"data\": { \"id\": 1, \"name\": \"Luxury Tent\", \"description\": \"A beautiful tent with ocean view\", \"price\": 150.0, \"campSiteId\": 1 } }"
+                            ))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error",
+                            content = @Content(mediaType = "application/json",
+                                    examples = @ExampleObject(value = "{\n" +
+                                            "  \"statusCode\": 500,\n" +
+                                            "  \"message\": \"An unexpected error occurred. Please try again later.\"" +
+                                            "}")))
             }
     )
-    public ResponseEntity<BaseResponse> createSelection(
-            @Parameter(description = "Name of the selection", required = true)
-            @RequestParam String name,
-            @Parameter(description = "Description of the selection", required = true)
-            @RequestParam String description,
-            @Parameter(description = "Price of the selection", required = true)
-            @RequestParam double price,
-            @Parameter(description = "Campsite ID", required = true)
-            @RequestParam Integer campSiteId
-    ) {
+    public ResponseEntity<BaseResponse> createSelection(@RequestBody SelectionRequest request) {
         try {
-            SelectionRequest request = new SelectionRequest(null, name, description, price, campSiteId);
             SelectionResponse response = selectionService.createSelection(request);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Selection created successfully", response));
         } catch (Exception e) {
@@ -56,32 +62,77 @@ public class SelectionController {
                     .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
         }
     }
+    // </editor-fold>
 
-    // Update Selection
+
+    // <editor-fold defaultstate="collapsed" desc="Update Selection">
     @PutMapping()
     @Operation(
             summary = "Update an existing selection",
-            description = "Updates an existing selection with the provided ID, name, description, price, image and campsite ID.",
+            description = "Updates an existing selection with the provided ID, name, description, price, and campsite ID.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Selection update request payload",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "Example Input",
+                                    value = """
+                                            {
+                                                "id": 1,
+                                                "name": "Luxury Tent",
+                                                "description": "A luxurious tent with a sea view.",
+                                                "price": 120.50,
+                                                "campSiteId": 3
+                                            }
+                                            """
+                            )
+                    )
+            ),
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Selection updated successfully"),
-                    @ApiResponse(responseCode = "404", description = "Selection not found"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Selection updated successfully",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(
+                                            name = "Example Response",
+                                            value = """
+                                                    {
+                                                        "statusCode": 200,
+                                                        "message": "Selection updated successfully",
+                                                        "data": {
+                                                            "id": 1,
+                                                            "name": "Luxury Tent",
+                                                            "description": "A luxurious tent with a sea view.",
+                                                            "price": 120.50,
+                                                            "campSiteId": 3
+                                                        }
+                                                    }
+                                                    """
+                                    )
+                            )
+                    ),
+                    @ApiResponse(responseCode = "404", description = "Place type not found",
+                            content = @Content(mediaType = "application/json",
+                                    examples = @ExampleObject(value = "{\n" +
+                                            "  \"statusCode\": 404,\n" +
+                                            "  \"message\": \"Place type not found\",\n" +
+                                            "  \"data\": null\n" +
+                                            "}"))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error",
+                            content = @Content(mediaType = "application/json",
+                                    examples = @ExampleObject(value = "{\n" +
+                                            "  \"statusCode\": 500,\n" +
+                                            "  \"message\": \"An unexpected error occurred. Please try again later.\",\n" +
+                                            "  \"data\": null\n" +
+                                            "}")))
             }
     )
     public ResponseEntity<BaseResponse> updateSelection(
-            @Parameter(description = "ID of the selection to update", required = true)
-            @RequestParam Integer id,
-            @Parameter(description = "Updated name of the selection", required = true)
-            @RequestParam String name,
-            @Parameter(description = "Updated description of the selection", required = true)
-            @RequestParam String description,
-            @Parameter(description = "Updated price of the selection", required = true)
-            @RequestParam double price,
-            @Parameter(description = "Updated campsite ID", required = true)
-            @RequestParam Integer campSiteId
+            @RequestBody SelectionRequest request
     ) {
         try {
-            SelectionRequest request = new SelectionRequest(id, name, description, price, campSiteId);
             SelectionResponse response = selectionService.updateSelection(request);
             return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Selection updated successfully", response));
         } catch (Exception e) {
@@ -91,7 +142,10 @@ public class SelectionController {
         }
     }
 
-    // Get Selections
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="Get Selections">
+    @GetMapping
     @Operation(
             summary = "Get list of selections",
             description = "Retrieve a paginated list of selections with optional filtering and field selection",
@@ -100,7 +154,6 @@ public class SelectionController {
                     @ApiResponse(responseCode = "400", description = "Invalid input or bad request")
             }
     )
-    @GetMapping
     public ResponseEntity<Object> getSelections(
             @RequestParam Map<String, String> params,
             @RequestParam(defaultValue = "0") int page,
@@ -110,20 +163,32 @@ public class SelectionController {
             @RequestParam(name = "direction", required = false, defaultValue = "ASC") String direction) {
         return ResponseEntity.ok(selectionService.getFilteredSelections(params, page, size, fields, sortBy, direction));
     }
+    // </editor-fold>
 
-    // Soft Delete Selection
+    // <editor-fold defaultstate="collapsed" desc="Soft Delete Selection">
     @DeleteMapping("/{id}")
     @Operation(
             summary = "Soft delete a selection",
             description = "Marks a selection as inactive without permanently removing it from the database.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Selection soft-deleted successfully"),
-                    @ApiResponse(responseCode = "404", description = "Selection not found"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
+                    @ApiResponse(responseCode = "200", description = "Selections deleted successfully",
+                            content = @Content(mediaType = "application/json",
+                                    examples = @ExampleObject(value = """
+                                            {
+                                              "statusCode": 200,
+                                              "message": "Selections deleted successfully"
+                                            }
+                                            """))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error",
+                            content = @Content(mediaType = "application/json",
+                                    examples = @ExampleObject(value = "{\n" +
+                                            "  \"statusCode\": 500,\n" +
+                                            "  \"message\": \"An unexpected error occurred. Please try again later.\"" +
+                                            "}")))
             }
     )
     public ResponseEntity<BaseResponse> softDeleteSelection(
-            @Parameter(description = "ID of the selection to delete", example = "3")
+            @Parameter(description = "Id of the selection", example = "2", required = true)
             @PathVariable int id
     ) {
         try {
@@ -135,5 +200,6 @@ public class SelectionController {
                     .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
         }
     }
+    // </editor-fold>
 
 }
