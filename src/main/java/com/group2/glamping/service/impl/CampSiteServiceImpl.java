@@ -256,7 +256,7 @@ public class CampSiteServiceImpl implements CampSiteService {
                 .map(campSiteMapper::toDto)
                 .toList();
         campSiteResponses.forEach(campSiteResponse -> {
-            System.out.println("Camp types in response: " + campSiteResponse.getCampTypes().size());
+            System.out.println("Camp types in response: " + campSiteResponse.getCampSiteCampTypeList().size());
         });
         return new PagingResponse<>(
                 campSiteResponses,

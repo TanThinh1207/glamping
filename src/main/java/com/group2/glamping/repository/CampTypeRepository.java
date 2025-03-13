@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 //@Repository
@@ -31,18 +30,16 @@ public interface CampTypeRepository extends JpaRepository<CampType, Integer>, Jp
     @Query(
             nativeQuery = true,
             value =
-                    "SELECT CAST((ct.quantity - COUNT(CASE \n" +
-                            "WHEN b.status IS NULL OR b.status = 'Cancelled' \n" +
-                            "THEN NULL \n" +
-                            "ELSE b.id \n" +
-                            "END)) AS SIGNED) AS remaining\n" +
+                    "SELECT ct.quantity - COUNT(DISTINCT(bd.id))\n" +
                             "FROM camp_type ct\n" +
-                            "LEFT JOIN booking_detail bd ON bd.id_camp_type = ct.id\n" +
-                            "LEFT JOIN booking b ON b.id = bd.id_booking\n" +
-                            "WHERE ct.id = :campTypeId  \n" +
-                            "AND (bd.check_in_at < :checkOutDate  \n" +
-                            "AND bd.check_out_at > :checkInDate)  \n" +
-                            "GROUP BY ct.id;"
+                            "JOIN booking_detail bd \n" +
+                            "ON bd.id_camp_type = ct.id\n" +
+                            "JOIN booking b\n" +
+                            "ON b.id = bd.id_booking\n" +
+                            "AND b.status NOT IN ('Refund', 'Cancelled')\n" +
+                            "AND((DATE(b.check_in_at) < DATE(:checkOutDate) AND DATE(b.check_out_at) > DATE(:checkInDate)))\n" +
+                            "WHERE ct.id = :campTypeId\n" +
+                            "GROUP BY ct.id"
 
     )
     Long getRemainingCampTypes(
@@ -50,8 +47,6 @@ public interface CampTypeRepository extends JpaRepository<CampType, Integer>, Jp
             @Param("checkInDate") LocalDateTime checkInDate,
             @Param("checkOutDate") LocalDateTime checkOutDate
     );
-
-    List<CampType> findByCampSiteId(int campSiteId);
 
     @Query("SELECT c FROM CampType c WHERE c.type = :type AND c.campSite.id = :campSiteId")
     Optional<CampType> findByTypeAndCampSiteId(@Param("type") String type, @Param("campSiteId") int campSiteId);

@@ -1,11 +1,7 @@
-package com.group2.glamping.model.dto.response;
+package com.group2.glamping.model.dto.response.filter;
 
-import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.group2.glamping.model.dto.response.filter.CampTypeResponseFilter;
-import com.group2.glamping.model.dto.response.filter.PlaceTypeResponseFilter;
-import com.group2.glamping.model.dto.response.filter.SelectionResponseFilter;
-import com.group2.glamping.model.dto.response.filter.UtilityResponseFilter;
+import com.group2.glamping.model.dto.response.ImageResponse;
 import com.group2.glamping.model.enums.CampSiteStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,8 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@JsonFilter("dynamicFilter")
-public class CampSiteResponse {
+public class CampSiteResponseFilter {
 
     private int id;
     private String name;
@@ -35,9 +30,5 @@ public class CampSiteResponse {
     private String description;
     private Double depositRate;
     private List<ImageResponse> imageList;
-    private List<SelectionResponseFilter> campSiteSelectionsList;
-    private List<PlaceTypeResponseFilter> campSitePlaceTypeList;
-    private List<UtilityResponseFilter> campSiteUtilityList;
-    private List<CampTypeResponseFilter> campSiteCampTypeList;
 
 }

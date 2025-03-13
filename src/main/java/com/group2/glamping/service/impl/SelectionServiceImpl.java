@@ -10,6 +10,7 @@ import com.group2.glamping.repository.SelectionRepository;
 import com.group2.glamping.service.interfaces.S3Service;
 import com.group2.glamping.service.interfaces.SelectionService;
 import com.group2.glamping.utils.ResponseFilterUtil;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -98,6 +99,10 @@ public class SelectionServiceImpl implements SelectionService {
                     case "name" -> predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
                     case "status" ->
                             predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
+                    case "campSiteId" ->{
+                        Join<Selection, CampSite> selectionCampSiteJoin = root.join("campSite");
+                        predicates.add(criteriaBuilder.equal(selectionCampSiteJoin.get("id"), value));
+                    }
                 }
             });
 

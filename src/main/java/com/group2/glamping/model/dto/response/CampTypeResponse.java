@@ -30,6 +30,7 @@ public class CampTypeResponse {
     int campSiteId;
     String image;
     List<FacilityResponse> facilities;
+    Long availableSlot = (long) quantity;
 
     public static CampTypeResponse fromEntity(CampType campType, S3Service s3Service) {
         if (campType == null) {

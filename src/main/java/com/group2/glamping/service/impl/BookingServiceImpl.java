@@ -118,12 +118,6 @@ public class BookingServiceImpl implements BookingService {
 //        for (int i = 0; i < 100000; i++) {
 //            pushNotificationService.sendNotification(bookingRequest.getUserId(), "New Booking!", "A new booking has been made for your campsite.");
 //        }
-
-        CampSite cs = campSiteRepository.findById(bookingRequest.getCampSiteId()).orElseThrow(() -> new AppException(ErrorCode.CAMP_SITE_NOT_FOUND));
-        int hostId = cs.getUser().getId();
-
-        pushNotificationService.sendNotification(hostId, "New Booking!", "A new booking has been made for your campsite.");
-
         return Optional.of(bookingMapper.toDto(resp));
     }
 
@@ -233,8 +227,6 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public Object getFilteredBookings(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
         PagingResponse<?> bookings = getBookings(params, page, size, sortBy, direction);
-        System.out.println(bookings.getContent());
-        System.out.println(bookings.getContent());
         return ResponseFilterUtil.getFilteredResponse(fields, bookings, "Return using dynamic filter successfully");
     }
 
@@ -252,6 +244,8 @@ public class BookingServiceImpl implements BookingService {
         paymentService.savePayment(payment);
         booking.setStatus(BookingStatus.Deposit);
         bookingRepository.save(booking);
+        pushNotificationService.sendNotification(booking.getCampSite().getUser().getId(), "New Booking For " + booking.getCampSite().getName(),
+                "A new booking has been made for your campsite " + booking.getCampSite().getName() + "from " + booking.getUser().getFirstname());
     }
 
     @Override

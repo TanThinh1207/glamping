@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class BookingDetailResponse {
 
+    int bookingDetailId;
     CampTypeResponse campTypeResponse;
     CampResponse campResponse;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -31,6 +32,7 @@ public class BookingDetailResponse {
         }
 
         return BookingDetailResponse.builder()
+                .bookingDetailId(bookingDetail.getId())
                 .campTypeResponse(CampTypeResponse.fromEntity(bookingDetail.getCampType(), s3Service))
                 .campResponse(CampResponse.fromEntity(bookingDetail.getCamp()))
                 .checkInAt(bookingDetail.getCheckInTime())

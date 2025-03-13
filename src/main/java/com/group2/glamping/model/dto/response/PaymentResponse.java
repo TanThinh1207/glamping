@@ -1,5 +1,6 @@
 package com.group2.glamping.model.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.group2.glamping.model.entity.Payment;
 import com.group2.glamping.model.enums.PaymentStatus;
 import lombok.AllArgsConstructor;
@@ -20,6 +21,7 @@ public class PaymentResponse {
     public String transactionId;
     public String sessionId;
     public String paymentUrl;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     public LocalDateTime completedAt;
 
     public static PaymentResponse fromEntity(Payment payment) {

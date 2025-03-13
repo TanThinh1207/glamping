@@ -41,7 +41,7 @@ public class CampSiteMapper {
                 .campSiteSelectionsList(mapSelections(campSite))
                 .campSiteUtilityList(mapUtilities(campSite))
                 .campSitePlaceTypeList(mapPlaceTypes(campSite))
-                .campTypes(campSite.getCampTypes().stream()
+                .campSiteCampTypeList(campSite.getCampTypes().stream()
                         .map(campType -> CampTypeResponseFilter.fromEntity(campType, s3Service))
                         .collect(Collectors.toList()))
                 .description(campSite.getDescription())
