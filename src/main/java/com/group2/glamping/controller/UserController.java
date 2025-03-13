@@ -49,7 +49,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
-    @PostMapping("/{id}")
+    @PutMapping("/{id}")
     @Transactional
     public ResponseEntity<?> updateUser(
             @Parameter(description = "ID of the user to update", required = true)

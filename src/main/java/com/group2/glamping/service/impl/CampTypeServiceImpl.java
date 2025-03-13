@@ -171,10 +171,11 @@ public class CampTypeServiceImpl implements CampTypeService {
                 .toList();
         if (params.containsKey("checkIn") && params.containsKey("checkOut")) {
             for (CampTypeResponse campTypeResponse : campTypeResponses) {
-                campTypeResponse.setAvailableSlot(findAvailableSlots(
+                Long availableSlots = findAvailableSlots(
                         campTypeResponse.getId(),
                         LocalDateTime.parse(params.get("checkIn")),
-                        LocalDateTime.parse(params.get("checkOut"))));
+                        LocalDateTime.parse(params.get("checkOut")));
+                campTypeResponse.setAvailableSlot(availableSlots == null ? campTypeResponse.getQuantity() : availableSlots);
             }
         }
         return new PagingResponse<>(

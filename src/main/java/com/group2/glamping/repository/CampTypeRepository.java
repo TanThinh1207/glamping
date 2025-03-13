@@ -36,9 +36,8 @@ public interface CampTypeRepository extends JpaRepository<CampType, Integer>, Jp
                             "ON bd.id_camp_type = ct.id\n" +
                             "JOIN booking b\n" +
                             "ON b.id = bd.id_booking\n" +
-                            "AND(\n" +
-                            "\t(DATE(b.check_in_at) < DATE(:checkOutDate) AND DATE(b.check_out_at) > DATE(:checkInDate))\n" +
-                            ")\n" +
+                            "AND b.status NOT IN ('Refund', 'Cancelled')\n" +
+                            "AND((DATE(b.check_in_at) < DATE(:checkOutDate) AND DATE(b.check_out_at) > DATE(:checkInDate)))\n" +
                             "WHERE ct.id = :campTypeId\n" +
                             "GROUP BY ct.id"
 
