@@ -50,8 +50,8 @@ public class CampSiteMapper {
 
     private List<ImageResponse> mapImages(CampSite campSite) {
         return (campSite.getImageList() != null) ?
-                campSite.getImageList().stream()
-                        .map(image -> new ImageResponse(image.getId(), s3Service.generatePresignedUrl(image.getPath())))
+                campSite.getImageList().parallelStream()
+                        .map(image -> new ImageResponse(image.getId(), "https://d16irpmj68i9v1.cloudfront.net/" + image.getPath()))
                         .collect(Collectors.toList()) :
                 Collections.emptyList();
     }
@@ -67,7 +67,7 @@ public class CampSiteMapper {
                                         selection.getName(),
                                         selection.getDescription(),
                                         selection.getPrice(),
-                                        s3Service.generatePresignedUrl(selection.getImageUrl()),
+                                        "https://d16irpmj68i9v1.cloudfront.net/" + selection.getImageUrl(),
                                         selection.isStatus()
                                 );
                             }

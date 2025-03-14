@@ -45,7 +45,7 @@ public class CampTypeResponseFilter {
                     .updatedAt(campType.getUpdatedTime())
                     .quantity(campType.getQuantity())
                     .status(campType.isStatus())
-                    .image(s3Service.generatePresignedUrl(campType.getImage()))
+                    .image("https://d16irpmj68i9v1.cloudfront.net/" + campType.getImage())
                     .facilities(campType.getFacilities() != null ? FacilityResponse.fromEntity(campType.getFacilities(), s3Service) : List.of())
                     .build();
         } catch (Exception e) {
