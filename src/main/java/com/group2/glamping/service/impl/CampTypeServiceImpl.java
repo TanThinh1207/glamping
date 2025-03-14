@@ -167,7 +167,7 @@ public class CampTypeServiceImpl implements CampTypeService {
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<CampType> campTypePage = campTypeRepository.findAll(spec, pageable);
         List<CampTypeResponse> campTypeResponses = campTypePage.getContent().stream()
-                .map(this::convertToResponse)
+                .map(campType -> CampTypeResponse.fromEntity(campType, s3Service))
                 .toList();
         if (params.containsKey("checkIn") && params.containsKey("checkOut")) {
             for (CampTypeResponse campTypeResponse : campTypeResponses) {

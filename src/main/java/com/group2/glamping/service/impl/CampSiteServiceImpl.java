@@ -1,5 +1,7 @@
 package com.group2.glamping.service.impl;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.CampSiteRequest;
@@ -25,7 +27,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -158,28 +159,15 @@ public class CampSiteServiceImpl implements CampSiteService {
         return Optional.of(campSiteMapper.toDto(campSiteRepository.save(campSite)));
     }
 
+
     @Override
-    public void updateCampSite(int id,
-                               CampSiteUpdateRequest campSiteUpdateRequest,
-                               List<MultipartFile> files) {
+    public Object updateCampSite(int id, CampSiteUpdateRequest campSiteUpdateRequest) throws JsonMappingException {
         CampSite campSite = campSiteRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.CAMP_SITE_NOT_FOUND));
-
-        updateProperties(campSite, campSiteUpdateRequest);
-
-        campSiteMapper.toDto(campSiteRepository.save(campSite));
-    }
-
-    private void updateProperties(CampSite campSite, CampSiteUpdateRequest campSiteUpdateRequest) {
-        if (campSiteUpdateRequest.name() != null) {
-            campSite.setName(campSiteUpdateRequest.name());
-        }
-        if (campSiteUpdateRequest.status() != null) {
-            campSite.setStatus(campSiteUpdateRequest.status());
-        }
-        if (campSiteUpdateRequest.address() != null) {
-            campSite.setAddress(campSiteUpdateRequest.address());
-        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.updateValue(campSite, campSiteUpdateRequest);
+        CampSite updatedCampSite = campSiteRepository.save(campSite);
+        return campSiteMapper.toDto(updatedCampSite);
     }
 
 
@@ -255,9 +243,7 @@ public class CampSiteServiceImpl implements CampSiteService {
         List<CampSiteResponse> campSiteResponses = campSitePage.getContent().stream()
                 .map(campSiteMapper::toDto)
                 .toList();
-        campSiteResponses.forEach(campSiteResponse -> {
-            System.out.println("Camp types in response: " + campSiteResponse.getCampSiteCampTypeList().size());
-        });
+        campSiteResponses.forEach(campSiteResponse -> System.out.println("Camp types in response: " + campSiteResponse.getCampSiteCampTypeList().size()));
         return new PagingResponse<>(
                 campSiteResponses,
                 campSitePage.getTotalElements(),
