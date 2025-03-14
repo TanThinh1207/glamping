@@ -15,8 +15,8 @@ import java.time.LocalDateTime;
 public class PaymentResponse {
 
     public int id;
-    public String payment_method;
-    public long totalAmount;
+    public String paymentMethod;
+    public Double totalAmount;
     public PaymentStatus status;
     public String transactionId;
     public String sessionId;
@@ -32,8 +32,8 @@ public class PaymentResponse {
 
         return PaymentResponse.builder()
                 .id(payment.getId())
-                .payment_method(payment.getPaymentMethod())
-                .totalAmount((long) payment.getTotalAmount())
+                .paymentMethod(payment.getPaymentMethod())
+                .totalAmount(payment.getTotalAmount())
                 .status(payment.getStatus())
                 .transactionId(payment.getTransactionId())
                 .sessionId(payment.getSessionId())

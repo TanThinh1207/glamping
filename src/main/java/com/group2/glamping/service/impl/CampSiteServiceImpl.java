@@ -95,6 +95,7 @@ public class CampSiteServiceImpl implements CampSiteService {
         campSite.setStatus(CampSiteStatus.Pending);
         campSite.setCreatedTime(LocalDateTime.now());
         campSite.setCity(city);
+        campSite.setDepositRate(0.3);
         campSite.setDescription(description);
 
         campSiteRepository.save(campSite);
