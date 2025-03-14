@@ -1,10 +1,8 @@
 package com.group2.glamping.controller;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.group2.glamping.exception.AppException;
-import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.CampSiteRequest;
 import com.group2.glamping.model.dto.requests.CampSiteUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
@@ -17,12 +15,9 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -101,25 +96,13 @@ public class CampSiteController {
                     @ApiResponse(responseCode = "404", description = "Camp site not found")
             }
     )
-    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/{id}")
     public ResponseEntity<BaseResponse> updateCampSite(
             @PathVariable int id,
-            @RequestPart("updatedCampSite") String updatedCampSiteJson,
-            @RequestPart(value = "files", required = false) List<MultipartFile> files) {
-
-        System.out.println("Received updatedCampSite JSON: " + updatedCampSiteJson);
-        System.out.println("Received files: " + (files != null ? files.size() : 0));
-
-        CampSiteUpdateRequest updatedCampSite;
-        try {
-            updatedCampSite = new ObjectMapper().readValue(updatedCampSiteJson, CampSiteUpdateRequest.class);
-        } catch (JsonProcessingException e) {
-            throw new AppException(ErrorCode.INVALID_REQUEST, "Invalid JSON format for updatedCampSite");
-        }
-
-        campSiteService.updateCampSite(id, updatedCampSite, files);
+            @RequestBody CampSiteUpdateRequest updatedCampSite) throws JsonMappingException {
         return ResponseEntity.ok(BaseResponse.builder()
                 .statusCode(HttpStatus.OK.value())
+                .data(campSiteService.updateCampSite(id, updatedCampSite))
                 .message("CampSite updated successfully")
                 .build());
     }

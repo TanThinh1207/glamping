@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity(name = "camp_site")
-@Builder
+@Builder(toBuilder = true)
 public class CampSite {
 
     @Id
