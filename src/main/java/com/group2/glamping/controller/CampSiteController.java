@@ -16,6 +16,7 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -122,6 +123,7 @@ public class CampSiteController {
                     @ApiResponse(responseCode = "404", description = "Camp site not found")
             }
     )
+    @CacheEvict(value = "camps", key = "#id")
     @PatchMapping(value = "/{id}")
     public ResponseEntity<BaseResponse> updateCampSite(
             @PathVariable int id,
