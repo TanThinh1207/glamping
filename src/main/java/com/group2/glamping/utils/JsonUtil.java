@@ -10,6 +10,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.group2.glamping.model.dto.response.CampSiteResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -18,10 +19,11 @@ public class JsonUtil {
 
     private static final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new SimpleModule()
-                    .addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-            )
+                    .addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))))
             .registerModule(new JavaTimeModule())
-            .setFilterProvider(new SimpleFilterProvider().setDefaultFilter(SimpleBeanPropertyFilter.serializeAll()));
+            .setFilterProvider(new SimpleFilterProvider()
+                    .addFilter("dynamicFilter", SimpleBeanPropertyFilter.serializeAll()) // Thêm filter cụ thể
+                    .setDefaultFilter(SimpleBeanPropertyFilter.serializeAll()));
 
 
     public static PagingResponse<CampSiteResponse> deserializePagingResponse(String data) throws JsonProcessingException {
@@ -44,4 +46,9 @@ public class JsonUtil {
         }
     }
 
-} 
+    public static ObjectMapper getObjectMapper() {
+        return objectMapper;
+    }
+
+
+}

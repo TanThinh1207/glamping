@@ -267,7 +267,7 @@ public class CampSiteServiceImpl implements CampSiteService {
             System.out.println("Cache hit in: getFilteredCampSites ");
             if (fields != null && !fields.isEmpty()) {
                 System.out.println("Cache hit in: getFilteredCampSites with dynamic field");
-                return new ObjectMapper().readValue(cachedData, new TypeReference<Map<String, Object>>() {
+                return JsonUtil.getObjectMapper().readValue(cachedData, new TypeReference<Map<String, Object>>() {
                 });
             }
 
@@ -277,7 +277,7 @@ public class CampSiteServiceImpl implements CampSiteService {
         PagingResponse<?> campSites = getCampSites(params, page, size, sortBy, direction);
         Object filteredResponse = ResponseFilterUtil.getFilteredResponse(fields, campSites, "Return using dynamic filter successfully");
 
-        String filteredResponseJson = new ObjectMapper().writeValueAsString(filteredResponse);
+        String filteredResponseJson = JsonUtil.getObjectMapper().writeValueAsString(filteredResponse);
         redisTemplate.opsForValue().set(cacheKey, filteredResponseJson);
 
         return filteredResponse;
