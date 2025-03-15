@@ -31,7 +31,7 @@ public class FacilityResponse {
         return facility.stream()
                 .map(facility1 -> FacilityResponse.builder()
                         .id(facility1.getId())
-                        .name(facility1.getDescription())
+                        .name(facility1.getName())
                         .description(facility1.getDescription())
                         .image(s3Service.getFileUrl(facility1.getImageUrl()))
                         .status(facility1.isStatus())
