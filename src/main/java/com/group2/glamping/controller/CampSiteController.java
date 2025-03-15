@@ -71,10 +71,15 @@ public class CampSiteController {
             @Parameter(description = "Sort direction: ASC or DESC", example = "ASC")
             @RequestParam(name = "direction", required = false, defaultValue = "ASC") String direction
     ) throws JsonProcessingException {
+        Object filteredCampSites = campSiteService.getFilteredCampSites(params, page, size, fields, sortBy, direction);
         long start = System.currentTimeMillis();
         long end = System.currentTimeMillis();
         System.out.println("API xử lý trong: " + (end - start) + "ms");
-        return ResponseEntity.ok(campSiteService.getFilteredCampSites(params, page, size, fields, sortBy, direction));
+        return ResponseEntity.ok(BaseResponse.builder()
+                .data(filteredCampSites)
+                .message("Return campsites successfully")
+                .statusCode(HttpStatus.OK.value())
+                .build());
     }
 
 

@@ -2,9 +2,7 @@ package com.group2.glamping.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.CampSiteRequest;
@@ -173,16 +171,42 @@ public class CampSiteServiceImpl implements CampSiteService {
 
 
     @Override
-    public Object updateCampSite(int id, CampSiteUpdateRequest campSiteUpdateRequest) throws JsonMappingException {
-        Set<String> keys = redisTemplate.keys("campSites:*");
-        if (keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
-        }
+    public Object updateCampSite(int id, CampSiteUpdateRequest campSiteUpdateRequest) {
+        String cacheKey = "campSites:*";
+        redisTemplate.delete(cacheKey);
+
         CampSite campSite = campSiteRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.CAMP_SITE_NOT_FOUND));
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.updateValue(campSite, campSiteUpdateRequest);
+
+        if (campSiteUpdateRequest.getName() != null) {
+            campSite.setName(campSiteUpdateRequest.getName());
+        }
+        if (campSiteUpdateRequest.getDescription() != null) {
+            campSite.setDescription(campSiteUpdateRequest.getDescription());
+        }
+        if (campSiteUpdateRequest.getDepositRate() != null) {
+            campSite.setDepositRate(campSiteUpdateRequest.getDepositRate());
+        }
+        if (campSiteUpdateRequest.getStatus() != null) {
+            campSite.setStatus(campSiteUpdateRequest.getStatus());
+        }
+        if (campSiteUpdateRequest.getLatitude() != null) {
+            campSite.setLatitude(campSiteUpdateRequest.getLatitude());
+        }
+        if (campSiteUpdateRequest.getLongitude() != null) {
+            campSite.setLongitude(campSiteUpdateRequest.getLongitude());
+        }
+        if (campSiteUpdateRequest.getCity() != null) {
+            campSite.setCity(campSiteUpdateRequest.getCity());
+        }
+        if (campSiteUpdateRequest.getAddress() != null) {
+            campSite.setAddress(campSiteUpdateRequest.getAddress());
+        }
+        if (campSiteUpdateRequest.getMessage() != null) {
+            campSite.setMessage(campSiteUpdateRequest.getMessage());
+        }
         CampSite updatedCampSite = campSiteRepository.save(campSite);
+
         return campSiteMapper.toDto(updatedCampSite);
     }
 
