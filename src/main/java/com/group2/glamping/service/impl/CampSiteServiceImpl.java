@@ -300,7 +300,7 @@ public class CampSiteServiceImpl implements CampSiteService {
 
                 if (fields != null && !fields.isEmpty()) {
                     System.out.println("Cache hit with dynamic fields");
-                    return ResponseFilterUtil.getFilteredResponse(fields, cachedResponse, "Return using dynamic filter successfully");
+                    return ResponseFilterUtil.getFilteredResponse(fields, cachedResponse, "Return successfully");
                 }
 
                 return cachedResponse;

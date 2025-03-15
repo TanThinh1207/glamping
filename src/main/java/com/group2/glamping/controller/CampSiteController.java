@@ -8,6 +8,7 @@ import com.group2.glamping.model.dto.requests.CampSiteRequest;
 import com.group2.glamping.model.dto.requests.CampSiteUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.service.interfaces.CampSiteService;
+import com.group2.glamping.utils.ResponseFilterUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -16,7 +17,6 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -71,15 +71,11 @@ public class CampSiteController {
             @Parameter(description = "Sort direction: ASC or DESC", example = "ASC")
             @RequestParam(name = "direction", required = false, defaultValue = "ASC") String direction
     ) throws JsonProcessingException {
+        // Lấy dữ liệu đã lọc
         Object filteredCampSites = campSiteService.getFilteredCampSites(params, page, size, fields, sortBy, direction);
-        long start = System.currentTimeMillis();
-        long end = System.currentTimeMillis();
-        System.out.println("API xử lý trong: " + (end - start) + "ms");
-        return ResponseEntity.ok(BaseResponse.builder()
-                .data(filteredCampSites)
-                .message("Return campsites successfully")
-                .statusCode(HttpStatus.OK.value())
-                .build());
+
+        // Trả về BaseResponse với dữ liệu đã lọc (hoặc chưa lọc)
+        return ResponseEntity.ok(ResponseFilterUtil.getFilteredResponse(fields, filteredCampSites, "Return campsites successfully"));
     }
 
 
@@ -128,7 +124,7 @@ public class CampSiteController {
                     @ApiResponse(responseCode = "404", description = "Camp site not found")
             }
     )
-    @CacheEvict(value = "camps", key = "#id")
+//    @CacheEvict(value = "camps", key = "#id")
     @PatchMapping(value = "/{id}")
     public ResponseEntity<BaseResponse> updateCampSite(
             @PathVariable int id,
