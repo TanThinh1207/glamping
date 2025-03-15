@@ -71,8 +71,8 @@ public class CampSiteServiceImpl implements CampSiteService {
                 campSiteUpdateRequest.longitude(),
                 campSiteUpdateRequest.description(),
                 campSiteUpdateRequest.campSiteSelections(),
-                campSiteUpdateRequest.placeTypeIds(),
                 campSiteUpdateRequest.utilityIds(),
+                campSiteUpdateRequest.placeTypeIds(),
                 campSiteUpdateRequest.campTypeList());
     }
 
@@ -152,6 +152,7 @@ public class CampSiteServiceImpl implements CampSiteService {
         campSite.setCampTypes(campTypes);
 
         //  Utilities
+        System.out.println(campSiteUtilities);
         List<Utility> utilities = campSiteUtilities.stream()
                 .map(request -> utilityRepository.findById(request)
                         .orElseThrow(() -> new AppException(ErrorCode.UTILITY_NOT_FOUND)))
