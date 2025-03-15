@@ -1,5 +1,7 @@
 package com.group2.glamping.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group2.glamping.exception.AppException;
@@ -15,9 +17,9 @@ import com.group2.glamping.model.enums.CampSiteStatus;
 import com.group2.glamping.model.mapper.CampSiteMapper;
 import com.group2.glamping.repository.*;
 import com.group2.glamping.service.interfaces.CampSiteService;
+import com.group2.glamping.utils.JsonUtil;
 import com.group2.glamping.utils.ResponseFilterUtil;
 import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -26,11 +28,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.group2.glamping.utils.JsonUtil.deserializePagingResponse;
+import static com.group2.glamping.utils.JsonUtil.serializePagingResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -42,9 +48,9 @@ public class CampSiteServiceImpl implements CampSiteService {
     private final UtilityRepository utilityRepository;
     private final PlaceTypeRepository placeTypeRepository;
     private final CampTypeRepository campTypeRepository;
-    //    private final S3Service s3Service;
     private final CampSiteMapper campSiteMapper;
     private final FacilityRepository facilityRepository;
+    private final StringRedisTemplate redisTemplate;
 
     @Override
     public Optional<CampSiteResponse> saveCampSite(CampSiteRequest campSiteUpdateRequest) {
@@ -186,79 +192,84 @@ public class CampSiteServiceImpl implements CampSiteService {
     }
 
     @Override
-    public PagingResponse<?> getCampSites(Map<String, String> params, int page, int size, String sortBy, String direction) {
+    public PagingResponse<?> getCampSites(Map<String, String> params, int page, int size, String sortBy, String direction) throws JsonProcessingException {
+        String cacheKey = String.format("campSites:%s:%d:%d:%s:%s", params.toString(), page, size, sortBy, direction);
+        String cachedData = redisTemplate.opsForValue().get(cacheKey);
+
+        if (cachedData != null) {
+            System.out.println("Cache hit! in deserializePagingResponse");
+            return deserializePagingResponse(cachedData);
+        }
+
         Specification<CampSite> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
-            root.fetch("campTypes", JoinType.LEFT); // <-- Force fetch campTypes
+//            root.fetch("campTypes", JoinType.LEFT);
+
             params.forEach((key, value) -> {
                 switch (key) {
-                    case "id":
-                        predicates.add(criteriaBuilder.equal(root.get("id"), value));
-                        break;
-                    case "name":
-                        predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
-                        break;
-                    case "status":
-                        predicates.add(criteriaBuilder.equal(root.get("status"), value));
-                        break;
-                    case "city":
-                        predicates.add(criteriaBuilder.like(root.get("city"), "%" + value + "%"));
-                        break;
-                    case "address":
-                        predicates.add(criteriaBuilder.like(root.get("address"), "%" + value + "%"));
-                        break;
-                    case "createdTime":
-                        predicates.add(criteriaBuilder.equal(root.get("createdTime"), value));
-                        break;
-                    case "depositRate":
-                        predicates.add(criteriaBuilder.equal(root.get("depositRate"), value));
-                        break;
-                    case "latitude":
-                        predicates.add(criteriaBuilder.equal(root.get("latitude"), value));
-                        break;
-                    case "longitude":
-                        predicates.add(criteriaBuilder.equal(root.get("longitude"), value));
-                        break;
-                    case "placeTypeName":
+                    case "id" -> predicates.add(criteriaBuilder.equal(root.get("id"), value));
+                    case "name" -> predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
+                    case "status" -> predicates.add(criteriaBuilder.equal(root.get("status"), value));
+                    case "city" -> predicates.add(criteriaBuilder.like(root.get("city"), "%" + value + "%"));
+                    case "address" -> predicates.add(criteriaBuilder.like(root.get("address"), "%" + value + "%"));
+                    case "placeTypeName" -> {
                         List<String> placeTypeList = Arrays.asList(value.split(","));
                         Join<CampSite, PlaceType> placeTypeJoin = root.join("placeTypes");
                         predicates.add(placeTypeJoin.get("name").in(placeTypeList));
-                        break;
-                    case "utilityName":
+                    }
+                    case "utilityName" -> {
                         List<String> utilityNameList = Arrays.asList(value.split(","));
                         Join<CampSite, Utility> utilityJoin = root.join("utilities");
                         predicates.add(utilityJoin.get("name").in(utilityNameList));
-                    case "userId":
+                    }
+                    case "userId" -> {
                         Join<CampSite, User> userJoin = root.join("user");
                         predicates.add(criteriaBuilder.equal(userJoin.get("id"), value));
-                        break;
+                    }
                 }
             });
-
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
 
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<CampSite> campSitePage = campSiteRepository.findAll(spec, pageable);
+
         List<CampSiteResponse> campSiteResponses = campSitePage.getContent().stream()
                 .map(campSiteMapper::toDto)
-                .toList();
-        campSiteResponses.forEach(campSiteResponse -> System.out.println("Camp types in response: " + campSiteResponse.getCampSiteCampTypeList().size()));
-        return new PagingResponse<>(
-                campSiteResponses,
-                campSitePage.getTotalElements(),
-                campSitePage.getTotalPages(),
-                campSitePage.getNumber(),
-                campSitePage.getNumberOfElements()
-        );
+                .collect(Collectors.toList());
+
+        PagingResponse<?> response = new PagingResponse<>(campSiteResponses, campSitePage.getTotalElements(), campSitePage.getTotalPages(), campSitePage.getNumber(), campSitePage.getNumberOfElements());
+
+        redisTemplate.opsForValue().set(cacheKey, serializePagingResponse(response));
+
+        return response;
     }
 
 
     @Override
-    public Object getFilteredCampSites(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
+    public Object getFilteredCampSites(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) throws JsonProcessingException {
+        String cacheKey = String.format("filteredCampSites:%s:%d:%d:%s:%s:%s", params.toString(), page, size, fields, sortBy, direction);
+        String cachedData = redisTemplate.opsForValue().get(cacheKey);
+
+        if (cachedData != null) {
+            System.out.println("Cache hit in: getFilteredCampSites ");
+            if (fields != null && !fields.isEmpty()) {
+                System.out.println("Cache hit in: getFilteredCampSites with dynamic field");
+                return new ObjectMapper().readValue(cachedData, new TypeReference<Map<String, Object>>() {
+                });
+            }
+
+            return JsonUtil.deserializePagingResponse(cachedData);
+        }
+
         PagingResponse<?> campSites = getCampSites(params, page, size, sortBy, direction);
-        return ResponseFilterUtil.getFilteredResponse(fields, campSites, "Return using dynamic filter successfully");
+        Object filteredResponse = ResponseFilterUtil.getFilteredResponse(fields, campSites, "Return using dynamic filter successfully");
+
+        String filteredResponseJson = new ObjectMapper().writeValueAsString(filteredResponse);
+        redisTemplate.opsForValue().set(cacheKey, filteredResponseJson);
+
+        return filteredResponse;
     }
 
 

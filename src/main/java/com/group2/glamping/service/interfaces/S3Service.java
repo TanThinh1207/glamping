@@ -10,6 +10,7 @@ public interface S3Service {
 
     String uploadFile(MultipartFile file, String fileType, int campSiteId);
 
-    String generatePresignedUrl(String fileName);
+    String generatePresignedUrl(String fileName, int expirationInSeconds);
 
+    String getFileUrl(String path);
 }

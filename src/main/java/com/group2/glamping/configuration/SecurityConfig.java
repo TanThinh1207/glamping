@@ -53,9 +53,10 @@ public class SecurityConfig {
                 .sessionManagement(sessionManagementCustomizer ->
                         sessionManagementCustomizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
-                            req.requestMatchers(WHITE_LIST).permitAll();
-//                            req.requestMatchers("/api/demo/**", "/api/campsites/**", "/login/oauth2/code/**").hasRole("USER");
-                            req.requestMatchers("/home").authenticated();
+//                            req.requestMatchers(WHITE_LIST).permitAll();
+////                            req.requestMatchers("/api/demo/**", "/api/campsites/**", "/login/oauth2/code/**").hasRole("USER");
+//                            req.requestMatchers("/home").authenticated();
+                            req.anyRequest().permitAll();
                         }
                 )
                 .exceptionHandling(exception -> exception

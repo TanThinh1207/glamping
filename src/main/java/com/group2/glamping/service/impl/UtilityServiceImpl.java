@@ -140,7 +140,7 @@ public class UtilityServiceImpl implements UtilityService {
                 .name(utility.getName())
                 .imagePath(utility.getImageUrl() == null || utility.getImageUrl().isEmpty() ?
                         "" :
-                        s3Service.generatePresignedUrl(utility.getImageUrl()))
+                        s3Service.generatePresignedUrl(utility.getImageUrl(), 86400))
                 .status(utility.isStatus())
                 .build();
     }

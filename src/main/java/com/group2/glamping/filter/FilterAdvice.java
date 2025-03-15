@@ -45,7 +45,6 @@ public class FilterAdvice implements ResponseBodyAdvice<Object> {
 
         MappingJacksonValue mapping = new MappingJacksonValue(body);
 
-        // Nếu body là PagingResponse, cần lọc từng phần tử trong content
         if (body instanceof PagingResponse<?> pagingResponse) {
             List<?> originalContent = pagingResponse.getContent();
             List<Object> filteredContent = originalContent.stream()

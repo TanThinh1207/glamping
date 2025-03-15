@@ -113,8 +113,8 @@ public class FacilityServiceImpl implements FacilityService {
                 .status(facility.isStatus())
                 .image(
                         facility.getImageUrl() == null || facility.getImageUrl().isEmpty() ?
-                                s3Service.generatePresignedUrl("Facility/FACILITY__1741050569490_Empty.png") :
-                                s3Service.generatePresignedUrl(facility.getImageUrl()))
+                                s3Service.generatePresignedUrl("Facility/FACILITY__1741050569490_Empty.png", 86400) :
+                                s3Service.generatePresignedUrl(facility.getImageUrl(), 86400))
                 .build();
     }
 }

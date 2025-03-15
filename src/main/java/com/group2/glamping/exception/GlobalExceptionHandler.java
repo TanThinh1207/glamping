@@ -1,5 +1,6 @@
 package com.group2.glamping.exception;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.firebase.FirebaseException;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.stripe.exception.StripeException;
@@ -50,6 +51,17 @@ public class GlobalExceptionHandler {
                 .status(ex.getStatusCode())
                 .body(BaseResponse.builder()
                         .statusCode(ex.getStatusCode())
+                        .message(ex.getMessage())
+                        .data(null)
+                        .build());
+    }
+
+    @ExceptionHandler(JsonProcessingException.class)
+    public ResponseEntity<BaseResponse> handleJsonProcessingException(JsonProcessingException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(BaseResponse.builder()
+                        .statusCode(HttpStatus.BAD_REQUEST.value())
                         .message(ex.getMessage())
                         .data(null)
                         .build());
