@@ -3,6 +3,7 @@ package com.group2.glamping.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
@@ -265,19 +266,30 @@ public class CampSiteServiceImpl implements CampSiteService {
 
         if (cachedData != null) {
             System.out.println("Cache hit in: getFilteredCampSites ");
-            if (fields != null && !fields.isEmpty()) {
-                System.out.println("Cache hit in: getFilteredCampSites with dynamic field");
-                return new ObjectMapper().readValue(cachedData, new TypeReference<Map<String, Object>>() {
-                });
-            }
+            JsonNode rootNode = JsonUtil.getObjectMapper().readTree(cachedData);
+            JsonNode dataNode = rootNode.get("data");
 
-            return JsonUtil.deserializePagingResponse(cachedData);
+            if (dataNode != null) {
+                PagingResponse<CampSiteResponse> cachedResponse = JsonUtil.getObjectMapper().readValue(dataNode.toString(), new TypeReference<>() {
+                });
+
+                if (fields != null && !fields.isEmpty()) {
+                    System.out.println("Cache hit with dynamic fields");
+                    return ResponseFilterUtil.getFilteredResponse(fields, cachedResponse, "Return using dynamic filter successfully");
+                }
+
+                return cachedResponse;
+            } else {
+                throw new JsonProcessingException("Missing 'data' field in cached response") {
+                };
+            }
         }
 
         PagingResponse<?> campSites = getCampSites(params, page, size, sortBy, direction);
         Object filteredResponse = ResponseFilterUtil.getFilteredResponse(fields, campSites, "Return using dynamic filter successfully");
 
-        String filteredResponseJson = new ObjectMapper().writeValueAsString(filteredResponse);
+        // Lưu vào cache
+        String filteredResponseJson = JsonUtil.getObjectMapper().writeValueAsString(filteredResponse);
         redisTemplate.opsForValue().set(cacheKey, filteredResponseJson);
 
         return filteredResponse;
