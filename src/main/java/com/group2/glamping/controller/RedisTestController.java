@@ -14,7 +14,7 @@ public class RedisTestController {
 
     private final StringRedisTemplate redisTemplate;
 
-    @DeleteMapping("/cache/clearAll")
+    @DeleteMapping("/cache")
     public ResponseEntity<String> clearAllCache() {
         if (redisTemplate.getConnectionFactory() != null) {
             Set<String> keys = redisTemplate.keys("*");
