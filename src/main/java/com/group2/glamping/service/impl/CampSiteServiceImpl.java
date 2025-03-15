@@ -288,7 +288,6 @@ public class CampSiteServiceImpl implements CampSiteService {
         PagingResponse<?> campSites = getCampSites(params, page, size, sortBy, direction);
         Object filteredResponse = ResponseFilterUtil.getFilteredResponse(fields, campSites, "Return using dynamic filter successfully");
 
-        // Lưu vào cache
         String filteredResponseJson = JsonUtil.getObjectMapper().writeValueAsString(filteredResponse);
         redisTemplate.opsForValue().set(cacheKey, filteredResponseJson);
 
