@@ -56,7 +56,7 @@ public class CampSiteServiceImpl implements CampSiteService {
         if (campSiteUpdateRequest == null) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
-        Set<String> keys = redisTemplate.keys("campSites:*");
+        Set<String> keys = redisTemplate.keys("filteredCampSites:*");
         if (keys != null && !keys.isEmpty()) {
             redisTemplate.delete(keys);
         }
@@ -172,7 +172,7 @@ public class CampSiteServiceImpl implements CampSiteService {
 
     @Override
     public Object updateCampSite(int id, CampSiteUpdateRequest campSiteUpdateRequest) {
-        String cacheKey = "campSites:*";
+        String cacheKey = "filteredCampSites:*";
         redisTemplate.delete(cacheKey);
 
         CampSite campSite = campSiteRepository.findById(id)
@@ -213,7 +213,7 @@ public class CampSiteServiceImpl implements CampSiteService {
 
     @Override
     public void deleteCampSite(int id) {
-        Set<String> keys = redisTemplate.keys("campSites:*");
+        Set<String> keys = redisTemplate.keys("filteredCampSites:*");
         if (keys != null && !keys.isEmpty()) {
             redisTemplate.delete(keys);
         }
@@ -232,6 +232,7 @@ public class CampSiteServiceImpl implements CampSiteService {
     public PagingResponse<?> getCampSites(Map<String, String> params, int page, int size, String sortBy, String direction) throws JsonProcessingException {
         String cacheKey = String.format("campSites:%s:%d:%d:%s:%s", params.toString(), page, size, sortBy, direction);
         String cachedData = redisTemplate.opsForValue().get(cacheKey);
+
 
         if (cachedData != null) {
             System.out.println("Cache hit! in deserializePagingResponse");
@@ -288,7 +289,7 @@ public class CampSiteServiceImpl implements CampSiteService {
     public Object getFilteredCampSites(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) throws JsonProcessingException {
         String cacheKey = String.format("filteredCampSites:%s:%d:%d:%s:%s:%s", params.toString(), page, size, fields, sortBy, direction);
         String cachedData = redisTemplate.opsForValue().get(cacheKey);
-
+        System.out.println(cacheKey);
         if (cachedData != null) {
             System.out.println("Cache hit in: getFilteredCampSites ");
             JsonNode rootNode = JsonUtil.getObjectMapper().readTree(cachedData);
