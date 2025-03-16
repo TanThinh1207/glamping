@@ -19,8 +19,6 @@ public interface BookingService {
 
     Object getFilteredBookings(Map<String, String> params, int page, int size, String fields, String sortBy, String direction);
 
-    void confirmPaymentSuccess(Integer orderId);
-
     BookingResponse checkInBooking(Integer bookingId);
 
     BookingResponse checkOutBooking(Integer bookingId);
