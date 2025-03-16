@@ -60,6 +60,10 @@ public class CampSiteServiceImpl implements CampSiteService {
         if (keys != null && !keys.isEmpty()) {
             redisTemplate.delete(keys);
         }
+        keys = redisTemplate.keys("campSites:*");
+        if (keys != null && !keys.isEmpty()) {
+            redisTemplate.delete(keys);
+        }
         CampSite campSite = new CampSite();
         return getCampSiteResponse(campSite,
                 campSiteUpdateRequest.hostId(),
@@ -172,8 +176,14 @@ public class CampSiteServiceImpl implements CampSiteService {
 
     @Override
     public Object updateCampSite(int id, CampSiteUpdateRequest campSiteUpdateRequest) {
-        String cacheKey = "filteredCampSites:*";
-        redisTemplate.delete(cacheKey);
+        Set<String> keys = redisTemplate.keys("filteredCampSites:*");
+        if (keys != null && !keys.isEmpty()) {
+            redisTemplate.delete(keys);
+        }
+        keys = redisTemplate.keys("campSites:*");
+        if (keys != null && !keys.isEmpty()) {
+            redisTemplate.delete(keys);
+        }
 
         CampSite campSite = campSiteRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.CAMP_SITE_NOT_FOUND));
@@ -217,6 +227,10 @@ public class CampSiteServiceImpl implements CampSiteService {
         if (keys != null && !keys.isEmpty()) {
             redisTemplate.delete(keys);
         }
+        keys = redisTemplate.keys("campSites:*");
+        if (keys != null && !keys.isEmpty()) {
+            redisTemplate.delete(keys);
+        }
         Optional<CampSite> existingCampSite = campSiteRepository.findById(id);
 
         if (existingCampSite.isPresent()) {
@@ -230,7 +244,11 @@ public class CampSiteServiceImpl implements CampSiteService {
 
     @Override
     public PagingResponse<?> getCampSites(Map<String, String> params, int page, int size, String sortBy, String direction) throws JsonProcessingException {
-        String cacheKey = String.format("campSites:%s:%d:%d:%s:%s", params.toString(), page, size, sortBy, direction);
+        String sortedParams = params.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .collect(Collectors.joining("&"));
+        String cacheKey = String.format("filteredCampSites:%s:%d:%d:%s:%s", sortedParams, page, size, sortBy, direction);
         String cachedData = redisTemplate.opsForValue().get(cacheKey);
 
 
