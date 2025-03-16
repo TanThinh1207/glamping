@@ -8,7 +8,6 @@ import com.group2.glamping.model.dto.requests.CampSiteRequest;
 import com.group2.glamping.model.dto.requests.CampSiteUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.service.interfaces.CampSiteService;
-import com.group2.glamping.utils.ResponseFilterUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -71,11 +70,9 @@ public class CampSiteController {
             @Parameter(description = "Sort direction: ASC or DESC", example = "ASC")
             @RequestParam(name = "direction", required = false, defaultValue = "ASC") String direction
     ) throws JsonProcessingException {
-        // Lấy dữ liệu đã lọc
         Object filteredCampSites = campSiteService.getFilteredCampSites(params, page, size, fields, sortBy, direction);
 
-        // Trả về BaseResponse với dữ liệu đã lọc (hoặc chưa lọc)
-        return ResponseEntity.ok(ResponseFilterUtil.getFilteredResponse(fields, filteredCampSites, "Return campsites successfully"));
+        return ResponseEntity.ok(filteredCampSites);
     }
 
 

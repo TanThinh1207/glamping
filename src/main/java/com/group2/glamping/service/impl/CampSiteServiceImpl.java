@@ -9,6 +9,7 @@ import com.group2.glamping.model.dto.requests.CampSiteRequest;
 import com.group2.glamping.model.dto.requests.CampSiteUpdateRequest;
 import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
 import com.group2.glamping.model.dto.requests.SelectionRequest;
+import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.CampSiteResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.entity.*;
@@ -28,6 +29,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -322,7 +324,11 @@ public class CampSiteServiceImpl implements CampSiteService {
                     return ResponseFilterUtil.getFilteredResponse(fields, cachedResponse, "Return successfully");
                 }
 
-                return cachedResponse;
+                return BaseResponse.builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .message("Return successfully")
+                        .data(cachedResponse)
+                        .build();
             } else {
                 throw new JsonProcessingException("Missing 'data' field in cached response") {
                 };
