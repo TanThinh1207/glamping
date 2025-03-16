@@ -184,7 +184,8 @@ public class BookingServiceImpl implements BookingService {
                         predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
                         break;
                     case "userId":
-                        predicates.add(criteriaBuilder.equal(root.get("id_user"), value));
+                        Join<Booking, User> bookingUserJoin = root.join("user");
+                        predicates.add(criteriaBuilder.equal(bookingUserJoin.get("id"), value));
                         break;
                     case "status":
                         predicates.add(criteriaBuilder.equal(root.get("status"), value));
