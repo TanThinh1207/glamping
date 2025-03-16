@@ -9,12 +9,10 @@ import com.group2.glamping.model.entity.*;
 import com.group2.glamping.model.entity.id.IdBookingSelection;
 import com.group2.glamping.model.enums.BookingDetailStatus;
 import com.group2.glamping.model.enums.BookingStatus;
-import com.group2.glamping.model.enums.PaymentStatus;
 import com.group2.glamping.model.mapper.BookingMapper;
 import com.group2.glamping.repository.*;
 import com.group2.glamping.service.interfaces.BookingService;
 import com.group2.glamping.service.interfaces.EmailService;
-import com.group2.glamping.service.interfaces.PaymentService;
 import com.group2.glamping.utils.ResponseFilterUtil;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
@@ -46,8 +44,6 @@ public class BookingServiceImpl implements BookingService {
     private final SelectionRepository selectionRepository;
     private final BookingMapper bookingMapper;
     private final EmailService emailService;
-    private final PaymentService paymentService;
-    private final PushNotificationService pushNotificationService;
 
     @Override
     public Optional<BookingResponse> createBooking(BookingRequest bookingRequest) {
@@ -230,23 +226,6 @@ public class BookingServiceImpl implements BookingService {
         return ResponseFilterUtil.getFilteredResponse(fields, bookings, "Return using dynamic filter successfully");
     }
 
-
-    @Override
-    public void confirmPaymentSuccess(Integer paymentId) {
-        Booking booking = bookingRepository.findById(paymentId).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
-        Payment payment = Payment.builder()
-                .booking(booking)
-                .paymentMethod("VNPay")
-                .completedTime(LocalDateTime.now())
-                .status(PaymentStatus.Completed)
-                .totalAmount(booking.getTotalAmount() * 0.3)
-                .build();
-        paymentService.savePayment(payment);
-        booking.setStatus(BookingStatus.Deposit);
-        bookingRepository.save(booking);
-        pushNotificationService.sendNotification(booking.getCampSite().getUser().getId(), "New Booking For " + booking.getCampSite().getName(),
-                "A new booking has been made for your campsite " + booking.getCampSite().getName() + "from " + booking.getUser().getFirstname());
-    }
 
     @Override
     public BookingResponse checkInBooking(Integer bookingId) {

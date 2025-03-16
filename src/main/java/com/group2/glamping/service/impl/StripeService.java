@@ -39,6 +39,7 @@ import static com.stripe.Stripe.apiKey;
 @Service
 @RequiredArgsConstructor
 public class StripeService {
+    private final PushNotificationService pushNotificationService;
     @Value("${stripe.secretKey}")
     private String secretKey;
 
@@ -203,6 +204,8 @@ public class StripeService {
         paymentRepository.save(payment);
 
         if (paymentStatus == PaymentStatus.Completed) {
+            pushNotificationService.sendNotification(booking.getCampSite().getUser().getId(), "New Booking For " + booking.getCampSite().getName(),
+                    "A new booking has been made for your campsite " + booking.getCampSite().getName() + "from " + booking.getUser().getFirstname());
             booking.setStatus(BookingStatus.Deposit);
         } else if (paymentStatus == PaymentStatus.Failed) {
             booking.setStatus(BookingStatus.Cancelled);

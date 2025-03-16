@@ -123,6 +123,7 @@ public class PaymentController {
             HttpServletResponse response) {
         try {
             stripeService.updatePaymentStatus(sessionId, PaymentStatus.Completed);
+
             log.info("Payment successful for session ID: {}", sessionId);
 
             // Redirect to frontend page (e.g., payment success page)
