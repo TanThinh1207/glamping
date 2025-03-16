@@ -101,6 +101,7 @@ public class PaymentController {
             return ResponseEntity.ok(BaseResponse.builder()
                     .statusCode(HttpStatus.OK.value())
                     .message("Refund successful")
+                    .data("Refund successful")
                     .build());
         } catch (Exception e) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION, "Refund failed: " + e.getMessage());
