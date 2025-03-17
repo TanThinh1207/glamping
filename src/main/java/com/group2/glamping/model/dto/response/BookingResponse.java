@@ -18,7 +18,7 @@ import java.util.List;
 public class BookingResponse {
 
     int id;
-//    UserResponse user;
+    UserResponse user;
     CampSiteResponseFilter campSite;
     @JsonFormat(pattern = "yyyy-MM-dd")
     LocalDateTime checkIn;

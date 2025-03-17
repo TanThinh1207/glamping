@@ -1,9 +1,6 @@
 package com.group2.glamping.model.mapper;
 
-import com.group2.glamping.model.dto.response.BookingDetailResponse;
-import com.group2.glamping.model.dto.response.BookingResponse;
-import com.group2.glamping.model.dto.response.BookingSelectionResponse;
-import com.group2.glamping.model.dto.response.PaymentResponse;
+import com.group2.glamping.model.dto.response.*;
 import com.group2.glamping.model.entity.Booking;
 import com.group2.glamping.model.entity.BookingDetail;
 import com.group2.glamping.model.entity.BookingSelection;
@@ -46,6 +43,7 @@ public class BookingMapper {
                 .bookingDetailResponseList(mapBookingDetails(booking.getBookingDetailList()))
                 .bookingSelectionResponseList(mapBookingSelections(booking.getBookingSelectionList()))
                 .paymentResponseList(mapPayments(booking.getPaymentList()))
+                .user(new UserResponse(booking.getUser()))
                 .build();
     }
 
