@@ -29,6 +29,7 @@ public class BookingResponse {
     BookingStatus status;
     double totalAmount;
     List<BookingDetailResponse> bookingDetailResponseList;
+    List<CampTypeItemResponse> campTypeItemResponse;
     List<BookingSelectionResponse> bookingSelectionResponseList;
     List<PaymentResponse> paymentResponseList;
 

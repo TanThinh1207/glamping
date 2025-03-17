@@ -5,6 +5,7 @@ import com.group2.glamping.model.entity.Booking;
 import com.group2.glamping.model.entity.BookingDetail;
 import com.group2.glamping.model.entity.BookingSelection;
 import com.group2.glamping.model.entity.Payment;
+import com.group2.glamping.service.interfaces.BookingDetailService;
 import com.group2.glamping.service.interfaces.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ public class BookingMapper {
 
     private final S3Service s3Service;
     private final CampSiteFilterMapper campSiteFilterMapper;
+    private final BookingDetailService bookingDetailService;
 
     public BookingResponse toDto(Booking booking) {
         if (booking == null) {
@@ -44,6 +46,7 @@ public class BookingMapper {
                 .bookingSelectionResponseList(mapBookingSelections(booking.getBookingSelectionList()))
                 .paymentResponseList(mapPayments(booking.getPaymentList()))
                 .user(new UserResponse(booking.getUser()))
+                .campTypeItemResponse(bookingDetailService.groupBookingDetailsByCampType(mapBookingDetails(booking.getBookingDetailList())))
                 .build();
     }
 

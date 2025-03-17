@@ -46,6 +46,8 @@ public class StripeService {
     @Value("${exchange.api.key}")
     private String exchangeApiKey;
 
+    @Value("${stripe.callback.url}")
+    private String stripeCallback;
 
     @PostConstruct
     public void init() {
@@ -73,8 +75,9 @@ public class StripeService {
 
         SessionCreateParams params = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
-                .setSuccessUrl("http://localhost:8080/api/payments/success?session_id={CHECKOUT_SESSION_ID}")
-                .setCancelUrl("http://localhost:8080/api/payments/cancel?session_id={CHECKOUT_SESSION_ID}")
+
+                .setSuccessUrl(stripeCallback + "/api/payments/success?session_id={CHECKOUT_SESSION_ID}")
+                .setCancelUrl(stripeCallback + "/api/payments/cancel?session_id={CHECKOUT_SESSION_ID}")
                 .addLineItem(lineItem)
                 .putMetadata("bookingId", String.valueOf(paymentRequest.bookingId()))
                 .build();

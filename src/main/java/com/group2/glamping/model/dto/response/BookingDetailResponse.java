@@ -1,7 +1,6 @@
 package com.group2.glamping.model.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.group2.glamping.model.entity.BookingDetail;
 import com.group2.glamping.model.enums.BookingDetailStatus;
 import com.group2.glamping.service.interfaces.S3Service;
@@ -40,7 +39,7 @@ public class BookingDetailResponse {
 
         BookingDetailResponse response = BookingDetailResponse.builder()
                 .bookingDetailId(bookingDetail.getId())
-                .campTypeResponse(CampTypeResponse.fromEntity(bookingDetail.getCampType(), s3Service ))
+                .campTypeResponse(CampTypeResponse.fromEntity(bookingDetail.getCampType(), s3Service))
                 .campResponse(CampResponse.fromEntity(bookingDetail.getCamp()))
                 .checkInAt(bookingDetail.getCheckInTime())
                 .checkOutAt(bookingDetail.getCheckOutTime())
