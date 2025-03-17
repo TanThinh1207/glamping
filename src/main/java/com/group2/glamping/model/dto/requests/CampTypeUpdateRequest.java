@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public record CampTypeUpdateRequest(
@@ -33,7 +32,7 @@ public record CampTypeUpdateRequest(
         @Schema(description = "Camp type status (active/inactive)", example = "true")
         Boolean status,
 
-        @Schema(description = "")
+        @Schema()
         List<Integer> facilities
 
 

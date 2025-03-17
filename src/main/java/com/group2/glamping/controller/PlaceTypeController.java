@@ -7,10 +7,10 @@ import com.group2.glamping.model.dto.response.PlaceTypeResponse;
 import com.group2.glamping.service.interfaces.PlaceTypeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -79,29 +79,32 @@ public class PlaceTypeController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Place type updated successfully",
                             content = @Content(mediaType = "application/json",
-                                    examples = @ExampleObject(value = "{\n" +
-                                            "  \"statusCode\": 200,\n" +
-                                            "  \"message\": \"Place type updated successfully\",\n" +
-                                            "  \"data\": {\n" +
-                                            "    \"id\": 1,\n" +
-                                            "    \"name\": \"Luxury Tent\",\n" +
-                                            "    \"image\": \"luxury_tent.jpg\"\n" +
-                                            "  }\n" +
-                                            "}"))),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                              "statusCode": 200,
+                                              "message": "Place type updated successfully",
+                                              "data": {
+                                                "id": 1,
+                                                "name": "Luxury Tent",
+                                                "image": "luxury_tent.jpg"
+                                              }
+                                            }"""))),
                     @ApiResponse(responseCode = "404", description = "Place type not found",
                             content = @Content(mediaType = "application/json",
-                                    examples = @ExampleObject(value = "{\n" +
-                                            "  \"statusCode\": 404,\n" +
-                                            "  \"message\": \"Place type not found\",\n" +
-                                            "  \"data\": null\n" +
-                                            "}"))),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                              "statusCode": 404,
+                                              "message": "Place type not found",
+                                              "data": null
+                                            }"""))),
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json",
-                                    examples = @ExampleObject(value = "{\n" +
-                                            "  \"statusCode\": 500,\n" +
-                                            "  \"message\": \"An unexpected error occurred. Please try again later.\",\n" +
-                                            "  \"data\": null\n" +
-                                            "}")))
+                                    examples = @ExampleObject(value = """
+                                            {
+                                              "statusCode": 500,
+                                              "message": "An unexpected error occurred. Please try again later.",
+                                              "data": null
+                                            }""")))
             }
     )
     public ResponseEntity<BaseResponse> updatePlaceType(
@@ -173,10 +176,11 @@ public class PlaceTypeController {
 
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json",
-                                    examples = @ExampleObject(value = "{\n" +
-                                            "  \"statusCode\": 500,\n" +
-                                            "  \"message\": \"An unexpected error occurred. Please try again later.\"" +
-                                            "}")))
+                                    examples = @ExampleObject(value = """
+                                            {
+                                              "statusCode": 500,
+                                              "message": "An unexpected error occurred. Please try again later."\
+                                            }""")))
             }
     )
     public ResponseEntity<BaseResponse> deletePlaceType(
