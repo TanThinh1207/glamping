@@ -26,11 +26,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -143,7 +148,6 @@ public class CampTypeServiceImpl implements CampTypeService {
         Specification<CampType> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-
             params.forEach((key, value) -> {
                 switch (key) {
                     case "id" -> predicates.add(criteriaBuilder.equal(root.get("id"), value));
@@ -160,8 +164,6 @@ public class CampTypeServiceImpl implements CampTypeService {
                         predicates.add(criteriaBuilder.equal(campSiteJoin.get("id"), value));
                     }
                 }
-
-
             });
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
@@ -170,18 +172,45 @@ public class CampTypeServiceImpl implements CampTypeService {
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<CampType> campTypePage = campTypeRepository.findAll(spec, pageable);
+
         List<CampTypeResponse> campTypeResponses = campTypePage.getContent().stream()
                 .map(campType -> CampTypeResponse.fromEntity(campType, s3Service))
                 .toList();
+
+        // Nếu có checkIn và checkOut, tính estimatedPrice và availableSlot
         if (params.containsKey("checkIn") && params.containsKey("checkOut")) {
+            LocalDate checkInDate = LocalDateTime.parse(params.get("checkIn")).toLocalDate();
+            LocalDate checkOutDate = LocalDateTime.parse(params.get("checkOut")).toLocalDate();
+
             for (CampTypeResponse campTypeResponse : campTypeResponses) {
                 Long availableSlots = findAvailableSlots(
                         campTypeResponse.getId(),
                         LocalDateTime.parse(params.get("checkIn")),
-                        LocalDateTime.parse(params.get("checkOut")));
+                        LocalDateTime.parse(params.get("checkOut"))
+                );
                 campTypeResponse.setAvailableSlot(availableSlots == null ? campTypeResponse.getQuantity() : availableSlots);
+
+                long totalDays = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
+                long weekendDays = IntStream.range(0, (int) totalDays)
+                        .mapToObj(checkInDate::plusDays)
+                        .filter(date -> {
+                            DayOfWeek dayOfWeek = date.getDayOfWeek();
+                            return dayOfWeek == DayOfWeek.FRIDAY ||
+                                    dayOfWeek == DayOfWeek.SATURDAY ||
+                                    dayOfWeek == DayOfWeek.SUNDAY;
+                        })
+                        .count();
+                long weekdayDays = totalDays - weekendDays;
+
+                BigDecimal amountPerNight = BigDecimal.valueOf(campTypeResponse.getPrice());
+                BigDecimal weekendRate = BigDecimal.valueOf(campTypeResponse.getWeekendRate());
+                BigDecimal estimatedPrice = amountPerNight.multiply(BigDecimal.valueOf(weekdayDays))
+                        .add(amountPerNight.multiply(weekendRate).multiply(BigDecimal.valueOf(weekendDays)));
+
+                campTypeResponse.setEstimatedPrice(estimatedPrice.doubleValue());
             }
         }
+
         return new PagingResponse<>(
                 campTypeResponses,
                 campTypePage.getTotalElements(),
@@ -190,6 +219,7 @@ public class CampTypeServiceImpl implements CampTypeService {
                 campTypePage.getNumberOfElements()
         );
     }
+
 
     @Override
     public Object getFilteredCampTypes(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {

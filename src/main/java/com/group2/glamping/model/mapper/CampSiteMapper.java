@@ -2,6 +2,7 @@ package com.group2.glamping.model.mapper;
 
 import com.group2.glamping.model.dto.response.CampSiteResponse;
 import com.group2.glamping.model.dto.response.ImageResponse;
+import com.group2.glamping.model.dto.response.UserResponse;
 import com.group2.glamping.model.dto.response.filter.CampTypeResponseFilter;
 import com.group2.glamping.model.dto.response.filter.PlaceTypeResponseFilter;
 import com.group2.glamping.model.dto.response.filter.SelectionResponseFilter;
@@ -45,6 +46,7 @@ public class CampSiteMapper {
                         .map(campType -> CampTypeResponseFilter.fromEntity(campType, s3Service))
                         .collect(Collectors.toList()))
                 .description(campSite.getDescription())
+                .user(new UserResponse(campSite.getUser()))
                 .build();
     }
 

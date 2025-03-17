@@ -34,6 +34,7 @@ public class CampSiteResponse {
     private String message;
     private String description;
     private Double depositRate;
+    private UserResponse user;
     private List<ImageResponse> imageList;
     private List<SelectionResponseFilter> campSiteSelectionsList;
     private List<PlaceTypeResponseFilter> campSitePlaceTypeList;

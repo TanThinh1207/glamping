@@ -31,6 +31,7 @@ public class CampTypeResponse {
     String image;
     List<FacilityResponse> facilities;
     Long availableSlot = (long) quantity;
+    Double estimatedPrice;
 
     public static CampTypeResponse fromEntity(CampType campType, S3Service s3Service) {
         if (campType == null) {
@@ -48,6 +49,7 @@ public class CampTypeResponse {
                 .status(campType.isStatus())
                 .image(s3Service.getFileUrl((campType.getImage())))
                 .facilities(FacilityResponse.fromEntity(campType.getFacilities(), s3Service))
+                .estimatedPrice(0.0)
                 .build();
     }
 }
