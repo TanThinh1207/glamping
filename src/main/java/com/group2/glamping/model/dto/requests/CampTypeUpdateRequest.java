@@ -16,26 +16,22 @@ public record CampTypeUpdateRequest(
 
         @Schema(description = "Maximum capacity of the camp", example = "4")
         @Min(value = 1, message = "Capacity must be greater than 0")
-        int capacity,
+        Integer capacity,
 
         @Schema(description = "Base price of the camp", example = "100.0")
         @Positive(message = "Price must be a positive number")
-        double price,
+        Double price,
 
         @Schema(description = "Weekend price rate", example = "120.0")
         @Positive(message = "Weekend rate must be a positive number")
-        double weekendRate,
-
-
-        @Schema(description = "Last update time", example = "2024-02-10T12:00:00")
-        LocalDateTime updatedAt,
+        Double weekendRate,
 
         @Schema(description = "Quantity available", example = "5")
         @Min(value = 1, message = "Quantity must be at least 1")
-        int quantity,
+        Integer quantity,
 
         @Schema(description = "Camp type status (active/inactive)", example = "true")
-        boolean status,
+        Boolean status,
 
         @Schema(description = "")
         List<Integer> facilities

@@ -4,6 +4,7 @@ import com.group2.glamping.model.dto.requests.CampTypeCreateRequest;
 import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.CampTypeResponse;
+import com.group2.glamping.model.dto.response.FacilityResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.model.entity.CampType;
@@ -108,11 +109,11 @@ public class CampTypeServiceImpl implements CampTypeService {
         CampType campType = campTypeOpt.get();
 
         if (request.type() != null) campType.setType(request.type());
-        campType.setCapacity(request.capacity());
-        if (request.price() > 0) campType.setPrice(request.price());
-        if (request.weekendRate() > 0) campType.setWeekendRate(request.weekendRate());
-        campType.setQuantity(request.quantity());
-        campType.setStatus(request.status());
+        if (request.capacity() != null) campType.setCapacity(request.capacity());
+        if (request.price() != null) campType.setPrice(request.price());
+        if (request.weekendRate() != null) campType.setWeekendRate(request.weekendRate());
+        if (request.quantity() != null) campType.setQuantity(request.quantity());
+        if (request.status() != null) campType.setStatus(request.status());
 
         campType.setUpdatedTime(LocalDateTime.now());
         campTypeRepository.save(campType);
@@ -122,9 +123,12 @@ public class CampTypeServiceImpl implements CampTypeService {
                 .type(campType.getType())
                 .capacity(campType.getCapacity())
                 .price(campType.getPrice())
+                .updatedAt(campType.getUpdatedTime())
                 .weekendRate(campType.getWeekendRate())
                 .quantity(campType.getQuantity())
+                .image(s3Service.getFileUrl(campType.getImage()))
                 .status(campType.isStatus())
+                .facilities(FacilityResponse.fromEntity(campType.getFacilities(), s3Service))
                 .build();
 
         response.setStatusCode(HttpStatus.OK.value());
