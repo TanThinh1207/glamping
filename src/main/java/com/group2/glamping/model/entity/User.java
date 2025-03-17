@@ -1,5 +1,6 @@
 package com.group2.glamping.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.group2.glamping.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -60,9 +61,11 @@ public class User implements UserDetails {
     private boolean status;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Booking> bookingList;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<CampSite> campSiteList;
 
     @OneToMany(mappedBy = "user")
@@ -108,4 +111,10 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return UserDetails.super.isEnabled();
     }
+
+    @Override
+    public String toString() {
+        return "User(id=" + this.id + ", email=" + this.email + ")";
+    }
+
 }

@@ -1,5 +1,7 @@
 package com.group2.glamping.service.impl;
 
+import com.group2.glamping.exception.AppException;
+import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.CampTypeCreateRequest;
 import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
@@ -30,12 +32,13 @@ import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -177,37 +180,42 @@ public class CampTypeServiceImpl implements CampTypeService {
                 .map(campType -> CampTypeResponse.fromEntity(campType, s3Service))
                 .toList();
 
-        // Nếu có checkIn và checkOut, tính estimatedPrice và availableSlot
         if (params.containsKey("checkIn") && params.containsKey("checkOut")) {
-            LocalDate checkInDate = LocalDateTime.parse(params.get("checkIn")).toLocalDate();
-            LocalDate checkOutDate = LocalDateTime.parse(params.get("checkOut")).toLocalDate();
+            try {
+                LocalDate checkInDate = LocalDateTime.parse(params.get("checkIn")).toLocalDate();
+                LocalDate checkOutDate = LocalDateTime.parse(params.get("checkOut")).toLocalDate();
 
-            for (CampTypeResponse campTypeResponse : campTypeResponses) {
-                Long availableSlots = findAvailableSlots(
-                        campTypeResponse.getId(),
-                        LocalDateTime.parse(params.get("checkIn")),
-                        LocalDateTime.parse(params.get("checkOut"))
-                );
-                campTypeResponse.setAvailableSlot(availableSlots == null ? campTypeResponse.getQuantity() : availableSlots);
+                long totalDays = Math.max(1, ChronoUnit.DAYS.between(checkInDate, checkOutDate));
 
-                long totalDays = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
-                long weekendDays = IntStream.range(0, (int) totalDays)
-                        .mapToObj(checkInDate::plusDays)
-                        .filter(date -> {
-                            DayOfWeek dayOfWeek = date.getDayOfWeek();
-                            return dayOfWeek == DayOfWeek.FRIDAY ||
-                                    dayOfWeek == DayOfWeek.SATURDAY ||
-                                    dayOfWeek == DayOfWeek.SUNDAY;
-                        })
-                        .count();
-                long weekdayDays = totalDays - weekendDays;
+                for (CampTypeResponse campTypeResponse : campTypeResponses) {
+                    Long availableSlots = findAvailableSlots(
+                            campTypeResponse.getId(),
+                            LocalDateTime.parse(params.get("checkIn")),
+                            LocalDateTime.parse(params.get("checkOut"))
+                    );
+                    campTypeResponse.setAvailableSlot(availableSlots == null ? campTypeResponse.getQuantity() : availableSlots);
 
-                BigDecimal amountPerNight = BigDecimal.valueOf(campTypeResponse.getPrice());
-                BigDecimal weekendRate = BigDecimal.valueOf(campTypeResponse.getWeekendRate());
-                BigDecimal estimatedPrice = amountPerNight.multiply(BigDecimal.valueOf(weekdayDays))
-                        .add(amountPerNight.multiply(weekendRate).multiply(BigDecimal.valueOf(weekendDays)));
+                    long weekendDays = Stream.iterate(checkInDate, date -> date.plusDays(1))
+                            .limit(totalDays)
+                            .filter(date -> {
+                                DayOfWeek dayOfWeek = date.getDayOfWeek();
+                                return dayOfWeek == DayOfWeek.FRIDAY ||
+                                        dayOfWeek == DayOfWeek.SATURDAY ||
+                                        dayOfWeek == DayOfWeek.SUNDAY;
+                            })
+                            .count();
 
-                campTypeResponse.setEstimatedPrice(estimatedPrice.doubleValue());
+                    long weekdayDays = totalDays - weekendDays;
+
+                    BigDecimal amountPerNight = BigDecimal.valueOf(campTypeResponse.getPrice());
+                    BigDecimal weekendRate = BigDecimal.valueOf(campTypeResponse.getWeekendRate());
+                    BigDecimal estimatedPrice = amountPerNight.multiply(BigDecimal.valueOf(weekdayDays))
+                            .add(amountPerNight.multiply(weekendRate).multiply(BigDecimal.valueOf(weekendDays)));
+
+                    campTypeResponse.setEstimatedPrice(estimatedPrice.doubleValue());
+                }
+            } catch (DateTimeParseException e) {
+                throw new AppException(ErrorCode.INVALID_DATE_FORMAT, "Invalid checkIn or checkOut format");
             }
         }
 

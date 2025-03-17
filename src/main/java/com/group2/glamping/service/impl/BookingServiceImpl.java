@@ -90,7 +90,7 @@ public class BookingServiceImpl implements BookingService {
 
         LocalDate checkInDate = bookingDb.getCheckInTime().toLocalDate();
         LocalDate checkOutDate = bookingDb.getCheckOutTime().toLocalDate();
-        long totalDays = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
+        long totalDays = Math.max(1, ChronoUnit.DAYS.between(checkInDate, checkOutDate));
         long weekendDays = IntStream.range(0, (int) totalDays)
                 .mapToObj(checkInDate::plusDays)
                 .filter(date -> {

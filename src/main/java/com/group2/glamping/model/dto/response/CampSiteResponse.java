@@ -7,15 +7,13 @@ import com.group2.glamping.model.dto.response.filter.PlaceTypeResponseFilter;
 import com.group2.glamping.model.dto.response.filter.SelectionResponseFilter;
 import com.group2.glamping.model.dto.response.filter.UtilityResponseFilter;
 import com.group2.glamping.model.enums.CampSiteStatus;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

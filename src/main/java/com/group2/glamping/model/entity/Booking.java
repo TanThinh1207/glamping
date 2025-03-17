@@ -1,5 +1,6 @@
 package com.group2.glamping.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.group2.glamping.model.enums.BookingStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,10 +24,12 @@ public class Booking {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_user")
+    @JsonIgnore
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "id_camp_site")
+    @JsonIgnore
     private CampSite campSite;
 
     @Column(name = "created_at")
@@ -68,4 +71,10 @@ public class Booking {
 
     @OneToMany(mappedBy = "booking")
     private List<BookingDetail> bookingDetailList;
+
+    @Override
+    public String toString() {
+        return "Booking(id=" + this.id + ")";
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.group2.glamping.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,5 +34,6 @@ public class Facility {
     private boolean status;
 
     @ManyToMany(mappedBy = "facilities")
+    @JsonIgnore
     private List<CampType> campTypes;
 }
