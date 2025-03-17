@@ -88,33 +88,32 @@ public class BookingServiceImpl implements BookingService {
 
         bookingSelectionRepository.saveAll(bookingSelections);
 
+        LocalDate checkInDate = bookingDb.getCheckInTime().toLocalDate();
+        LocalDate checkOutDate = bookingDb.getCheckOutTime().toLocalDate();
+        long totalDays = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
+        long weekendDays = IntStream.range(0, (int) totalDays)
+                .mapToObj(checkInDate::plusDays)
+                .filter(date -> {
+                    DayOfWeek dayOfWeek = date.getDayOfWeek();
+                    return dayOfWeek == DayOfWeek.FRIDAY ||
+                            dayOfWeek == DayOfWeek.SATURDAY ||
+                            dayOfWeek == DayOfWeek.SUNDAY;
+                })
+                .count();
+        long weekdayDays = totalDays - weekendDays;
+        System.out.println("WeekendDays: " + weekendDays);
+        System.out.println("Weekdays: " + weekdayDays);
         List<BookingDetail> bookingDetails = bookingRequest.getBookingDetails().stream()
                 .flatMap(bookingDetailRequest -> {
                     CampType campType = campTypeRepository.findById(bookingDetailRequest.getCampTypeId())
                             .orElseThrow(() -> new AppException(ErrorCode.CAMP_TYPE_NOT_FOUND));
 
-                    LocalDate checkInDate = bookingDetailRequest.getCheckInAt().toLocalDate();
-                    LocalDate checkOutDate = bookingDetailRequest.getCheckOutAt().toLocalDate();
-
-                    long totalDays = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
-                    long weekendDays = IntStream.range(0, (int) totalDays)
-                            .mapToObj(checkInDate::plusDays)
-                            .filter(date -> {
-                                DayOfWeek dayOfWeek = date.getDayOfWeek();
-                                return dayOfWeek == DayOfWeek.FRIDAY ||
-                                        dayOfWeek == DayOfWeek.SATURDAY ||
-                                        dayOfWeek == DayOfWeek.SUNDAY;
-                            })
-                            .count();
-
-                    long weekdayDays = totalDays - weekendDays;
 
                     BigDecimal amountPerNight = BigDecimal.valueOf(campType.getPrice());
                     BigDecimal weekendRate = BigDecimal.valueOf(campType.getWeekendRate());
                     BigDecimal totalAmount = amountPerNight.multiply(BigDecimal.valueOf(weekdayDays))
                             .add(amountPerNight.multiply(weekendRate).multiply(BigDecimal.valueOf(weekendDays)));
 
-                    System.out.println("Weekdays: " + weekdayDays);
                     System.out.println("Amount per night: " + amountPerNight);
                     System.out.println("weekendRate: " + weekendRate);
                     System.out.println("totalAmount: " + totalAmount);

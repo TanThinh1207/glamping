@@ -168,7 +168,7 @@ public class S3ServiceImpl implements S3Service {
     @Override
     public String getFileUrl(String path) {
         if (path == null || path.trim().isEmpty()) {
-            return cloudFrontDomain + "/Facility/FACILITY__1741050569490_Empty.png";
+            return "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg";
         }
         return cloudFrontDomain + "/" + path;
     }

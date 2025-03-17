@@ -228,7 +228,7 @@ public class CampTypeServiceImpl implements CampTypeService {
                 .campSiteId(campType.getCampSite().getId())
                 .image(campType.getImage() == null || campType.getImage().isEmpty() ?
                         "No image" :
-                        s3Service.generatePresignedUrl(campType.getImage(), 86400))
+                        s3Service.getFileUrl(campType.getImage()))
                 .build();
 
     }
