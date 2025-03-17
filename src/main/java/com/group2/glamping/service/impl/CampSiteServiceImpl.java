@@ -18,6 +18,7 @@ import com.group2.glamping.model.mapper.CampSiteMapper;
 import com.group2.glamping.repository.*;
 import com.group2.glamping.service.interfaces.CampSiteService;
 import com.group2.glamping.utils.JsonUtil;
+import com.group2.glamping.utils.RedisUtil;
 import com.group2.glamping.utils.ResponseFilterUtil;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
@@ -52,20 +53,15 @@ public class CampSiteServiceImpl implements CampSiteService {
     private final CampSiteMapper campSiteMapper;
     private final FacilityRepository facilityRepository;
     private final StringRedisTemplate redisTemplate;
+    private final RedisUtil redisUtil;
 
     @Override
     public Optional<CampSiteResponse> saveCampSite(CampSiteRequest campSiteUpdateRequest) {
         if (campSiteUpdateRequest == null) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
-        Set<String> keys = redisTemplate.keys("filteredCampSites:*");
-        if (keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
-        }
-        keys = redisTemplate.keys("campSites:*");
-        if (keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
-        }
+        redisUtil.deleteCache("filteredCampSites:*");
+        redisUtil.deleteCache("campSites:*");
         CampSite campSite = new CampSite();
         return getCampSiteResponse(campSite,
                 campSiteUpdateRequest.hostId(),
@@ -178,14 +174,8 @@ public class CampSiteServiceImpl implements CampSiteService {
 
     @Override
     public Object updateCampSite(int id, CampSiteUpdateRequest campSiteUpdateRequest) {
-        Set<String> keys = redisTemplate.keys("filteredCampSites:*");
-        if (keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
-        }
-        keys = redisTemplate.keys("campSites:*");
-        if (keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
-        }
+        redisUtil.deleteCache("filteredCampSites:*");
+        redisUtil.deleteCache("campSites:*");
 
         CampSite campSite = campSiteRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.CAMP_SITE_NOT_FOUND));
@@ -225,14 +215,8 @@ public class CampSiteServiceImpl implements CampSiteService {
 
     @Override
     public void deleteCampSite(int id) {
-        Set<String> keys = redisTemplate.keys("filteredCampSites:*");
-        if (keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
-        }
-        keys = redisTemplate.keys("campSites:*");
-        if (keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
-        }
+        redisUtil.deleteCache("filteredCampSites:*");
+        redisUtil.deleteCache("campSites:*");
         Optional<CampSite> existingCampSite = campSiteRepository.findById(id);
 
         if (existingCampSite.isPresent()) {

@@ -25,7 +25,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -56,29 +60,27 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = Booking.builder()
                 .user(user)
                 .campSite(campSite)
-                .totalAmount(bookingRequest.getTotalAmount())
+                .totalAmount(0.0)
                 .status(BookingStatus.Pending)
                 .createdTime(LocalDateTime.now())
                 .checkInTime(bookingRequest.getCheckInTime())
                 .checkOutTime(bookingRequest.getCheckOutTime())
-                .systemFee(0.9 * bookingRequest.getTotalAmount())
-                .netAmount(bookingRequest.getTotalAmount() - (0.9 * bookingRequest.getTotalAmount()))
+                .systemFee(0.0)
+                .netAmount(0.0)
                 .build();
 
         Booking bookingDb = bookingRepository.save(booking);
-        //bookingServiceRepository.saveAll(bookingRequest.getBookingServiceList());
-
 
         List<BookingSelection> bookingSelections = bookingRequest.getBookingSelectionRequestList().stream()
-                .map(bookingService -> {
-                    Selection service = selectionRepository.findById(bookingService.idSelection())
+                .map(bookingSelectionRequest -> {
+                    Selection service = selectionRepository.findById(bookingSelectionRequest.idSelection())
                             .orElseThrow(() -> new AppException(ErrorCode.SELECTION_NOT_FOUND));
 
                     return BookingSelection.builder()
                             .idBookingService(new IdBookingSelection(bookingDb.getId(), service.getId()))
                             .booking(bookingDb)
                             .selection(service)
-                            .quantity(bookingService.quantity())
+                            .quantity(bookingSelectionRequest.quantity())
                             .name(service.getName())
                             .build();
                 })
@@ -91,6 +93,32 @@ public class BookingServiceImpl implements BookingService {
                     CampType campType = campTypeRepository.findById(bookingDetailRequest.getCampTypeId())
                             .orElseThrow(() -> new AppException(ErrorCode.CAMP_TYPE_NOT_FOUND));
 
+                    LocalDate checkInDate = bookingDetailRequest.getCheckInAt().toLocalDate();
+                    LocalDate checkOutDate = bookingDetailRequest.getCheckOutAt().toLocalDate();
+
+                    long totalDays = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
+                    long weekendDays = IntStream.range(0, (int) totalDays)
+                            .mapToObj(checkInDate::plusDays)
+                            .filter(date -> {
+                                DayOfWeek dayOfWeek = date.getDayOfWeek();
+                                return dayOfWeek == DayOfWeek.FRIDAY ||
+                                        dayOfWeek == DayOfWeek.SATURDAY ||
+                                        dayOfWeek == DayOfWeek.SUNDAY;
+                            })
+                            .count();
+
+                    long weekdayDays = totalDays - weekendDays;
+
+                    BigDecimal amountPerNight = BigDecimal.valueOf(campType.getPrice());
+                    BigDecimal weekendRate = BigDecimal.valueOf(campType.getWeekendRate());
+                    BigDecimal totalAmount = amountPerNight.multiply(BigDecimal.valueOf(weekdayDays))
+                            .add(amountPerNight.multiply(weekendRate).multiply(BigDecimal.valueOf(weekendDays)));
+
+                    System.out.println("Weekdays: " + weekdayDays);
+                    System.out.println("Amount per night: " + amountPerNight);
+                    System.out.println("weekendRate: " + weekendRate);
+                    System.out.println("totalAmount: " + totalAmount);
+
                     return IntStream.range(0, bookingDetailRequest.getQuantity())
                             .mapToObj(i -> BookingDetail.builder()
                                     .booking(bookingDb)
@@ -99,23 +127,32 @@ public class BookingServiceImpl implements BookingService {
                                     .checkInTime(bookingDetailRequest.getCheckInAt())
                                     .checkOutTime(bookingDetailRequest.getCheckOutAt())
                                     .status(BookingDetailStatus.Waiting)
+                                    .amount(totalAmount.doubleValue())
                                     .build());
                 })
                 .collect(Collectors.toList());
 
         bookingDetailRepository.saveAll(bookingDetails);
 
-        Booking resp = bookingRepository.findByIdWithoutDetails(bookingDb.getId())
-                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        double totalBookingAmount = bookingDetails.stream()
+                .mapToDouble(BookingDetail::getAmount)
+                .sum();
 
-        resp.setBookingDetailList(bookingDetailRepository.findBookingDetails(bookingDb.getId()));
-        resp.setBookingSelectionList(bookingSelectionRepository.findBookingSelections(bookingDb.getId()));
+        double systemFee = 0.1 * totalBookingAmount;
+        double netAmount = totalBookingAmount - systemFee;
 
-//        for (int i = 0; i < 100000; i++) {
-//            pushNotificationService.sendNotification(bookingRequest.getUserId(), "New Booking!", "A new booking has been made for your campsite.");
-//        }
-        return Optional.of(bookingMapper.toDto(resp));
+        bookingDb.setTotalAmount(totalBookingAmount);
+        bookingDb.setSystemFee(systemFee);
+        bookingDb.setNetAmount(netAmount);
+
+        bookingRepository.save(bookingDb);
+
+        bookingDb.setBookingDetailList(bookingDetailRepository.findBookingDetails(bookingDb.getId()));
+        bookingDb.setBookingSelectionList(bookingSelectionRepository.findBookingSelections(bookingDb.getId()));
+
+        return Optional.of(bookingMapper.toDto(bookingDb));
     }
+
 
     //Accept Bookings
     @Override
