@@ -72,7 +72,7 @@ public class UtilityController {
     }
     // </editor-fold>
 
-    // <editor-fold default state="collapsed" desc="Update Utility">
+    // <editor-fold desc="Update Utility">
     @PutMapping
     @Operation(
             summary = "Update an existing utility",
@@ -127,7 +127,7 @@ public class UtilityController {
     }
     // </editor-fold>
 
-    // <editor-fold default state="collapsed" desc="Retrieve Utilities">
+    // <editor-fold defaultstate="collapsed" desc="Retrieve Utilities">
     @Operation(
             summary = "Get list of utilities",
             description = "Retrieve a paginated list of utilities with optional filtering, sorting, and field selection.",

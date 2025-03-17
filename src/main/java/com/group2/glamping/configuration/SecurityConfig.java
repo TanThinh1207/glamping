@@ -39,7 +39,7 @@ public class SecurityConfig {
             "/api-docs/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/api/docs/**",
             "/api/camp-types/**", "/api/selections/**", "/api/facilities/**", "/api/utilities/**",
             "/api/place-types/**", "/mail/**", "/api/users/**", "/api/campsites/**", "/api/booking-details/**",
-            "/api/v1/auth/**", "/api/campsites/**", "/api/bookings/**", "/api/payments/**",
+            "/api/v1/auth/**", "/api/campsites/**", "/api/bookings/**", "/api/payments/**", "/api/reports/**",
             "/home/**", "/home", "/api/s3/**",
             "/", "/login", "/payment",
             "/confirm-payment", "/refund" // sau khi có link FE sẽ đổi sang link fe

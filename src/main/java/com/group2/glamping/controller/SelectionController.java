@@ -64,7 +64,6 @@ public class SelectionController {
     }
     // </editor-fold>
 
-
     // <editor-fold defaultstate="collapsed" desc="Update Selection">
     @PutMapping()
     @Operation(

@@ -36,6 +36,7 @@ public class BookingMapper {
                 .createdAt(booking.getCreatedTime())
                 .status(booking.getStatus())
                 .totalAmount(booking.getTotalAmount())
+                .comment(booking.getComment())
                 .bookingDetailResponseList(mapBookingDetails(booking.getBookingDetailList()))
                 .bookingSelectionResponseList(mapBookingSelections(booking.getBookingSelectionList()))
                 .build();

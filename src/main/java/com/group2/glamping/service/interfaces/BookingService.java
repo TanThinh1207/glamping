@@ -25,4 +25,6 @@ public interface BookingService {
     BookingResponse checkInBooking(Integer bookingId);
 
     BookingResponse checkOutBooking(Integer bookingId);
+
+    BookingResponse updateBookingComment(Integer bookingId, String comment);
 }

@@ -273,5 +273,18 @@ public class BookingServiceImpl implements BookingService {
 
         return bookingMapper.toDto(booking);
     }
+
+    @Override
+    @Transactional
+    public BookingResponse updateBookingComment(Integer bookingId, String comment) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found with id: " + bookingId));
+
+        booking.setComment(comment);
+        bookingRepository.save(booking);
+
+        return bookingMapper.toDto(booking);
+    }
+
 }
 

@@ -6,6 +6,8 @@ import com.group2.glamping.model.dto.response.BookingResponse;
 import com.group2.glamping.service.interfaces.BookingDetailService;
 import com.group2.glamping.service.interfaces.BookingService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -127,6 +129,84 @@ public class BookingController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                             "An unexpected error occurred. Please try again later.", null));
+        }
+    }
+
+    // </editor-fold>
+
+    // <editor-fold default state="collapsed" desc="Retrieve bookings by status">
+    @PutMapping("/{bookingId}/comment")
+    @Operation(
+            summary = "Update booking comment",
+            description = "Updates the comment of a booking by its ID.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "JSON payload containing the new comment",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "Example Request",
+                                    value = "{ \"comment\": \"This is an updated comment.\" }"
+                            )
+                    )
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Booking comment updated successfully",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(
+                                            value = "{\n" +
+                                                    "  \"statusCode\": 200,\n" +
+                                                    "  \"message\": \"Booking comment updated successfully\",\n" +
+                                                    "  \"data\": {\n" +
+                                                    "    \"bookingId\": 1,\n" +
+                                                    "    \"comment\": \"This is an updated comment.\"\n" +
+                                                    "  }\n" +
+                                                    "}"
+                                    )
+                            )
+                    ),
+                    @ApiResponse(responseCode = "400", description = "Invalid request data",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(
+                                            value = "{ \"statusCode\": 400, \"message\": \"Comment cannot be empty\", \"data\": null }"
+                                    )
+                            )
+                    ),
+                    @ApiResponse(responseCode = "404", description = "No Booking found",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(
+                                            value = "{ \"statusCode\": 404, \"message\": \"No booking found with ID 1\", \"data\": null }"
+                                    )
+                            )
+                    ),
+                    @ApiResponse(responseCode = "500", description = "Internal server error",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(
+                                            value = "{ \"statusCode\": 500, \"message\": \"An unexpected error occurred. Please try again later.\", \"data\": null }"
+                                    )
+                            )
+                    )
+            }
+    )
+    public ResponseEntity<BaseResponse> updateBookingComment(
+            @PathVariable Integer bookingId,
+            @RequestBody Map<String, String> requestBody) {
+        try {
+            String comment = requestBody.get("comment");
+            if (comment == null || comment.isBlank()) {
+                return ResponseEntity.badRequest()
+                        .body(new BaseResponse(HttpStatus.BAD_REQUEST.value(), "Comment cannot be empty", null));
+            }
+            BookingResponse response = bookingService.updateBookingComment(bookingId, comment);
+            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Booking comment updated successfully", response));
+        } catch (Exception e) {
+            logger.error("Error while updating booking comment: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
         }
     }
 

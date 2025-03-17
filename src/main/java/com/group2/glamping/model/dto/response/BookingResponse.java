@@ -32,5 +32,5 @@ public class BookingResponse {
     double totalAmount;
     List<BookingDetailResponse> bookingDetailResponseList;
     List<BookingSelectionResponse> bookingSelectionResponseList;
-
+    String comment;
 }
