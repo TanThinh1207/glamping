@@ -19,7 +19,6 @@ import java.time.LocalDateTime;
 public class BookingDetailResponse {
 
     int bookingDetailId;
-    @JsonIgnore
     CampTypeResponse campTypeResponse;
     CampResponse campResponse;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
