@@ -112,7 +112,7 @@ public class BookingServiceImpl implements BookingService {
                     BigDecimal amountPerNight = BigDecimal.valueOf(campType.getPrice());
                     BigDecimal weekendRate = BigDecimal.valueOf(campType.getWeekendRate());
                     BigDecimal totalAmount = amountPerNight.multiply(BigDecimal.valueOf(weekdayDays))
-                            .add(amountPerNight.multiply(weekendRate).multiply(BigDecimal.valueOf(weekendDays)));
+                            .add(weekendRate.multiply(BigDecimal.valueOf(weekendDays)));
 
                     System.out.println("Amount per night: " + amountPerNight);
                     System.out.println("weekendRate: " + weekendRate);
