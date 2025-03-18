@@ -1,16 +1,15 @@
 package com.group2.glamping.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.group2.glamping.model.enums.BookingDetailStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -24,6 +23,7 @@ public class BookingDetail {
 
     @ManyToOne
     @JoinColumn(name = "id_booking")
+    @JsonIgnore
     private Booking booking;
 
     @ManyToOne
@@ -55,4 +55,6 @@ public class BookingDetail {
 
     @OneToMany(mappedBy = "bookingDetail")
     private List<BookingDetailOrder> bookingDetailOrders;
+
+
 }

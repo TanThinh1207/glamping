@@ -31,13 +31,16 @@ public class CampTypeResponse {
     String image;
     List<FacilityResponse> facilities;
     Long availableSlot = (long) quantity;
+    Double estimatedPrice;
 
     public static CampTypeResponse fromEntity(CampType campType, S3Service s3Service) {
         if (campType == null) {
             return null;
         }
 
-        return CampTypeResponse.builder()
+        System.out.println("Creating CampTypeResponse for CampType ID: " + campType.getId());
+
+        CampTypeResponse response = CampTypeResponse.builder()
                 .id(campType.getId())
                 .type(campType.getType())
                 .capacity(campType.getCapacity())
@@ -46,8 +49,14 @@ public class CampTypeResponse {
                 .updatedAt(campType.getUpdatedTime())
                 .quantity(campType.getQuantity())
                 .status(campType.isStatus())
-                .image(s3Service.generatePresignedUrl(campType.getImage()))
+                .image(s3Service.getFileUrl(campType.getImage()))
                 .facilities(FacilityResponse.fromEntity(campType.getFacilities(), s3Service))
+//                .estimatedPrice(campType.getPrice())
                 .build();
+
+        System.out.println("CampTypeResponse created: " + response);
+        return response;
     }
+
+
 }

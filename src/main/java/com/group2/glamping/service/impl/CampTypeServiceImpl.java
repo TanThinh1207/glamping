@@ -1,9 +1,12 @@
 package com.group2.glamping.service.impl;
 
+import com.group2.glamping.exception.AppException;
+import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.CampTypeCreateRequest;
 import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.CampTypeResponse;
+import com.group2.glamping.model.dto.response.FacilityResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.model.entity.CampType;
@@ -25,11 +28,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -108,11 +117,11 @@ public class CampTypeServiceImpl implements CampTypeService {
         CampType campType = campTypeOpt.get();
 
         if (request.type() != null) campType.setType(request.type());
-        campType.setCapacity(request.capacity());
-        if (request.price() > 0) campType.setPrice(request.price());
-        if (request.weekendRate() > 0) campType.setWeekendRate(request.weekendRate());
-        campType.setQuantity(request.quantity());
-        campType.setStatus(request.status());
+        if (request.capacity() != null) campType.setCapacity(request.capacity());
+        if (request.price() != null) campType.setPrice(request.price());
+        if (request.weekendRate() != null) campType.setWeekendRate(request.weekendRate());
+        if (request.quantity() != null) campType.setQuantity(request.quantity());
+        if (request.status() != null) campType.setStatus(request.status());
 
         campType.setUpdatedTime(LocalDateTime.now());
         campTypeRepository.save(campType);
@@ -122,9 +131,12 @@ public class CampTypeServiceImpl implements CampTypeService {
                 .type(campType.getType())
                 .capacity(campType.getCapacity())
                 .price(campType.getPrice())
+                .updatedAt(campType.getUpdatedTime())
                 .weekendRate(campType.getWeekendRate())
                 .quantity(campType.getQuantity())
+                .image(s3Service.getFileUrl(campType.getImage()))
                 .status(campType.isStatus())
+                .facilities(FacilityResponse.fromEntity(campType.getFacilities(), s3Service))
                 .build();
 
         response.setStatusCode(HttpStatus.OK.value());
@@ -138,7 +150,6 @@ public class CampTypeServiceImpl implements CampTypeService {
     public PagingResponse<?> getCampTypes(Map<String, String> params, int page, int size, String sortBy, String direction) {
         Specification<CampType> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
-
 
             params.forEach((key, value) -> {
                 switch (key) {
@@ -156,8 +167,6 @@ public class CampTypeServiceImpl implements CampTypeService {
                         predicates.add(criteriaBuilder.equal(campSiteJoin.get("id"), value));
                     }
                 }
-
-
             });
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
@@ -166,18 +175,50 @@ public class CampTypeServiceImpl implements CampTypeService {
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<CampType> campTypePage = campTypeRepository.findAll(spec, pageable);
+
         List<CampTypeResponse> campTypeResponses = campTypePage.getContent().stream()
                 .map(campType -> CampTypeResponse.fromEntity(campType, s3Service))
                 .toList();
+
         if (params.containsKey("checkIn") && params.containsKey("checkOut")) {
-            for (CampTypeResponse campTypeResponse : campTypeResponses) {
-                Long availableSlots = findAvailableSlots(
-                        campTypeResponse.getId(),
-                        LocalDateTime.parse(params.get("checkIn")),
-                        LocalDateTime.parse(params.get("checkOut")));
-                campTypeResponse.setAvailableSlot(availableSlots == null ? campTypeResponse.getQuantity() : availableSlots);
+            try {
+                LocalDate checkInDate = LocalDateTime.parse(params.get("checkIn")).toLocalDate();
+                LocalDate checkOutDate = LocalDateTime.parse(params.get("checkOut")).toLocalDate();
+
+                long totalDays = Math.max(1, ChronoUnit.DAYS.between(checkInDate, checkOutDate));
+
+                for (CampTypeResponse campTypeResponse : campTypeResponses) {
+                    Long availableSlots = findAvailableSlots(
+                            campTypeResponse.getId(),
+                            LocalDateTime.parse(params.get("checkIn")),
+                            LocalDateTime.parse(params.get("checkOut"))
+                    );
+                    campTypeResponse.setAvailableSlot(availableSlots == null ? campTypeResponse.getQuantity() : availableSlots);
+
+                    long weekendDays = Stream.iterate(checkInDate, date -> date.plusDays(1))
+                            .limit(totalDays)
+                            .filter(date -> {
+                                DayOfWeek dayOfWeek = date.getDayOfWeek();
+                                return dayOfWeek == DayOfWeek.FRIDAY ||
+                                        dayOfWeek == DayOfWeek.SATURDAY ||
+                                        dayOfWeek == DayOfWeek.SUNDAY;
+                            })
+                            .count();
+
+                    long weekdayDays = totalDays - weekendDays;
+
+                    BigDecimal amountPerNight = BigDecimal.valueOf(campTypeResponse.getPrice());
+                    BigDecimal weekendRate = BigDecimal.valueOf(campTypeResponse.getWeekendRate());
+                    BigDecimal estimatedPrice = amountPerNight.multiply(BigDecimal.valueOf(weekdayDays))
+                            .add(amountPerNight.multiply(weekendRate).multiply(BigDecimal.valueOf(weekendDays)));
+
+                    campTypeResponse.setEstimatedPrice(estimatedPrice.doubleValue());
+                }
+            } catch (DateTimeParseException e) {
+                throw new AppException(ErrorCode.INVALID_DATE_FORMAT, "Invalid checkIn or checkOut format");
             }
         }
+
         return new PagingResponse<>(
                 campTypeResponses,
                 campTypePage.getTotalElements(),
@@ -186,6 +227,7 @@ public class CampTypeServiceImpl implements CampTypeService {
                 campTypePage.getNumberOfElements()
         );
     }
+
 
     @Override
     public Object getFilteredCampTypes(Map<String, String> params, int page, int size, String fields, String sortBy, String direction) {
@@ -228,7 +270,7 @@ public class CampTypeServiceImpl implements CampTypeService {
                 .campSiteId(campType.getCampSite().getId())
                 .image(campType.getImage() == null || campType.getImage().isEmpty() ?
                         "No image" :
-                        s3Service.generatePresignedUrl(campType.getImage()))
+                        s3Service.getFileUrl(campType.getImage()))
                 .build();
 
     }

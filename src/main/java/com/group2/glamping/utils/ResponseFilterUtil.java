@@ -11,8 +11,8 @@ public class ResponseFilterUtil {
     public static Object getFilteredResponse(String fields, Object data, String message) {
         BaseResponse response = BaseResponse.builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(data)
                 .message(message)
+                .data(data)
                 .build();
 
         if (fields != null && !fields.isEmpty()) {
@@ -23,7 +23,8 @@ public class ResponseFilterUtil {
 
                 mapper.setFilterProvider(filters);
 
-                return mapper.convertValue(response, Object.class);
+                response.setData(mapper.convertValue(data, Object.class));
+
             } catch (Exception e) {
                 throw new RuntimeException("Failed to filter response fields", e);
             }
@@ -31,4 +32,5 @@ public class ResponseFilterUtil {
 
         return response;
     }
+
 }

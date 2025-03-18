@@ -1,6 +1,7 @@
 package com.group2.glamping.controller;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.model.dto.requests.CampSiteRequest;
@@ -11,16 +12,19 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 @RestController
+@Validated
 @RequestMapping("/api/campsites")
 @Tag(name = "CampSite API", description = "API for managing Campsites")
 @RequiredArgsConstructor
@@ -32,7 +36,18 @@ public class CampSiteController {
 
     @Operation(
             summary = "Get list of campsites",
-            description = "Retrieve a paginated list of campsites with optional filtering, field selection, and sorting",
+            description = """
+                        Retrieve a paginated list of campsites with optional filtering, field selection, and sorting.
+                        Filtering parameters available in the 'params' map:
+                        - id: Exact match on campsite ID
+                        - name: Partial match on campsite name
+                        - status: Exact match on campsite status
+                        - city: Partial match on city name
+                        - address: Partial match on address
+                        - placeTypeName: Comma-separated list of place type names
+                        - utilityName: Comma-separated list of utility names
+                        - userId: Exact match on the user ID associated with the campsite
+                    """,
             responses = {
                     @ApiResponse(responseCode = "200", description = "Campsites retrieved successfully"),
                     @ApiResponse(responseCode = "400", description = "Invalid input or bad request")
@@ -40,14 +55,24 @@ public class CampSiteController {
     )
     @GetMapping
     public ResponseEntity<Object> getCampSites(
+            @Parameter(description = "Filtering parameters like id, name, city, status, placeTypeName, utilityName, and userId")
             @RequestParam Map<String, String> params,
+            @Parameter(description = "Page number for pagination", example = "0")
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Number of items per page", example = "10")
+            @RequestParam(defaultValue = "10")
+            @Min(value = 2, message = "Page size must be greater than 1")
+            int size,
+            @Parameter(description = "Fields to include in the response, comma-separated", example = "id,name,city")
             @RequestParam(name = "fields", required = false) String fields,
+            @Parameter(description = "Field to sort by", example = "name")
             @RequestParam(name = "sortBy", required = false, defaultValue = "id") String sortBy,
+            @Parameter(description = "Sort direction: ASC or DESC", example = "ASC")
             @RequestParam(name = "direction", required = false, defaultValue = "ASC") String direction
-    ) {
-        return ResponseEntity.ok(campSiteService.getFilteredCampSites(params, page, size, fields, sortBy, direction));
+    ) throws JsonProcessingException {
+        Object filteredCampSites = campSiteService.getFilteredCampSites(params, page, size, fields, sortBy, direction);
+
+        return ResponseEntity.ok(filteredCampSites);
     }
 
 
@@ -96,6 +121,7 @@ public class CampSiteController {
                     @ApiResponse(responseCode = "404", description = "Camp site not found")
             }
     )
+//    @CacheEvict(value = "camps", key = "#id")
     @PatchMapping(value = "/{id}")
     public ResponseEntity<BaseResponse> updateCampSite(
             @PathVariable int id,

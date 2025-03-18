@@ -19,12 +19,25 @@ public class PushNotificationService {
 
 
     public void sendNotification(int userId, String title, String body) {
-        System.out.println(userId);
+        System.out.println("Sending notification to user: " + userId);
+
         List<FcmToken> tokens = fcmTokenRepository.findByUserId(userId);
 
+        if (tokens.isEmpty()) {
+            System.out.println("⚠️ No FCM tokens found for user: " + userId);
+            return;
+        }
+
         for (FcmToken token : tokens) {
+            String fcmToken = token.getToken();
+
+            if (fcmToken == null || fcmToken.isEmpty()) {
+                System.out.println("⚠️ Skipping empty FCM token for user: " + userId);
+                continue;
+            }
+
             Message message = Message.builder()
-                    .setToken(token.getToken())
+                    .setToken(fcmToken)
                     .setNotification(Notification.builder()
                             .setImage("https://cdn.dribbble.com/userupload/36626798/file/original-83c59b604abf17b46f2dafd5dd0c7e4f.png?resize=400x0")
                             .setTitle(title)
@@ -34,10 +47,12 @@ public class PushNotificationService {
                     .build();
             try {
                 FirebaseMessaging.getInstance().sendAsync(message).get();
+                System.out.println("✅ Notification sent successfully to: " + userId);
             } catch (ExecutionException | InterruptedException e) {
-                System.out.println(e.getMessage());
+                System.out.println("❌ Failed to send notification: " + e.getMessage());
             }
         }
     }
+
 }
 

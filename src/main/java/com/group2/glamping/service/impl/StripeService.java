@@ -39,12 +39,15 @@ import static com.stripe.Stripe.apiKey;
 @Service
 @RequiredArgsConstructor
 public class StripeService {
+    private final PushNotificationService pushNotificationService;
     @Value("${stripe.secretKey}")
     private String secretKey;
 
     @Value("${exchange.api.key}")
     private String exchangeApiKey;
 
+    @Value("${stripe.callback.url}")
+    private String stripeCallback;
 
     @PostConstruct
     public void init() {
@@ -72,8 +75,9 @@ public class StripeService {
 
         SessionCreateParams params = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
-                .setSuccessUrl("http://localhost:8080/api/payments/success?session_id={CHECKOUT_SESSION_ID}")
-                .setCancelUrl("http://localhost:8080/api/payments/cancel?session_id={CHECKOUT_SESSION_ID}")
+
+                .setSuccessUrl(stripeCallback + "/api/payments/success?session_id={CHECKOUT_SESSION_ID}")
+                .setCancelUrl(stripeCallback + "/api/payments/cancel?session_id={CHECKOUT_SESSION_ID}")
                 .addLineItem(lineItem)
                 .putMetadata("bookingId", String.valueOf(paymentRequest.bookingId()))
                 .build();
@@ -203,6 +207,8 @@ public class StripeService {
         paymentRepository.save(payment);
 
         if (paymentStatus == PaymentStatus.Completed) {
+            pushNotificationService.sendNotification(booking.getCampSite().getUser().getId(), "New Booking For " + booking.getCampSite().getName(),
+                    "A new booking has been made for your campsite " + booking.getCampSite().getName() + "from " + booking.getUser().getFirstname());
             booking.setStatus(BookingStatus.Deposit);
         } else if (paymentStatus == PaymentStatus.Failed) {
             booking.setStatus(BookingStatus.Cancelled);

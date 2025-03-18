@@ -5,6 +5,7 @@ import com.group2.glamping.model.entity.Booking;
 import com.group2.glamping.model.entity.BookingDetail;
 import com.group2.glamping.model.entity.BookingSelection;
 import com.group2.glamping.model.entity.Payment;
+import com.group2.glamping.service.interfaces.BookingDetailService;
 import com.group2.glamping.service.interfaces.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,18 +18,24 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BookingMapper {
 
-    private final CampSiteMapper campSiteMapper;
     private final S3Service s3Service;
     private final CampSiteFilterMapper campSiteFilterMapper;
+    private final BookingDetailService bookingDetailService;
 
     public BookingResponse toDto(Booking booking) {
         if (booking == null) {
+            System.out.println("booking is null");
             return null;
         }
+        System.out.println("Booking ID: " + booking.getId());
+        System.out.println("Booking Details: " + (booking.getBookingDetailList() == null ? "null" : booking.getBookingDetailList().size()));
+        for (BookingDetail detail : booking.getBookingDetailList()) {
+            System.out.println("BookingDetail ID: " + detail.getId());
+        }
+
 
         return BookingResponse.builder()
                 .id(booking.getId())
-                .user(new UserResponse(booking.getUser()))
                 .campSite(campSiteFilterMapper.toDto(booking.getCampSite()))
                 .checkIn(booking.getCheckInTime())
                 .checkOut(booking.getCheckOutTime())
@@ -38,12 +45,19 @@ public class BookingMapper {
                 .bookingDetailResponseList(mapBookingDetails(booking.getBookingDetailList()))
                 .bookingSelectionResponseList(mapBookingSelections(booking.getBookingSelectionList()))
                 .paymentResponseList(mapPayments(booking.getPaymentList()))
+                .user(new UserResponse(booking.getUser()))
+                .campTypeItemResponse(bookingDetailService.groupBookingDetailsByCampType(mapBookingDetails(booking.getBookingDetailList())))
                 .build();
     }
 
+
     private List<BookingDetailResponse> mapBookingDetails(List<BookingDetail> bookingDetails) {
+        System.out.println("Mapping BookingDetail: " + bookingDetails);
         return (bookingDetails != null) ? bookingDetails.stream()
-                .map(detail -> BookingDetailResponse.fromEntity(detail, s3Service))
+                .map(detail -> {
+                    System.out.println("Mapping BookingDetail ID: " + detail.getId());
+                    return BookingDetailResponse.fromEntity(detail, s3Service);
+                })
                 .collect(Collectors.toList()) : Collections.emptyList();
     }
 

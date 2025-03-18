@@ -2,6 +2,7 @@ package com.group2.glamping.model.mapper;
 
 import com.group2.glamping.model.dto.response.CampSiteResponse;
 import com.group2.glamping.model.dto.response.ImageResponse;
+import com.group2.glamping.model.dto.response.UserResponse;
 import com.group2.glamping.model.dto.response.filter.CampTypeResponseFilter;
 import com.group2.glamping.model.dto.response.filter.PlaceTypeResponseFilter;
 import com.group2.glamping.model.dto.response.filter.SelectionResponseFilter;
@@ -45,13 +46,14 @@ public class CampSiteMapper {
                         .map(campType -> CampTypeResponseFilter.fromEntity(campType, s3Service))
                         .collect(Collectors.toList()))
                 .description(campSite.getDescription())
+                .user(new UserResponse(campSite.getUser()))
                 .build();
     }
 
     private List<ImageResponse> mapImages(CampSite campSite) {
         return (campSite.getImageList() != null) ?
                 campSite.getImageList().parallelStream()
-                        .map(image -> new ImageResponse(image.getId(), "https://d16irpmj68i9v1.cloudfront.net/" + image.getPath()))
+                        .map(image -> new ImageResponse(image.getId(), s3Service.getFileUrl(image.getPath())))
                         .collect(Collectors.toList()) :
                 Collections.emptyList();
     }
@@ -67,7 +69,7 @@ public class CampSiteMapper {
                                         selection.getName(),
                                         selection.getDescription(),
                                         selection.getPrice(),
-                                        "https://d16irpmj68i9v1.cloudfront.net/" + selection.getImageUrl(),
+                                        s3Service.getFileUrl(selection.getImageUrl()),
                                         selection.isStatus()
                                 );
                             }
@@ -87,7 +89,7 @@ public class CampSiteMapper {
                                 return new UtilityResponseFilter(
                                         utility.getId(),
                                         utility.getName(),
-                                        s3Service.generatePresignedUrl(utility.getImageUrl()),
+                                        s3Service.getFileUrl(utility.getImageUrl()),
                                         utility.isStatus()
                                 );
                             }
@@ -106,7 +108,7 @@ public class CampSiteMapper {
                                 return new PlaceTypeResponseFilter(
                                         placeType.getId(),
                                         placeType.getName(),
-                                        s3Service.generatePresignedUrl(placeType.getImage()),
+                                        s3Service.getFileUrl(placeType.getImage()),
                                         placeType.isStatus()
                                 );
                             }

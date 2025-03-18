@@ -4,16 +4,14 @@ import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.group2.glamping.model.dto.response.filter.CampSiteResponseFilter;
 import com.group2.glamping.model.enums.BookingStatus;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonFilter("dynamicFilter")
@@ -31,6 +29,7 @@ public class BookingResponse {
     BookingStatus status;
     double totalAmount;
     List<BookingDetailResponse> bookingDetailResponseList;
+    List<CampTypeItemResponse> campTypeItemResponse;
     List<BookingSelectionResponse> bookingSelectionResponseList;
     List<PaymentResponse> paymentResponseList;
 

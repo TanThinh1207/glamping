@@ -38,4 +38,11 @@ public class Camp {
 
     @OneToMany(mappedBy = "camp")
     private List<BookingDetail> bookingDetailList;
+
+    @Override
+    public String toString() {
+        return "CampSite(id=" + this.id + ", name=" + this.name + ")";
+    }
+
+
 }

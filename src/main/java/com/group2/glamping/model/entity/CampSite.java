@@ -1,17 +1,16 @@
 package com.group2.glamping.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.group2.glamping.model.enums.CampSiteStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity(name = "camp_site")
@@ -56,6 +55,7 @@ public class CampSite {
 
     @ManyToOne
     @JoinColumn(name = "id_user")
+    @JsonIgnore
     private User user;
 
     @OneToMany(mappedBy = "campSite")
@@ -91,5 +91,10 @@ public class CampSite {
 
     @OneToMany(mappedBy = "campSite", cascade = CascadeType.ALL)
     private List<Selection> selections;
+
+    @Override
+    public String toString() {
+        return "CampSite(id=" + this.id + ", name=" + this.name + ")";
+    }
 
 }

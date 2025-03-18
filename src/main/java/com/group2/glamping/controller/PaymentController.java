@@ -101,6 +101,7 @@ public class PaymentController {
             return ResponseEntity.ok(BaseResponse.builder()
                     .statusCode(HttpStatus.OK.value())
                     .message("Refund successful")
+                    .data("Refund successful")
                     .build());
         } catch (Exception e) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION, "Refund failed: " + e.getMessage());
@@ -123,6 +124,7 @@ public class PaymentController {
             HttpServletResponse response) {
         try {
             stripeService.updatePaymentStatus(sessionId, PaymentStatus.Completed);
+
             log.info("Payment successful for session ID: {}", sessionId);
 
             // Redirect to frontend page (e.g., payment success page)

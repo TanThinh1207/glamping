@@ -40,7 +40,7 @@ public class CampSiteFilterMapper {
     private List<ImageResponse> mapImages(CampSite campSite) {
         return (campSite.getImageList() != null) ?
                 campSite.getImageList().stream()
-                        .map(image -> new ImageResponse(image.getId(), s3Service.generatePresignedUrl(image.getPath())))
+                        .map(image -> new ImageResponse(image.getId(), s3Service.getFileUrl(image.getPath())))
                         .collect(Collectors.toList()) :
                 Collections.emptyList();
     }
