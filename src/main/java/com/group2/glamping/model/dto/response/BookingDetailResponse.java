@@ -28,6 +28,7 @@ public class BookingDetailResponse {
     LocalDateTime createdAt;
     BookingDetailStatus status;
     Double amount;
+    Double addOn;
 
     public static BookingDetailResponse fromEntity(BookingDetail bookingDetail, S3Service s3Service) {
         if (bookingDetail == null) {
@@ -45,6 +46,7 @@ public class BookingDetailResponse {
                 .createdAt(bookingDetail.getCreatedTime())
                 .status(bookingDetail.getStatus())
                 .amount(bookingDetail.getAmount())
+                .addOn(bookingDetail.getAddOn())
                 .build();
     }
 
