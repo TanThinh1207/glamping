@@ -21,6 +21,7 @@ import com.group2.glamping.service.interfaces.CampSiteService;
 import com.group2.glamping.utils.JsonUtil;
 import com.group2.glamping.utils.RedisUtil;
 import com.group2.glamping.utils.ResponseFilterUtil;
+import com.stripe.exception.StripeException;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
@@ -58,7 +59,7 @@ public class CampSiteServiceImpl implements CampSiteService {
     private final CampRepository campRepository;
 
     @Override
-    public Optional<CampSiteResponse> saveCampSite(CampSiteRequest campSiteUpdateRequest) {
+    public Optional<CampSiteResponse> saveCampSite(CampSiteRequest campSiteUpdateRequest) throws StripeException {
         if (campSiteUpdateRequest == null) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
@@ -93,7 +94,7 @@ public class CampSiteServiceImpl implements CampSiteService {
                                                            List<SelectionRequest> campSiteSelections,
                                                            List<Integer> campSiteUtilities,
                                                            List<Integer> campSitePlaceTypes,
-                                                           List<CampTypeUpdateRequest> campTypeList) {
+                                                           List<CampTypeUpdateRequest> campTypeList) throws StripeException {
 
         // Check Host
         campSite.setUser(userService.findById(hostId)
@@ -190,7 +191,7 @@ public class CampSiteServiceImpl implements CampSiteService {
     }
 
     @Override
-    public Object updateCampSite(int id, CampSiteUpdateRequest campSiteUpdateRequest) {
+    public Object updateCampSite(int id, CampSiteUpdateRequest campSiteUpdateRequest) throws StripeException {
         redisUtil.deleteCache("filteredCampSites:*");
         redisUtil.deleteCache("campSites:*");
 
@@ -295,8 +296,15 @@ public class CampSiteServiceImpl implements CampSiteService {
         Page<CampSite> campSitePage = campSiteRepository.findAll(spec, pageable);
 
         List<CampSiteResponse> campSiteResponses = campSitePage.getContent().stream()
-                .map(campSiteMapper::toDto)
+                .map(campSite -> {
+                    try {
+                        return campSiteMapper.toDto(campSite);
+                    } catch (Exception e) {
+                        throw new RuntimeException("CampSite sang DTO: " + e.getMessage(), e);
+                    }
+                })
                 .collect(Collectors.toList());
+
 
         PagingResponse<?> response = new PagingResponse<>(campSiteResponses, campSitePage.getTotalElements(), campSitePage.getTotalPages(), campSitePage.getNumber(), campSitePage.getNumberOfElements());
 
@@ -346,7 +354,7 @@ public class CampSiteServiceImpl implements CampSiteService {
     }
 
     @Override
-    public CampSiteResponse updatePlaceType(int campSiteId, List<Integer> placeTypeIds) {
+    public CampSiteResponse updatePlaceType(int campSiteId, List<Integer> placeTypeIds) throws StripeException {
         CampSite campSite = campSiteRepository.findById(campSiteId)
                 .orElseThrow(() -> new AppException(ErrorCode.CAMP_SITE_NOT_FOUND));
 
@@ -373,7 +381,7 @@ public class CampSiteServiceImpl implements CampSiteService {
     }
 
     @Override
-    public CampSiteResponse updateUtility(int campSiteId, List<Integer> utilityIds) {
+    public CampSiteResponse updateUtility(int campSiteId, List<Integer> utilityIds) throws StripeException {
         CampSite campSite = campSiteRepository.findById(campSiteId)
                 .orElseThrow(() -> new AppException(ErrorCode.CAMP_SITE_NOT_FOUND));
 

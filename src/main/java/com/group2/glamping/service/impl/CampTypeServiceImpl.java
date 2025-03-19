@@ -180,8 +180,14 @@ public class CampTypeServiceImpl implements CampTypeService {
         Page<CampType> campTypePage = campTypeRepository.findAll(spec, pageable);
 
         List<CampTypeResponse> campTypeResponses = campTypePage.getContent().stream()
-                .map(campType -> CampTypeResponse.fromEntity(campType, s3Service))
+                .map(campType -> {
+                    CampTypeResponse response = CampTypeResponse.fromEntity(campType, s3Service);
+                    return response.toBuilder()
+                            .availableSlot(response.getAvailableSlot() != null ? response.getAvailableSlot() : (long) campType.getQuantity())
+                            .build();
+                })
                 .toList();
+
 
         if (params.containsKey("checkIn") && params.containsKey("checkOut")) {
             try {

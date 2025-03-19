@@ -4,7 +4,10 @@ import com.group2.glamping.model.dto.requests.BookingDetailOrderRequest;
 import com.group2.glamping.model.dto.requests.BookingRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.BookingResponse;
+import com.group2.glamping.model.entity.Booking;
+import com.group2.glamping.service.impl.StripeService;
 import com.group2.glamping.service.interfaces.BookingService;
+import com.stripe.exception.StripeException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,6 +31,7 @@ public class BookingController {
 
     private static final Logger logger = LoggerFactory.getLogger(BookingController.class);
     private final BookingService bookingService;
+    private final StripeService stripeService;
 
     // <editor-fold default state="collapsed" desc="Create Booking">
     @PostMapping
@@ -39,7 +43,7 @@ public class BookingController {
                     @ApiResponse(responseCode = "400", description = "Invalid request data")
             }
     )
-    public ResponseEntity<BaseResponse> addBooking(@Valid @RequestBody BookingRequest bookingRequest) {
+    public ResponseEntity<BaseResponse> addBooking(@Valid @RequestBody BookingRequest bookingRequest) throws StripeException {
         Optional<BookingResponse> booking = bookingService.createBooking(bookingRequest);
         return booking.map(response -> ResponseEntity.ok(BaseResponse.builder()
                         .statusCode(HttpStatus.OK.value())
@@ -90,6 +94,7 @@ public class BookingController {
                      **Note:** \s
                      - When using `deny`, the `deniedReason` parameter is **required**. \s
                      - When using `checkout`, a list of `BookingDetailOrderRequest` must be provided in the request body.
+                     - Before `checkout`, the Host's Stripe account is checked. If restricted, a Stripe Account Link is provided.
                     \s""",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Booking status updated successfully"),
@@ -123,6 +128,15 @@ public class BookingController {
                     response = bookingService.checkInBooking(bookingId);
                     break;
                 case "checkout":
+                    Booking booking = bookingService.getBookingById(bookingId);
+                    String hostStripeAccountId = booking.getCampSite().getUser().getConnectionId();
+                    if (stripeService.isAccountRestricted(hostStripeAccountId)) {
+                        String accountLink = stripeService.createAccountLink(booking.getCampSite().getUser().getId());
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                .body(new BaseResponse(HttpStatus.FORBIDDEN.value(),
+                                        "Host's Stripe account requires additional verification. Redirect to: " + accountLink, null));
+                    }
+
                     response = bookingService.checkOutBooking(bookingId, bookingDetailOrderRequest);
                     break;
                 default:
@@ -140,5 +154,6 @@ public class BookingController {
                             "An unexpected error occurred. Please try again later.", null));
         }
     }
+
 
 }

@@ -45,12 +45,14 @@ public class CampSite {
     private CampSiteStatus status;
 
     @Column(name = "message", columnDefinition = "TEXT DEFAULT 'No message provided'")
+    @Builder.Default
     private String message = "No message provided";
 
     @Column(name = "deposit_rate", columnDefinition = "DOUBLE DEFAULT 0.0", nullable = false)
     private Double depositRate;
 
     @Column(name = "description", columnDefinition = "TEXT DEFAULT 'No description provided'")
+    @Builder.Default
     private String description = "No description provided";
 
     @ManyToOne

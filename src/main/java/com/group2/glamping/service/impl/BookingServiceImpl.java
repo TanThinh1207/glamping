@@ -16,6 +16,7 @@ import com.group2.glamping.repository.*;
 import com.group2.glamping.service.interfaces.BookingService;
 import com.group2.glamping.service.interfaces.EmailService;
 import com.group2.glamping.utils.ResponseFilterUtil;
+import com.stripe.exception.StripeException;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
@@ -27,6 +28,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -52,9 +54,10 @@ public class BookingServiceImpl implements BookingService {
     private final EmailService emailService;
     private final CampRepository campRepository;
     private final BookingDetailOrderRepository bookingDetailOrderRepository;
+    private final StripeService stripeService;
 
     @Override
-    public Optional<BookingResponse> createBooking(BookingRequest bookingRequest) {
+    public Optional<BookingResponse> createBooking(BookingRequest bookingRequest) throws StripeException {
         User user = userRepository.findById(bookingRequest.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
@@ -161,7 +164,7 @@ public class BookingServiceImpl implements BookingService {
 
     //Accept Bookings
     @Override
-    public BookingResponse acceptBookings(Integer bookingId) {
+    public BookingResponse acceptBookings(Integer bookingId) throws StripeException {
         Optional<Booking> existedBooking = bookingRepository.findById(bookingId);
         Booking booking = new Booking();
         if (existedBooking.isPresent()) {
@@ -178,7 +181,7 @@ public class BookingServiceImpl implements BookingService {
 
     //Deny Bookings
     @Override
-    public BookingResponse denyBookings(Integer bookingId, String deniedReason) {
+    public BookingResponse denyBookings(Integer bookingId, String deniedReason) throws StripeException {
         Optional<Booking> existedBooking = bookingRepository.findById(bookingId);
         Booking booking = new Booking();
         if (existedBooking.isPresent()) {
@@ -251,8 +254,15 @@ public class BookingServiceImpl implements BookingService {
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Booking> bookingPage = bookingRepository.findAll(spec, pageable);
         List<BookingResponse> bookingResponses = bookingPage.getContent().stream()
-                .map(bookingMapper::toDto)
+                .map(booking -> {
+                    try {
+                        return bookingMapper.toDto(booking);
+                    } catch (StripeException e) {
+                        throw new RuntimeException("Lỗi khi gọi Stripe API: " + e.getMessage(), e);
+                    }
+                })
                 .toList();
+
 
         return new PagingResponse<>(
                 bookingResponses,
@@ -271,7 +281,7 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public BookingResponse checkInBooking(Integer bookingId) {
+    public BookingResponse checkInBooking(Integer bookingId) throws StripeException {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
 
@@ -310,7 +320,7 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public BookingResponse checkOutBooking(Integer bookingId, List<BookingDetailOrderRequest> bookingDetailOrderRequests) {
+    public BookingResponse checkOutBooking(Integer bookingId, List<BookingDetailOrderRequest> bookingDetailOrderRequests) throws StripeException, IOException {
 
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
@@ -354,8 +364,13 @@ public class BookingServiceImpl implements BookingService {
 
         booking.setStatus(BookingStatus.Completed);
         bookingRepository.save(booking);
-
+        stripeService.transferToHost(booking.getCampSite().getUser().getId(), (long) (booking.getPaymentList().getFirst().getTotalAmount() * 0.9));
         return bookingMapper.toDto(booking);
+    }
+
+    @Override
+    public Booking getBookingById(Integer bookingId) {
+        return bookingRepository.findById(bookingId).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
     }
 
 }

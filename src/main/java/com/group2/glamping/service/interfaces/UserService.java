@@ -4,6 +4,7 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.group2.glamping.model.dto.requests.UserUpdateRequest;
 import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.dto.response.UserResponse;
+import com.stripe.exception.StripeException;
 
 import java.util.Map;
 
@@ -12,9 +13,9 @@ public interface UserService {
 
     PagingResponse<?> getUsers(Map<String, String> params, int page, int size, String sortBy, String direction);
 
-    UserResponse updateUser(int id, UserUpdateRequest userUpdateRequest);
+    UserResponse updateUser(int id, UserUpdateRequest userUpdateRequest) throws StripeException;
 
-    UserResponse deleteUser(int id) throws FirebaseAuthException;
+    UserResponse deleteUser(int id) throws FirebaseAuthException, StripeException;
 
     String updateFcmToken(int userId, String fcmToken);
 

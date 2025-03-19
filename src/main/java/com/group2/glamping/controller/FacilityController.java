@@ -73,9 +73,9 @@ public class FacilityController {
     @Operation(
             summary = "Update an existing facility",
             description = """
-                    Updates an existing facility based on the provided ID.\s
-                    Allows modifying the name and description of the facility.
-                   \s""",
+                     Updates an existing facility based on the provided ID.\s
+                     Allows modifying the name and description of the facility.
+                    \s""",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Facility update request",
                     required = true,

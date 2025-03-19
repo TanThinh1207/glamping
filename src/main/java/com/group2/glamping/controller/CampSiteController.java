@@ -8,6 +8,7 @@ import com.group2.glamping.model.dto.requests.CampSiteRequest;
 import com.group2.glamping.model.dto.requests.CampSiteUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.service.interfaces.CampSiteService;
+import com.stripe.exception.StripeException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -89,7 +90,6 @@ public class CampSiteController {
     @PostMapping
     public ResponseEntity<BaseResponse> createCampSite(@RequestBody CampSiteRequest campSiteRequest) {
         try {
-//            logger.info("Parsed campSiteRequest: {}", campSiteRequest);
             return ResponseEntity.ok().body(BaseResponse.builder()
                     .statusCode(HttpStatus.OK.value())
                     .data(campSiteService.saveCampSite(campSiteRequest)
@@ -127,7 +127,7 @@ public class CampSiteController {
     @PatchMapping(value = "/{id}")
     public ResponseEntity<BaseResponse> updateCampSite(
             @PathVariable int id,
-            @RequestBody CampSiteUpdateRequest updatedCampSite) throws JsonMappingException {
+            @RequestBody CampSiteUpdateRequest updatedCampSite) throws JsonMappingException, StripeException {
         return ResponseEntity.ok(BaseResponse.builder()
                 .statusCode(HttpStatus.OK.value())
                 .data(campSiteService.updateCampSite(id, updatedCampSite))
@@ -170,7 +170,7 @@ public class CampSiteController {
             @RequestBody
             @Schema(description = "List of place type IDs to associate with the campsite", example = "[1, 2, 3]")
             List<Integer> placeTypesId
-    ) {
+    ) throws StripeException {
         return ResponseEntity.ok(new BaseResponse(
                 HttpStatus.OK.value(),
                 "Camp site update place types successfully",
@@ -196,7 +196,7 @@ public class CampSiteController {
             @RequestBody
             @Schema(description = "List of utility IDs to associate with the campsite", example = "[1, 2, 3]")
             List<Integer> utilitiesIds
-    ) {
+    ) throws StripeException {
         return ResponseEntity.ok(new BaseResponse(
                 HttpStatus.OK.value(),
                 "Camp site update utilities successfully",
