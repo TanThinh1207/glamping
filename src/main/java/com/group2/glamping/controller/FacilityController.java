@@ -36,16 +36,17 @@ public class FacilityController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Facility created successfully",
                             content = @Content(mediaType = "application/json",
-                                    examples = @ExampleObject(value = "{\n" +
-                                            "  \"statusCode\": 200,\n" +
-                                            "  \"message\": \"Facility created successfully\",\n" +
-                                            "  \"data\": {\n" +
-                                            "    \"id\": 5,\n" +
-                                            "    \"name\": \"Lounge Area\",\n" +
-                                            "    \"description\": \"Relaxing lounge space with comfortable seating.\",\n" +
-                                            "    \"status\": true\n" +
-                                            "  }\n" +
-                                            "}"))),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                              "statusCode": 200,
+                                              "message": "Facility created successfully",
+                                              "data": {
+                                                "id": 5,
+                                                "name": "Lounge Area",
+                                                "description": "Relaxing lounge space with comfortable seating.",
+                                                "status": true
+                                              }
+                                            }"""))),
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
@@ -72,9 +73,9 @@ public class FacilityController {
     @Operation(
             summary = "Update an existing facility",
             description = """
-                Updates an existing facility based on the provided ID. 
-                Allows modifying the name and description of the facility.
-                """,
+                    Updates an existing facility based on the provided ID.\s
+                    Allows modifying the name and description of the facility.
+                   \s""",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Facility update request",
                     required = true,
@@ -120,24 +121,25 @@ public class FacilityController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Facilities retrieved successfully",
                             content = @Content(mediaType = "application/json",
-                                    examples = @ExampleObject(value = "{\n" +
-                                            "  \"statusCode\": 200,\n" +
-                                            "  \"message\": \"Facilities retrieved successfully\",\n" +
-                                            "  \"data\": [\n" +
-                                            "    {\n" +
-                                            "      \"id\": 1,\n" +
-                                            "      \"name\": \"Swimming Pool\",\n" +
-                                            "      \"description\": \"Large outdoor pool with heating.\",\n" +
-                                            "      \"status\": true\n" +
-                                            "    },\n" +
-                                            "    {\n" +
-                                            "      \"id\": 2,\n" +
-                                            "      \"name\": \"BBQ Area\",\n" +
-                                            "      \"description\": \"Outdoor BBQ space with seating.\",\n" +
-                                            "      \"status\": true\n" +
-                                            "    }\n" +
-                                            "  ]\n" +
-                                            "}"))),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                              "statusCode": 200,
+                                              "message": "Facilities retrieved successfully",
+                                              "data": [
+                                                {
+                                                  "id": 1,
+                                                  "name": "Swimming Pool",
+                                                  "description": "Large outdoor pool with heating.",
+                                                  "status": true
+                                                },
+                                                {
+                                                  "id": 2,
+                                                  "name": "BBQ Area",
+                                                  "description": "Outdoor BBQ space with seating.",
+                                                  "status": true
+                                                }
+                                              ]
+                                            }"""))),
                     @ApiResponse(responseCode = "400", description = "Invalid input or bad request")
             }
     )
@@ -161,16 +163,17 @@ public class FacilityController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Facility deleted successfully",
                             content = @Content(mediaType = "application/json",
-                                    examples = @ExampleObject(value = "{\n" +
-                                            "  \"statusCode\": 200,\n" +
-                                            "  \"message\": \"Facility deleted successfully\",\n" +
-                                            "  \"data\": {\n" +
-                                            "    \"id\": 3,\n" +
-                                            "    \"name\": \"Lounge Area\",\n" +
-                                            "    \"description\": \"Relaxing lounge space with comfortable seating.\",\n" +
-                                            "    \"status\": false\n" +
-                                            "  }\n" +
-                                            "}"))),
+                                    examples = @ExampleObject(value = """
+                                            {
+                                              "statusCode": 200,
+                                              "message": "Facility deleted successfully",
+                                              "data": {
+                                                "id": 3,
+                                                "name": "Lounge Area",
+                                                "description": "Relaxing lounge space with comfortable seating.",
+                                                "status": false
+                                              }
+                                            }"""))),
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )

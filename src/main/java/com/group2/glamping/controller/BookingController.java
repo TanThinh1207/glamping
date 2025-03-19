@@ -1,9 +1,9 @@
 package com.group2.glamping.controller;
 
+import com.group2.glamping.model.dto.requests.BookingDetailOrderRequest;
 import com.group2.glamping.model.dto.requests.BookingRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.BookingResponse;
-import com.group2.glamping.service.interfaces.BookingDetailService;
 import com.group2.glamping.service.interfaces.BookingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -27,7 +28,6 @@ public class BookingController {
 
     private static final Logger logger = LoggerFactory.getLogger(BookingController.class);
     private final BookingService bookingService;
-    private final BookingDetailService bookingDetailService;
 
     // <editor-fold default state="collapsed" desc="Create Booking">
     @PostMapping
@@ -77,10 +77,20 @@ public class BookingController {
     // </editor-fold>
 
     // <editor-fold default state="collapsed" desc="Accept or deny bookings">
-    @PutMapping("/{bookingId}/update-status")
+    @PutMapping("/{bookingId}")
     @Operation(
             summary = "Update booking status",
-            description = "Update booking status (Accepted, Denied, Checked-in, Checked-out) based on booking ID.",
+            description = """
+                     Update the status of a booking based on its ID. The possible statuses are:
+                     - `accept`: Approve the booking request.
+                     - `deny`: Reject the booking request (requires a denial reason).
+                     - `checkin`: Mark the booking as checked-in.
+                     - `checkout`: Mark the booking as checked-out (requires booking detail orders).
+                                    \s
+                     **Note:** \s
+                     - When using `deny`, the `deniedReason` parameter is **required**. \s
+                     - When using `checkout`, a list of `BookingDetailOrderRequest` must be provided in the request body.
+                    \s""",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Booking status updated successfully"),
                     @ApiResponse(responseCode = "400", description = "Invalid request data"),
@@ -91,10 +101,11 @@ public class BookingController {
     public ResponseEntity<BaseResponse> updateBookingStatus(
             @PathVariable Integer bookingId,
             @RequestParam String status,
-            @RequestParam(required = false) String deniedReason
+            @RequestParam(required = false) String deniedReason,
+            @RequestBody(required = false) List<BookingDetailOrderRequest> bookingDetailOrderRequest
     ) {
         try {
-            BookingResponse response = null;
+            BookingResponse response;
 
             switch (status.toLowerCase()) {
                 case "accept":
@@ -112,7 +123,7 @@ public class BookingController {
                     response = bookingService.checkInBooking(bookingId);
                     break;
                 case "checkout":
-                    response = bookingService.checkOutBooking(bookingId);
+                    response = bookingService.checkOutBooking(bookingId, bookingDetailOrderRequest);
                     break;
                 default:
                     return ResponseEntity.badRequest()
@@ -130,133 +141,4 @@ public class BookingController {
         }
     }
 
-    // </editor-fold>
-
-    // Retrieve by status
-//    @GetMapping
-//    @Operation(
-//            summary = "Retrieve bookings by status and Camp Site Id",
-//            description = "Retrieves Booking records filtered by status (Pending, Completed, etc.) and Camp Site Id.",
-//            responses = {
-//                    @ApiResponse(responseCode = "200", description = "Bookings retrieved successfully"),
-//                    @ApiResponse(responseCode = "404", description = "No Bookings found"),
-//                    @ApiResponse(responseCode = "500", description = "Internal server error")
-//            }
-//    )
-//    public ResponseEntity<BaseResponse> getBookings(
-//            @RequestParam Integer campSiteId,
-//            @RequestParam(required = false) String status
-//    ) {
-//        try {
-//            List<BookingResponse> responses = new ArrayList<>();
-//            if (status.equals("pending")) {
-//                responses = bookingService.getPendingBookingsByCampSiteId(campSiteId);
-//            } else if (status.equals("completed")) {
-//                responses = bookingService.getCompletedBookingsByCampSiteId(campSiteId);
-//            }
-//            if (responses.isEmpty()) {
-//                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                        .body(new BaseResponse(HttpStatus.NOT_FOUND.value(),
-//                                "No Bookings found with Camp Site Id: " + campSiteId + " and status: " + status, responses));
-//            }
-//
-//            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Bookings retrieved successfully", responses));
-//        } catch (Exception e) {
-//            logger.error("Error while retrieving bookings by status: {}", e.getMessage(), e);
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
-//        }
-//    }
-//    //Check in booking
-//    @PutMapping("/{bookingDetailId}/check-in")
-//    @Operation(
-//            summary = "Checkin",
-//            description = "Checkin by booking detail id.",
-//            responses = {
-//                    @ApiResponse(responseCode = "200", description = "Bookings accepted successfully"),
-//                    @ApiResponse(responseCode = "404", description = "No Bookings found"),
-//                    @ApiResponse(responseCode = "500", description = "Internal server error")
-//            }
-//    )
-//    public ResponseEntity<BaseResponse> checkinBookingDetail(
-//            @PathVariable Integer bookingDetailId
-//    ) {
-//        try {
-//            BookingDetailResponse responses = bookingDetailService.checkInBookingDetail(bookingDetailId);
-//            if (responses == null) {
-//                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                        .body(new BaseResponse(HttpStatus.NOT_FOUND.value(),
-//                                "No Booking Details found with Id: " + bookingDetailId, null));
-//            }
-//
-//            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Checkin successfully", responses));
-//        } catch (Exception e) {
-//            logger.error("Error while retrieving bookings by status: {}", e.getMessage(), e);
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
-//        }
-//    }
-
-    // <editor-fold default state="collapsed" desc="Accept or deny bookings (OLD VERSION)">
-    //Accept bookings
-//    @PutMapping("/{bookingId}/accept")
-//    @Operation(
-//            summary = "Retrieve bookings by status and Camp Site Id",
-//            description = "Retrieves Booking records filtered by status (Pending, Completed, etc.) and Camp Site Id.",
-//            responses = {
-//                    @ApiResponse(responseCode = "200", description = "Bookings accepted successfully"),
-//                    @ApiResponse(responseCode = "404", description = "No Bookings found"),
-//                    @ApiResponse(responseCode = "500", description = "Internal server error")
-//            }
-//    )
-//    public ResponseEntity<BaseResponse> acceptBookings(
-//            @PathVariable Integer bookingId
-//    ) {
-//        try {
-//            BookingResponse responses = bookingService.acceptBookings(bookingId);
-//            if (responses == null) {
-//                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                        .body(new BaseResponse(HttpStatus.NOT_FOUND.value(),
-//                                "No Bookings found with Id: " + bookingId , null));
-//            }
-//
-//            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Bookings accepted successfully", responses));
-//        } catch (Exception e) {
-//            logger.error("Error while retrieving bookings by status: {}", e.getMessage(), e);
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
-//        }
-//    }
-//
-//    //Deny bookings
-//    @PutMapping("/{bookingId}/deny")
-//    @Operation(
-//            summary = "Retrieve bookings by status and Camp Site Id",
-//            description = "Retrieves Booking records filtered by status (Pending, Completed, etc.) and Camp Site Id.",
-//            responses = {
-//                    @ApiResponse(responseCode = "200", description = "Bookings denied successfully"),
-//                    @ApiResponse(responseCode = "404", description = "No Bookings found"),
-//                    @ApiResponse(responseCode = "500", description = "Internal server error")
-//            }
-//    )
-//    public ResponseEntity<BaseResponse> denyBookings(
-//            @PathVariable Integer bookingId,
-//            @RequestParam String deniedReason
-//    ) {
-//        try {
-//            BookingResponse responses = bookingService.denyBookings(bookingId, deniedReason);
-//            if (responses == null) {
-//                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                        .body(new BaseResponse(HttpStatus.NOT_FOUND.value(),
-//                                "No Bookings found with Id: " + bookingId , null));
-//            }
-//
-//            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Bookings denied successfully", responses));
-//        } catch (Exception e) {
-//            logger.error("Error while retrieving bookings by status: {}", e.getMessage(), e);
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred. Please try again later.", null));
-//        }
-//    }
-    // </editor-fold>
 }

@@ -14,6 +14,7 @@ import com.group2.glamping.model.dto.response.CampSiteResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.entity.*;
 import com.group2.glamping.model.enums.CampSiteStatus;
+import com.group2.glamping.model.enums.CampStatus;
 import com.group2.glamping.model.mapper.CampSiteMapper;
 import com.group2.glamping.repository.*;
 import com.group2.glamping.service.interfaces.CampSiteService;
@@ -54,6 +55,7 @@ public class CampSiteServiceImpl implements CampSiteService {
     private final FacilityRepository facilityRepository;
     private final StringRedisTemplate redisTemplate;
     private final RedisUtil redisUtil;
+    private final CampRepository campRepository;
 
     @Override
     public Optional<CampSiteResponse> saveCampSite(CampSiteRequest campSiteUpdateRequest) {
@@ -132,6 +134,7 @@ public class CampSiteServiceImpl implements CampSiteService {
                             existingCampType.setQuantity(request.quantity());
                             existingCampType.setStatus(request.status());
                             existingCampType.setFacilities(facilityRepository.findAllById(request.facilities()));
+                            generateCamp(existingCampType);
                             return campTypeRepository.save(existingCampType);
                         })
                         .orElseGet(() -> {
@@ -146,6 +149,7 @@ public class CampSiteServiceImpl implements CampSiteService {
                                     .campSite(campSite)
                                     .facilities(facilityRepository.findAllById(request.facilities()))
                                     .build();
+                            generateCamp(newCampType);
                             return campTypeRepository.save(newCampType);
                         }))
                 .collect(Collectors.toList());
@@ -171,6 +175,19 @@ public class CampSiteServiceImpl implements CampSiteService {
         return Optional.of(campSiteMapper.toDto(campSiteRepository.save(campSite)));
     }
 
+    private void generateCamp(CampType campType) {
+        List<Camp> camps = new ArrayList<>();
+        for (int i = 0; i <= campType.getQuantity(); i++) {
+            camps.add(Camp.builder()
+                    .campType(campType)
+                    .createdTime(LocalDateTime.now())
+                    .status(CampStatus.Not_Assigned)
+                    .updatedTime(LocalDateTime.now())
+                    .name(campType.getType() + " " + i)
+                    .build());
+        }
+        campRepository.saveAll(camps);
+    }
 
     @Override
     public Object updateCampSite(int id, CampSiteUpdateRequest campSiteUpdateRequest) {
@@ -326,6 +343,58 @@ public class CampSiteServiceImpl implements CampSiteService {
         redisTemplate.opsForValue().set(cacheKey, filteredResponseJson);
 
         return filteredResponse;
+    }
+
+    @Override
+    public CampSiteResponse updatePlaceType(int campSiteId, List<Integer> placeTypeIds) {
+        CampSite campSite = campSiteRepository.findById(campSiteId)
+                .orElseThrow(() -> new AppException(ErrorCode.CAMP_SITE_NOT_FOUND));
+
+        if (placeTypeIds == null || placeTypeIds.isEmpty()) {
+            throw new AppException(ErrorCode.PLACE_TYPE_LIST_CANNOT_BE_EMPTY);
+        }
+
+        List<PlaceType> placeTypes = placeTypeRepository.findAllById(placeTypeIds);
+
+        if (placeTypes.isEmpty()) {
+            throw new AppException(ErrorCode.PLACE_TYPE_NOT_FOUND);
+        }
+
+        Set<PlaceType> currentPlaceTypes = new HashSet<>(campSite.getPlaceTypes());
+        Set<PlaceType> newPlaceTypes = new HashSet<>(placeTypes);
+
+        if (!currentPlaceTypes.equals(newPlaceTypes)) {
+            campSite.setPlaceTypes(placeTypes);
+            campSiteRepository.save(campSite);
+        }
+
+        return campSiteMapper.toDto(campSite);
+    }
+
+    @Override
+    public CampSiteResponse updateUtility(int campSiteId, List<Integer> utilityIds) {
+        CampSite campSite = campSiteRepository.findById(campSiteId)
+                .orElseThrow(() -> new AppException(ErrorCode.CAMP_SITE_NOT_FOUND));
+
+        if (utilityIds == null || utilityIds.isEmpty()) {
+            throw new AppException(ErrorCode.UTILITY_LIST_CANNOT_BE_EMPTY);
+        }
+
+        List<Utility> utilities = utilityRepository.findAllById(utilityIds);
+
+        if (utilities.isEmpty()) {
+            throw new AppException(ErrorCode.UTILITY_NOT_FOUND);
+        }
+
+        Set<Utility> currentUtilities = new HashSet<>(campSite.getUtilities());
+        Set<Utility> newUtilities = new HashSet<>(utilities);
+
+        if (!currentUtilities.equals(newUtilities)) {
+            campSite.setUtilities(utilities);
+            campSiteRepository.save(campSite);
+        }
+
+        return campSiteMapper.toDto(campSite);
     }
 
 

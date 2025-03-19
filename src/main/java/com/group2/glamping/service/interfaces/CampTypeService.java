@@ -3,9 +3,11 @@ package com.group2.glamping.service.interfaces;
 import com.group2.glamping.model.dto.requests.CampTypeCreateRequest;
 import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
+import com.group2.glamping.model.dto.response.CampTypeResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 public interface CampTypeService {
@@ -21,4 +23,5 @@ public interface CampTypeService {
 
     BaseResponse softDeleteCampType(int campTypeId);
 
+    CampTypeResponse updateFacility(int campTypeId, List<Integer> facilityIds);
 }

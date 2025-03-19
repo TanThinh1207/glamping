@@ -7,6 +7,7 @@ import com.group2.glamping.model.dto.requests.CampSiteUpdateRequest;
 import com.group2.glamping.model.dto.response.CampSiteResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -22,4 +23,7 @@ public interface CampSiteService {
 
     Object updateCampSite(int id, CampSiteUpdateRequest campSiteUpdateRequest) throws JsonMappingException;
 
+    CampSiteResponse updatePlaceType(int campTypeId, List<Integer> placeTypeIds);
+
+    CampSiteResponse updateUtility(int campTypeId, List<Integer> placeTypeIds);
 }

@@ -35,9 +35,8 @@ public class BookingDetailResponse {
             return null;
         }
 
-        System.out.println("Creating BookingDetailResponse for BookingDetail ID: " + bookingDetail.getId());
 
-        BookingDetailResponse response = BookingDetailResponse.builder()
+        return BookingDetailResponse.builder()
                 .bookingDetailId(bookingDetail.getId())
                 .campTypeResponse(CampTypeResponse.fromEntity(bookingDetail.getCampType(), s3Service))
                 .campResponse(CampResponse.fromEntity(bookingDetail.getCamp()))
@@ -47,9 +46,6 @@ public class BookingDetailResponse {
                 .status(bookingDetail.getStatus())
                 .amount(bookingDetail.getAmount())
                 .build();
-
-        System.out.println("BookingDetailResponse created: " + response);
-        return response;
     }
 
 }

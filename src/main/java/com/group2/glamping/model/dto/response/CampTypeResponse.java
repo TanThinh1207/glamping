@@ -38,9 +38,8 @@ public class CampTypeResponse {
             return null;
         }
 
-        System.out.println("Creating CampTypeResponse for CampType ID: " + campType.getId());
 
-        CampTypeResponse response = CampTypeResponse.builder()
+        return CampTypeResponse.builder()
                 .id(campType.getId())
                 .type(campType.getType())
                 .capacity(campType.getCapacity())
@@ -51,11 +50,8 @@ public class CampTypeResponse {
                 .status(campType.isStatus())
                 .image(s3Service.getFileUrl(campType.getImage()))
                 .facilities(FacilityResponse.fromEntity(campType.getFacilities(), s3Service))
-//                .estimatedPrice(campType.getPrice())
+                .estimatedPrice(campType.getPrice())
                 .build();
-
-        System.out.println("CampTypeResponse created: " + response);
-        return response;
     }
 
 

@@ -27,11 +27,6 @@ public class BookingMapper {
             System.out.println("booking is null");
             return null;
         }
-        System.out.println("Booking ID: " + booking.getId());
-        System.out.println("Booking Details: " + (booking.getBookingDetailList() == null ? "null" : booking.getBookingDetailList().size()));
-        for (BookingDetail detail : booking.getBookingDetailList()) {
-            System.out.println("BookingDetail ID: " + detail.getId());
-        }
 
 
         return BookingResponse.builder()
@@ -52,12 +47,8 @@ public class BookingMapper {
 
 
     private List<BookingDetailResponse> mapBookingDetails(List<BookingDetail> bookingDetails) {
-        System.out.println("Mapping BookingDetail: " + bookingDetails);
         return (bookingDetails != null) ? bookingDetails.stream()
-                .map(detail -> {
-                    System.out.println("Mapping BookingDetail ID: " + detail.getId());
-                    return BookingDetailResponse.fromEntity(detail, s3Service);
-                })
+                .map(detail -> BookingDetailResponse.fromEntity(detail, s3Service))
                 .collect(Collectors.toList()) : Collections.emptyList();
     }
 

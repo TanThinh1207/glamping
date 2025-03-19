@@ -1,6 +1,8 @@
 package com.group2.glamping.model.dto.response;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter

@@ -1,9 +1,11 @@
 package com.group2.glamping.service.interfaces;
 
+import com.group2.glamping.model.dto.requests.BookingDetailOrderRequest;
 import com.group2.glamping.model.dto.requests.BookingRequest;
 import com.group2.glamping.model.dto.response.BookingResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -21,5 +23,5 @@ public interface BookingService {
 
     BookingResponse checkInBooking(Integer bookingId);
 
-    BookingResponse checkOutBooking(Integer bookingId);
+    BookingResponse checkOutBooking(Integer bookingId, List<BookingDetailOrderRequest> bookingDetailOrderRequest);
 }

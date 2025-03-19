@@ -10,8 +10,10 @@ import com.group2.glamping.model.dto.response.FacilityResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
 import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.model.entity.CampType;
+import com.group2.glamping.model.entity.Facility;
 import com.group2.glamping.repository.CampSiteRepository;
 import com.group2.glamping.repository.CampTypeRepository;
+import com.group2.glamping.repository.FacilityRepository;
 import com.group2.glamping.service.interfaces.CampTypeService;
 import com.group2.glamping.service.interfaces.S3Service;
 import com.group2.glamping.utils.ResponseFilterUtil;
@@ -34,10 +36,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Service
@@ -48,6 +47,7 @@ public class CampTypeServiceImpl implements CampTypeService {
     private final CampTypeRepository campTypeRepository;
     private final CampSiteRepository campSiteRepository;
     private final S3Service s3Service;
+    private final FacilityRepository facilityRepository;
 
     @Override
     public Long findAvailableSlots(Integer idCampType, LocalDateTime checkInDate, LocalDateTime checkOutDate) {
@@ -248,7 +248,7 @@ public class CampTypeServiceImpl implements CampTypeService {
 
             response.setStatusCode(200);
             response.setMessage("Camp Type status updated to NOT_AVAILABLE");
-            response.setData(convertToResponse(campType));
+            response.setData(CampTypeResponse.fromEntity(campType, s3Service));
         } else {
             response.setStatusCode(404);
             response.setMessage("Camp Type not found");
@@ -257,21 +257,31 @@ public class CampTypeServiceImpl implements CampTypeService {
         return response;
     }
 
-    // Mapping to entity to entityResponse
-    private CampTypeResponse convertToResponse(CampType campType) {
-        return CampTypeResponse.builder()
-                .id(campType.getId())
-                .type(campType.getType())
-                .capacity(campType.getCapacity())
-                .price(campType.getPrice())
-                .weekendRate(campType.getWeekendRate())
-                .quantity(campType.getQuantity())
-                .status(campType.isStatus())
-                .campSiteId(campType.getCampSite().getId())
-                .image(campType.getImage() == null || campType.getImage().isEmpty() ?
-                        "No image" :
-                        s3Service.getFileUrl(campType.getImage()))
-                .build();
+    @Override
+    public CampTypeResponse updateFacility(int campTypeId, List<Integer> facilityIds) {
+        CampType campType = campTypeRepository.findById(campTypeId)
+                .orElseThrow(() -> new AppException(ErrorCode.CAMP_TYPE_NOT_FOUND));
 
+        if (facilityIds == null || facilityIds.isEmpty()) {
+            throw new AppException(ErrorCode.FACILITY_LIST_CANNOT_BE_EMPTY);
+        }
+
+        List<Facility> facilities = facilityRepository.findAllById(facilityIds);
+
+        if (facilities.isEmpty()) {
+            throw new AppException(ErrorCode.FACILITY_NOT_FOUND);
+        }
+
+        Set<Facility> currentFacilities = new HashSet<>(campType.getFacilities());
+        Set<Facility> newFacilities = new HashSet<>(facilities);
+
+        if (!currentFacilities.equals(newFacilities)) {
+            campType.setFacilities(facilities);
+            campTypeRepository.save(campType);
+        }
+
+        return CampTypeResponse.fromEntity(campType, s3Service);
     }
+
+
 }

@@ -134,14 +134,14 @@ public class PlaceTypeController {
             summary = "Get list of place types",
             description = """
                         Retrieve a paginated list of place types with optional filtering and field selection.
-                    
+                                       \s
                         - Optional Parameters:
                           - `page` (default = 0): Page number
                           - `size` (default = 10): Number of records per page
                           - `fields`: Fields to return
                           - `sortBy`: Sorting field (default = "id")
                           - `direction`: Sorting order (ASC/DESC, default = "ASC")
-                    """,
+                   \s""",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Place types retrieved successfully"),
                     @ApiResponse(responseCode = "400", description = "Invalid input or bad request")
