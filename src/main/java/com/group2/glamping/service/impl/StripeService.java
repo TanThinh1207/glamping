@@ -76,8 +76,8 @@ public class StripeService {
         SessionCreateParams params = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
 
-                .setSuccessUrl(stripeCallback + "/api/payments/success?session_id={CHECKOUT_SESSION_ID}")
-                .setCancelUrl(stripeCallback + "/api/payments/cancel?session_id={CHECKOUT_SESSION_ID}")
+                .setSuccessUrl(stripeCallback + "api/payments/success?session_id={CHECKOUT_SESSION_ID}")
+                .setCancelUrl(stripeCallback + "api/payments/cancel?session_id={CHECKOUT_SESSION_ID}")
                 .addLineItem(lineItem)
                 .putMetadata("bookingId", String.valueOf(paymentRequest.bookingId()))
                 .build();
