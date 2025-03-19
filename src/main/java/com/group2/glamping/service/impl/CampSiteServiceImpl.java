@@ -367,7 +367,8 @@ public class CampSiteServiceImpl implements CampSiteService {
             campSite.setPlaceTypes(placeTypes);
             campSiteRepository.save(campSite);
         }
-
+        redisUtil.deleteCache("filteredCampSites:*");
+        redisUtil.deleteCache("campSites:*");
         return campSiteMapper.toDto(campSite);
     }
 
@@ -393,7 +394,8 @@ public class CampSiteServiceImpl implements CampSiteService {
             campSite.setUtilities(utilities);
             campSiteRepository.save(campSite);
         }
-
+        redisUtil.deleteCache("filteredCampSites:*");
+        redisUtil.deleteCache("campSites:*");
         return campSiteMapper.toDto(campSite);
     }
 
