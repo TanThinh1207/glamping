@@ -16,6 +16,7 @@ import com.group2.glamping.repository.CampTypeRepository;
 import com.group2.glamping.repository.FacilityRepository;
 import com.group2.glamping.service.interfaces.CampTypeService;
 import com.group2.glamping.service.interfaces.S3Service;
+import com.group2.glamping.utils.RedisUtil;
 import com.group2.glamping.utils.ResponseFilterUtil;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -48,6 +49,7 @@ public class CampTypeServiceImpl implements CampTypeService {
     private final CampSiteRepository campSiteRepository;
     private final S3Service s3Service;
     private final FacilityRepository facilityRepository;
+    private final RedisUtil redisUtil;
 
     @Override
     public Long findAvailableSlots(Integer idCampType, LocalDateTime checkInDate, LocalDateTime checkOutDate) {
@@ -142,7 +144,8 @@ public class CampTypeServiceImpl implements CampTypeService {
         response.setStatusCode(HttpStatus.OK.value());
         response.setMessage("CampType updated successfully");
         response.setData(campTypeResponse);
-
+        redisUtil.deleteCache("filteredCampSites:*");
+        redisUtil.deleteCache("campSites:*");
         return response;
     }
 
@@ -254,6 +257,8 @@ public class CampTypeServiceImpl implements CampTypeService {
             response.setMessage("Camp Type not found");
             response.setData(null);
         }
+        redisUtil.deleteCache("filteredCampSites:*");
+        redisUtil.deleteCache("campSites:*");
         return response;
     }
 
@@ -279,7 +284,8 @@ public class CampTypeServiceImpl implements CampTypeService {
             campType.setFacilities(facilities);
             campTypeRepository.save(campType);
         }
-
+        redisUtil.deleteCache("filteredCampSites:*");
+        redisUtil.deleteCache("campSites:*");
         return CampTypeResponse.fromEntity(campType, s3Service);
     }
 
