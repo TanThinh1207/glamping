@@ -177,7 +177,7 @@ public class CampSiteServiceImpl implements CampSiteService {
 
     private void generateCamp(CampType campType) {
         List<Camp> camps = new ArrayList<>();
-        for (int i = 0; i <= campType.getQuantity(); i++) {
+        for (int i = 0; i < campType.getQuantity(); i++) {
             camps.add(Camp.builder()
                     .campType(campType)
                     .createdTime(LocalDateTime.now())
