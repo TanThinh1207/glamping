@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +31,11 @@ public class PaymentController {
 
     private final StripeService stripeService;
 
+    @Value("${stripe.url.redirect}")
+    private String redirectUrl;
+
+    @Value("${stripe.url.connect.account}")
+    private String connectUrl;
 
     @Operation(
             summary = "Process a Stripe payment",
@@ -99,7 +105,6 @@ public class PaymentController {
 
             log.info("Payment successful for session ID: {}", sessionId);
 
-            String redirectUrl = "http://localhost:5173/complete-booking";
             response.sendRedirect(redirectUrl);
         } catch (StripeException | IOException e) {
             log.error("Failed to update payment status for session ID: {}", sessionId, e);
@@ -126,7 +131,6 @@ public class PaymentController {
             stripeService.cancelPayment(sessionId);
             log.info("Payment cancelled for session ID: {}", sessionId);
 
-            String redirectUrl = "http://localhost:5173/complete-booking";
             response.sendRedirect(redirectUrl);
         } catch (StripeException | IOException e) {
             log.error("Failed to update payment status for session ID: {}", sessionId, e);
@@ -142,8 +146,7 @@ public class PaymentController {
 
     @GetMapping("/connected-success")
     public RedirectView connectedSuccess() {
-        String url = "http://localhost:5173/account";
-        return new RedirectView(url);
+        return new RedirectView(connectUrl);
     }
 
 }

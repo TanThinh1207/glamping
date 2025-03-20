@@ -18,10 +18,16 @@ import org.springframework.context.annotation.Configuration;
                 title = "OpenApi specification - Glamping",
                 version = "1.0"
         ),
-        servers = @Server(
-                description = "Local server",
-                url = "http://localhost:8080"
-        )
+        servers = {
+                @Server(
+                        description = "Local server",
+                        url = "http://localhost:8080"
+                ),
+                @Server(
+                        description = "Deploy server",
+                        url = "http://18.140.180.54:8080"
+                )
+        }
 )
 public class OpenApiConfig {
 }
