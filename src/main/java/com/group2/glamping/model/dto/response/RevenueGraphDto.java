@@ -7,15 +7,17 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class RevenueGraphDto {
     private String date;
-    private Double revenue;
-    private Double withdraw;
+    private double totalRevenue;
+    private double totalProfit;
+    private long numberOfBookings;
 
-    public void addRevenueAndProfit(double additionalRevenue, double additionalProfit) {
-        this.revenue += additionalRevenue;
-        this.withdraw += additionalProfit;
+    public void addRevenueProfitAndBooking(double revenue, double profit, long count) {
+        this.totalRevenue += revenue;
+        this.totalProfit += profit;
+        this.numberOfBookings += count;
     }
 }

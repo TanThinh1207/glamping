@@ -364,7 +364,7 @@ public class BookingServiceImpl implements BookingService {
 
         booking.setStatus(BookingStatus.Completed);
         bookingRepository.save(booking);
-        stripeService.transferToHost(booking.getCampSite().getUser().getId(), (long) (booking.getPaymentList().getFirst().getTotalAmount() * 0.9));
+        stripeService.transferToHost(booking.getCampSite().getUser().getId(), (long) (booking.getPaymentList().getFirst().getTotalAmount() - booking.getNetAmount()));
         return bookingMapper.toDto(booking);
     }
 

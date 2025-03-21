@@ -3,6 +3,7 @@ package com.group2.glamping.service.impl;
 import com.group2.glamping.model.dto.response.RevenueGraphDto;
 import com.group2.glamping.model.entity.Booking;
 import com.group2.glamping.model.entity.BookingDetail;
+import com.group2.glamping.model.entity.Payment;
 import com.group2.glamping.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,6 @@ public class RevenueService {
 
     public List<RevenueGraphDto> getRevenueGraph(Long hostId, LocalDateTime startDate, LocalDateTime endDate, Long campSiteId, String interval) {
         List<Booking> bookings = bookingRepository.findCompletedBookings(hostId, startDate, endDate);
-
         Map<String, RevenueGraphDto> revenueMap = new TreeMap<>();
 
         for (Booking booking : bookings) {
@@ -35,15 +35,22 @@ public class RevenueService {
                     .filter(bd -> campSiteId == null || bd.getCamp().getId() == (campSiteId))
                     .mapToDouble(BookingDetail::getAddOn)
                     .sum();
-            double profit = booking.getPaymentList().stream()
-                    .mapToDouble(p -> p.getTotalAmount() * 0.9)
-                    .sum();
 
-            revenueMap.computeIfAbsent(keyDate, k -> new RevenueGraphDto(k, 0.0, 0.0))
-                    .addRevenueAndProfit(revenue + addOn, profit);
+            double totalAmount = booking.getTotalAmount();
+            double firstPaymentAmount = booking.getPaymentList().stream()
+                    .findFirst()
+                    .map(Payment::getTotalAmount)
+                    .orElse(0.0);
+
+            double profit = firstPaymentAmount - (totalAmount * 0.1);
+
+            // Cập nhật RevenueGraphDto
+            revenueMap.computeIfAbsent(keyDate, k -> new RevenueGraphDto(k, 0.0, 0.0, 0))
+                    .addRevenueProfitAndBooking(revenue + addOn, profit, 1);
         }
 
         return new ArrayList<>(revenueMap.values());
     }
+
 
 }

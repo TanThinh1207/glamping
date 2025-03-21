@@ -12,7 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -24,21 +26,26 @@ public class RevenueController {
     private final RevenueService revenueService;
 
     @Operation(summary = "Get revenue graph", description = "Retrieve revenue data for a host within a specified time range.")
-    @GetMapping("/host/{hostId}/graph")
+    @GetMapping("/{hostId}")
     public ResponseEntity<?> getRevenueGraph(
             @PathVariable @Parameter(description = "Host ID") Long hostId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            @Parameter(description = "Start date in ISO format (yyyy-MM-dd'T'HH:mm:ss)") LocalDateTime startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            @Parameter(description = "End date in ISO format (yyyy-MM-dd'T'HH:mm:ss)") LocalDateTime endDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @Parameter(description = "Start date in ISO format (yyyy-MM-dd)") LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @Parameter(description = "End date in ISO format (yyyy-MM-dd)") LocalDate endDate,
             @RequestParam(required = false) @Parameter(description = "CampSite ID (optional)") Long campSiteId,
             @RequestParam(defaultValue = "daily") @Parameter(description = "Interval (daily/monthly)") String interval) {
 
-        List<RevenueGraphDto> data = revenueService.getRevenueGraph(hostId, startDate, endDate, campSiteId, interval);
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+
+        List<RevenueGraphDto> data = revenueService.getRevenueGraph(hostId, startDateTime, endDateTime, campSiteId, interval);
+
         return ResponseEntity.ok(BaseResponse.builder()
                 .data(data)
                 .message("Get successfully")
                 .statusCode(HttpStatus.OK.value())
                 .build());
     }
+
 }
