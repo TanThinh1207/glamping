@@ -42,7 +42,8 @@ public class SecurityConfig {
             "/api/v1/auth/**", "/api/campsites/**", "/api/bookings/**", "/api/payments/**",
             "/home/**", "/home", "/api/s3/**", "/oauth2/authorization/google", "/api/fcm-tokens",
             "/", "/login", "/payment",
-            "/confirm-payment", "/refund"// sau khi có link FE sẽ đổi sang link fe
+            "/confirm-payment", "/refund",// sau khi có link FE sẽ đổi sang link fe
+            "/ws/**" // Cho phép WebSocket kết nối
 
     };
 
@@ -72,7 +73,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsFilter corsFilter() {
+    public CorsFilter customCorsFilter() {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         final CorsConfiguration config = new CorsConfiguration();
 
@@ -80,6 +81,7 @@ public class SecurityConfig {
         config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "OPTIONS", "DELETE", "PATCH"));
         source.registerCorsConfiguration("/**", config);
+        config.setAllowCredentials(true); // Cho phép gửi credentials
         return new CorsFilter(source);
     }
 }
