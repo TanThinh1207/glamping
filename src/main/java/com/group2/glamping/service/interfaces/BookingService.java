@@ -29,4 +29,6 @@ public interface BookingService {
     BookingResponse checkOutBooking(Integer bookingId, List<BookingDetailOrderRequest> bookingDetailOrderRequest) throws StripeException, IOException;
 
     Booking getBookingById(Integer bookingId);
+
+    BookingResponse ratingBooking(Integer bookingId, Integer rating, String comment) throws StripeException;
 }

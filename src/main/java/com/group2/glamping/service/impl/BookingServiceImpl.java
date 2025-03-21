@@ -373,5 +373,30 @@ public class BookingServiceImpl implements BookingService {
         return bookingRepository.findById(bookingId).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
     }
 
+    @Override
+    public BookingResponse ratingBooking(Integer bookingId, Integer rating, String comment) throws StripeException {
+        if (rating == null || rating < 1 || rating > 5) {
+            throw new IllegalArgumentException("Rating must be between 1 and 5.");
+        }
+        Booking booking = getBookingById(bookingId);
+        if (booking == null) {
+            throw new AppException(ErrorCode.BOOKING_NOT_FOUND);
+        }
+        boolean isUpdated = false;
+        if (comment != null && !comment.equals(booking.getComment())) {
+            booking.setComment(comment);
+            isUpdated = true;
+        }
+
+        if (!rating.equals(booking.getRating())) {
+            booking.setRating(rating);
+            isUpdated = true;
+        }
+        if (isUpdated) {
+            bookingRepository.save(booking);
+        }
+        return bookingMapper.toDto(booking);
+    }
+
 }
 

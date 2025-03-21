@@ -9,8 +9,10 @@ import com.group2.glamping.service.impl.StripeService;
 import com.group2.glamping.service.interfaces.BookingService;
 import com.stripe.exception.StripeException;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -86,13 +88,15 @@ public class BookingController {
             summary = "Update booking status",
             description = """
                      Update the status of a booking based on its ID. The possible statuses are:
-                     - `accept`: Approve the booking request.
-                     - `deny`: Reject the booking request (requires a denial reason).
-                     - `checkin`: Mark the booking as checked-in.
-                     - `checkout`: Mark the booking as checked-out (requires booking detail orders).
                                     \s
-                     **Note:** \s
-                     - When using `deny`, the `deniedReason` parameter is **required**. \s
+                     - `accept`: Approve the booking request.
+                     - `deny`: Reject the booking request (**requires `deniedReason`**).
+                     - `checkin`: Mark the booking as checked-in.
+                     - `checkout`: Mark the booking as checked-out (**requires `bookingDetailOrderRequest`**).
+                     - `rating`: Rate a completed booking (**requires `rating` (1-5) and `comment`**).
+
+                     **Important Notes:**
+                     - When using `deny`, the `deniedReason` parameter is **required**.
                      - When using `checkout`, a list of `BookingDetailOrderRequest` must be provided in the request body.
                      - Before `checkout`, the Host's Stripe account is checked. If restricted, a Stripe Account Link is provided.
                     \s""",
@@ -105,30 +109,61 @@ public class BookingController {
     )
     public ResponseEntity<BaseResponse> updateBookingStatus(
             @PathVariable Integer bookingId,
+            @Parameter(description = "Action to perform: accept, deny, checkin, checkout, or rating")
             @RequestParam String status,
+
+            @Parameter(description = "Required when status is 'deny'")
             @RequestParam(required = false) String deniedReason,
+
+            @Parameter(description = "Required when status is 'rating' (must be between 1 and 5)")
+            @RequestParam(required = false) Integer rating,
+
+            @Parameter(description = "Optional comment for rating or general feedback")
+            @RequestParam(required = false) String comment,
+
+            @Parameter(description = "Required when status is 'checkout'")
             @RequestBody(required = false) List<BookingDetailOrderRequest> bookingDetailOrderRequest
     ) {
+
         try {
+            if (bookingId == null) {
+                return ResponseEntity.badRequest()
+                        .body(new BaseResponse(HttpStatus.BAD_REQUEST.value(), "Booking ID is required", null));
+            }
+
+            if (status == null || status.isBlank()) {
+                return ResponseEntity.badRequest()
+                        .body(new BaseResponse(HttpStatus.BAD_REQUEST.value(), "Status is required", null));
+            }
+
+            String action = status.trim().toLowerCase();
             BookingResponse response;
 
-            switch (status.toLowerCase()) {
+            switch (action) {
                 case "accept":
                     response = bookingService.acceptBookings(bookingId);
                     break;
+
                 case "deny":
                     if (deniedReason == null || deniedReason.isBlank()) {
                         return ResponseEntity.badRequest()
                                 .body(new BaseResponse(HttpStatus.BAD_REQUEST.value(),
-                                        "Denied reason is required when setting status to Denied", null));
+                                        "Denied reason is required when status is 'deny'", null));
                     }
                     response = bookingService.denyBookings(bookingId, deniedReason);
                     break;
+
                 case "checkin":
                     response = bookingService.checkInBooking(bookingId);
                     break;
+
                 case "checkout":
                     Booking booking = bookingService.getBookingById(bookingId);
+                    if (booking == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body(new BaseResponse(HttpStatus.NOT_FOUND.value(), "Booking not found", null));
+                    }
+
                     String hostStripeAccountId = booking.getCampSite().getUser().getConnectionId();
                     if (stripeService.isAccountRestricted(hostStripeAccountId)) {
                         String accountLink = stripeService.createAccountLink(booking.getCampSite().getUser().getId());
@@ -139,19 +174,32 @@ public class BookingController {
 
                     response = bookingService.checkOutBooking(bookingId, bookingDetailOrderRequest);
                     break;
+
+                case "rating":
+                    if (rating == null || rating < 1 || rating > 5) {
+                        return ResponseEntity.badRequest()
+                                .body(new BaseResponse(HttpStatus.BAD_REQUEST.value(), "Rating must be between 1 and 5", null));
+                    }
+                    response = bookingService.ratingBooking(bookingId, rating, comment);
+                    break;
+
                 default:
                     return ResponseEntity.badRequest()
                             .body(new BaseResponse(HttpStatus.BAD_REQUEST.value(),
-                                    "Invalid status. Only 'accept', 'deny', 'checkin', or 'checkout' are allowed.", null));
+                                    "Invalid action. Allowed values: 'accept', 'deny', 'checkin', 'checkout', 'rating'", null));
             }
 
-            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(),
-                    "Booking status updated successfully", response));
+            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Booking status updated successfully", response));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new BaseResponse(HttpStatus.NOT_FOUND.value(), e.getMessage(), null));
+        } catch (StripeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new BaseResponse(HttpStatus.BAD_REQUEST.value(), "Stripe error: " + e.getMessage(), null));
         } catch (Exception e) {
             logger.error("Error while updating booking status: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                            "An unexpected error occurred. Please try again later.", null));
+                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred", null));
         }
     }
 

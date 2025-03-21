@@ -28,6 +28,8 @@ public class BookingResponse {
     LocalDateTime createdAt;
     BookingStatus status;
     double totalAmount;
+    int rating;
+    String comment;
     List<BookingDetailResponse> bookingDetailResponseList;
     List<CampTypeItemResponse> campTypeItemResponse;
     List<BookingSelectionResponse> bookingSelectionResponseList;

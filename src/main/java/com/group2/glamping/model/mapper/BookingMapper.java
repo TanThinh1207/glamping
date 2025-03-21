@@ -43,6 +43,8 @@ public class BookingMapper {
                 .paymentResponseList(mapPayments(booking.getPaymentList()))
                 .user(new UserResponse(booking.getUser()))
                 .campTypeItemResponse(bookingDetailService.groupBookingDetailsByCampType(mapBookingDetails(booking.getBookingDetailList())))
+                .comment(booking.getComment() != null ? booking.getComment() : "No comment")
+                .rating(booking.getRating() != null ? booking.getRating() : 0)
                 .build();
     }
 
