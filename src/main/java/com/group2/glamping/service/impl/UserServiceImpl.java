@@ -162,4 +162,11 @@ public class UserServiceImpl implements UserService {
         return ResponseFilterUtil.getFilteredResponse(fields, users, "Return using dynamic filter successfully");
     }
 
+    @Override
+    public Optional<UserResponse> getUserById(int id) {
+        return userRepository.findById(id)
+                .map(UserResponse::new);
+    }
+
+
 }
