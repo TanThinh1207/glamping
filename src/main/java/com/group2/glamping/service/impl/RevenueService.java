@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 
 @Service
@@ -23,12 +22,12 @@ public class RevenueService {
 
     public List<RevenueGraphDto> getRevenueGraph(Long hostId, LocalDateTime startDate, LocalDateTime endDate, Long campSiteId, String interval) {
         List<Booking> bookings = bookingRepository.findCompletedBookings(hostId, startDate, endDate);
-        Map<String, RevenueGraphDto> revenueMap = new TreeMap<>();
+        TreeMap<String, RevenueGraphDto> revenueMap = new TreeMap<>();
 
         for (Booking booking : bookings) {
             String keyDate = interval.equals("monthly")
-                    ? YearMonth.from(booking.getCheckOutTime()).toString() // yyyy-MM
-                    : booking.getCheckOutTime().toLocalDate().toString();  // yyyy-MM-dd
+                    ? YearMonth.from(booking.getCheckOutTime()).toString()
+                    : booking.getCheckOutTime().toLocalDate().toString();
 
             double revenue = booking.getNetAmount();
             double addOn = booking.getBookingDetailList().stream()
@@ -44,9 +43,12 @@ public class RevenueService {
 
             double profit = firstPaymentAmount - (totalAmount * 0.1);
 
-            // Cập nhật RevenueGraphDto
-            revenueMap.computeIfAbsent(keyDate, k -> new RevenueGraphDto(k, 0.0, 0.0, 0))
+            revenueMap.computeIfAbsent(keyDate, k -> new RevenueGraphDto(k, 0.0, 0.0, 0, 0))
                     .addRevenueProfitAndBooking(revenue + addOn, profit, 1);
+        }
+        if (!revenueMap.isEmpty()) {
+            String latestKey = revenueMap.lastKey();
+            revenueMap.get(latestKey).setRecentRevenue(revenueMap.get(latestKey).getTotalRevenue());
         }
 
         return new ArrayList<>(revenueMap.values());

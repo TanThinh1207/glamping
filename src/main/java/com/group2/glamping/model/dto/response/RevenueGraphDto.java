@@ -14,6 +14,7 @@ public class RevenueGraphDto {
     private double totalRevenue;
     private double totalProfit;
     private long numberOfBookings;
+    private double recentRevenue;
 
     public void addRevenueProfitAndBooking(double revenue, double profit, long count) {
         this.totalRevenue += revenue;
