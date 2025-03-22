@@ -133,9 +133,8 @@ public class StripeService {
     // Transfer payout to Host
     public void transferToHost(int hostID, long amountVnd) throws StripeException, IOException {
         try {
-            long hostAmountVnd = (long) (amountVnd * 0.9);
-            System.out.println("Amount after 10% fee (VND): " + hostAmountVnd);
-            double amountUsd = convertVndToUsd(hostAmountVnd, exchangeApiKey);
+            System.out.println("Amount after 10% fee (VND): " + amountVnd);
+            double amountUsd = convertVndToUsd(amountVnd, exchangeApiKey);
             long amountUsdCents = Math.round(amountUsd * 100);
             System.out.println("Converted amount (USD cents): " + amountUsdCents);
 
