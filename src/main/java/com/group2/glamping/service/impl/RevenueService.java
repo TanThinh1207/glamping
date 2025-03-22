@@ -1,6 +1,7 @@
 package com.group2.glamping.service.impl;
 
 import com.group2.glamping.model.dto.response.RevenueGraphDto;
+import com.group2.glamping.model.dto.response.RevenueGraphResponse;
 import com.group2.glamping.model.entity.Booking;
 import com.group2.glamping.model.entity.BookingDetail;
 import com.group2.glamping.model.entity.Payment;
@@ -20,7 +21,7 @@ public class RevenueService {
 
     private final BookingRepository bookingRepository;
 
-    public List<RevenueGraphDto> getRevenueGraph(Long hostId, LocalDateTime startDate, LocalDateTime endDate, Long campSiteId, String interval) {
+    public RevenueGraphResponse getRevenueGraph(Long hostId, LocalDateTime startDate, LocalDateTime endDate, Long campSiteId, String interval) {
         List<Booking> bookings = bookingRepository.findCompletedBookings(hostId, startDate, endDate);
         TreeMap<String, RevenueGraphDto> revenueMap = new TreeMap<>();
 
@@ -43,15 +44,36 @@ public class RevenueService {
 
             double profit = firstPaymentAmount - (totalAmount * 0.1);
 
-            revenueMap.computeIfAbsent(keyDate, k -> new RevenueGraphDto(k, 0.0, 0.0, 0, 0))
+            revenueMap.computeIfAbsent(keyDate, k -> new RevenueGraphDto(k, 0.0, 0.0, 0))
                     .addRevenueProfitAndBooking(revenue + addOn, profit, 1);
         }
-        if (!revenueMap.isEmpty()) {
-            String latestKey = revenueMap.lastKey();
-            revenueMap.get(latestKey).setRecentRevenue(revenueMap.get(latestKey).getTotalRevenue());
+
+        // Khúc này là để tính recentRevenue
+        // 2025-03-01 -> 2025-03-30 là lấy theo daily
+        //thì recent là tổng totalProfit của 2025-02-01 -> 2025-02-29
+        //còn nếu monthly thì thành 2024-03-01 -> 2025-03-01
+        //recent thành tổng totalProfit của 2023-03-01 -> 2024-03-01
+        List<RevenueGraphDto> profitList = new ArrayList<>(revenueMap.values());
+        LocalDateTime previousStartDate;
+        LocalDateTime previousEndDate;
+        if ("daily".equals(interval)) {
+            YearMonth previousMonth = YearMonth.from(startDate.minusMonths(1));
+            previousStartDate = previousMonth.atDay(1).atStartOfDay();
+            previousEndDate = previousMonth.atEndOfMonth().atTime(23, 59, 59);
+        } else {
+            previousStartDate = startDate.minusYears(1);
+            previousEndDate = endDate.minusYears(1);
         }
 
-        return new ArrayList<>(revenueMap.values());
+        double recentRevenue = bookingRepository.findCompletedBookings(hostId, previousStartDate, previousEndDate).stream()
+                .mapToDouble(booking -> booking.getPaymentList().stream()
+                        .findFirst()
+                        .map(Payment::getTotalAmount)
+                        .orElse(0.0) - (booking.getTotalAmount() * 0.1))
+                .sum();
+
+
+        return new RevenueGraphResponse(recentRevenue, profitList);
     }
 
 

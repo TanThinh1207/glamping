@@ -1,7 +1,6 @@
 package com.group2.glamping.controller;
 
 import com.group2.glamping.model.dto.response.BaseResponse;
-import com.group2.glamping.model.dto.response.RevenueGraphDto;
 import com.group2.glamping.service.impl.RevenueService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/revenue")
@@ -39,10 +37,8 @@ public class RevenueController {
         LocalDateTime startDateTime = startDate.atStartOfDay();
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
 
-        List<RevenueGraphDto> data = revenueService.getRevenueGraph(hostId, startDateTime, endDateTime, campSiteId, interval);
-
         return ResponseEntity.ok(BaseResponse.builder()
-                .data(data)
+                .data(revenueService.getRevenueGraph(hostId, startDateTime, endDateTime, campSiteId, interval))
                 .message("Get successfully")
                 .statusCode(HttpStatus.OK.value())
                 .build());
