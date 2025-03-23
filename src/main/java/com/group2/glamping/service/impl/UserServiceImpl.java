@@ -173,7 +173,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<UserResponse> getUserById(int id) {
         return userRepository.findById(id)
-                .map(UserResponse::new);
+                .map(user -> {
+                    try {
+                        return new UserResponse(user);
+                    } catch (StripeException e) {
+                        throw new RuntimeException("Failed to create UserResponse", e);
+                    }
+                });
+
     }
 
 

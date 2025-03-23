@@ -3,6 +3,8 @@ package com.group2.glamping.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.group2.glamping.model.dto.response.ChatHistoryResponse;
+import com.group2.glamping.model.dto.response.ChatMessageResponse;
 import com.group2.glamping.model.dto.response.UserChatInfoResponse;
 import com.group2.glamping.model.entity.ChatMessage;
 import com.group2.glamping.service.interfaces.ChatRedisService;
@@ -10,9 +12,6 @@ import com.group2.glamping.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
@@ -53,29 +52,30 @@ public class ChatRedisServiceImpl implements ChatRedisService {
     }
 
     @Override
-    public Page<ChatMessage> getChatHistory(Integer senderId, Integer recipientId, int page, int size, String sortBy, String direction) {
+    public ChatHistoryResponse getChatHistory(Integer senderId, Integer recipientId, int page, int size, String sortBy, String direction) {
         String key = getChatKey(senderId, recipientId);
         List<Object> rawMessages = redisTemplate.opsForList().range(key, 0, -1);
 
         if (rawMessages == null || rawMessages.isEmpty()) {
-            return new PageImpl<>(Collections.emptyList(), PageRequest.of(page, size), 0);
+            return new ChatHistoryResponse(Collections.emptyList(), 0, 0, page, size);
         }
 
         List<ChatMessage> allMessages = rawMessages.stream()
                 .map(obj -> {
                     try {
-                        ChatMessage message = objectMapper.readValue(obj.toString(), ChatMessage.class);
-                        return message;
+                        return objectMapper.readValue(obj.toString(), ChatMessage.class);
                     } catch (JsonProcessingException e) {
-                        logger.error("Error parsing chat message from Redis: {}", obj, e);
-                        return null;
+                        logger.error("🚨 Error parsing chat message from Redis: {}", obj, e);
+                        return null; // Tránh lỗi, nhưng có thể bỏ sót tin nhắn
                     }
                 })
-                .filter(Objects::nonNull)
+                .filter(Objects::nonNull) // 🔥 Lọc tin nhắn bị lỗi
                 .collect(Collectors.toList());
 
+        // Đảo ngược tin nhắn (mới nhất ở cuối)
         Collections.reverse(allMessages);
 
+        // 🏷 Chọn cách sắp xếp
         Comparator<ChatMessage> comparator = Comparator.comparing(ChatMessage::getTimestamp);
         if ("senderId".equalsIgnoreCase(sortBy)) {
             comparator = Comparator.comparing(ChatMessage::getSenderId);
@@ -88,12 +88,32 @@ public class ChatRedisServiceImpl implements ChatRedisService {
 
         allMessages.sort(comparator);
 
+        // Xử lý phân trang
         int start = page * size;
         int end = Math.min(start + size, allMessages.size());
         List<ChatMessage> pagedMessages = (start < allMessages.size()) ? allMessages.subList(start, end) : Collections.emptyList();
 
-        return new PageImpl<>(pagedMessages, PageRequest.of(page, size), allMessages.size());
+        // Chuyển đổi sang `ChatMessageResponse`
+        List<ChatMessageResponse> responseMessages = pagedMessages.stream()
+                .map(msg -> new ChatMessageResponse(
+                        msg.getSenderId(),
+                        msg.getRecipientId(),
+                        msg.getTimestamp(),
+                        msg.getContent()
+                ))
+                .collect(Collectors.toList());
+
+        // Trả về response đầy đủ
+        return new ChatHistoryResponse(
+                responseMessages,
+                allMessages.size(),
+                (int) Math.ceil((double) allMessages.size() / size),
+                page,
+                size
+        );
     }
+
+
 
     @Override
     public void clearChatHistory(Integer senderId, Integer recipientId) {
