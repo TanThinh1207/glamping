@@ -66,13 +66,8 @@ public class RevenueService {
         }
 
         double recentRevenue = bookingRepository.findCompletedBookings(hostId, previousStartDate, previousEndDate).stream()
-                .mapToDouble(booking -> booking.getPaymentList().stream()
-                        .findFirst()
-                        .map(Payment::getTotalAmount)
-                        .orElse(0.0) - (booking.getTotalAmount() * 0.1))
+                .mapToDouble(Booking::getTotalAmount)
                 .sum();
-
-
         return new RevenueGraphResponse(recentRevenue, profitList);
     }
 
