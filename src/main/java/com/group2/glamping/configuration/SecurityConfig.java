@@ -29,42 +29,72 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    //    private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    //    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
-    private final String[] WHITE_LIST = {
-            "/api-docs/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/api/docs/**",
-            "/api/camp-types/**", "/api/selections/**", "/api/facilities/**", "/api/utilities/**",
-            "/api/place-types/**", "/mail/**", "/api/users/**", "/api/campsites/**", "/api/booking-details/**",
-            "/api/v1/auth/**", "/api/campsites/**", "/api/bookings/**", "/api/payments/**",
-            "/home/**", "/home", "/api/s3/**", "/oauth2/authorization/google", "/api/fcm-tokens",
-            "/", "/login", "/payment",
-            "/confirm-payment", "/refund"// sau khi có link FE sẽ đổi sang link fe
-
+    private static final String[] WHITE_LIST = {
+            "/api/v1/auth/verify",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/v3/api-docs/**",
+            "/v3/api-docs.yaml",
+            "/v3/api-docs/swagger-config",
+            "/api/docs/swagger",
+            "/error",
+            "/home",
+            "/login",
+            "/api/s3/image/**"
     };
+
+
+    private static final String[] USER_LIST = {
+            "/api/bookings/**",
+            "/api/fcm-tokens/**",
+            "/api/payments/**",
+            "/api/reports/**",
+            "/api/campsites/**",
+            "/api/camp-types/**",
+            "/api/selections/**"
+    };
+
+    private static final String[] MANAGER_LIST = {
+            "/api/bookings/**",
+            "/api/campsites/**",
+            "/api/reports/**",
+            "/api/payments/**"
+    };
+
+    private static final String[] ADMIN_LIST = {
+            "/api/users/**",
+            "/api/facilities/**",
+            "/api/utilities/**",
+            "/api/place-types/**",
+            "/api/demo/**"
+    };
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(sessionManagementCustomizer ->
-                        sessionManagementCustomizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(req -> {
-//                            req.requestMatchers(WHITE_LIST).permitAll();
-////                            req.requestMatchers("/api/demo/**", "/api/campsites/**", "/login/oauth2/code/**").hasRole("USER");
-//                            req.requestMatchers("/home").authenticated();
-                            req.anyRequest().permitAll();
-                        }
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                                .anyRequest().permitAll()
+//                        .requestMatchers(WHITE_LIST).permitAll()
+//                        .requestMatchers(USER_LIST).hasRole("USER")
+//                        .requestMatchers(MANAGER_LIST).hasRole("MANAGER")
+//                        .requestMatchers(ADMIN_LIST).hasRole("ADMIN")
+//                        .anyRequest().authenticated()
                 )
+                .securityContext(security -> security.requireExplicitSave(true))
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                         .accessDeniedHandler(customAccessDeniedHandler))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
+
 
     @Bean
     public OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService() {

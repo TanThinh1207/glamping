@@ -28,6 +28,7 @@ public class BookingDetailResponse {
     LocalDateTime createdAt;
     BookingDetailStatus status;
     Double amount;
+    Double addOn;
 
     public static BookingDetailResponse fromEntity(BookingDetail bookingDetail, S3Service s3Service) {
         if (bookingDetail == null) {
@@ -35,9 +36,8 @@ public class BookingDetailResponse {
             return null;
         }
 
-        System.out.println("Creating BookingDetailResponse for BookingDetail ID: " + bookingDetail.getId());
 
-        BookingDetailResponse response = BookingDetailResponse.builder()
+        return BookingDetailResponse.builder()
                 .bookingDetailId(bookingDetail.getId())
                 .campTypeResponse(CampTypeResponse.fromEntity(bookingDetail.getCampType(), s3Service))
                 .campResponse(CampResponse.fromEntity(bookingDetail.getCamp()))
@@ -46,10 +46,8 @@ public class BookingDetailResponse {
                 .createdAt(bookingDetail.getCreatedTime())
                 .status(bookingDetail.getStatus())
                 .amount(bookingDetail.getAmount())
+                .addOn(bookingDetail.getAddOn())
                 .build();
-
-        System.out.println("BookingDetailResponse created: " + response);
-        return response;
     }
 
 }

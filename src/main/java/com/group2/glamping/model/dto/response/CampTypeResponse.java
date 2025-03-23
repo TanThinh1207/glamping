@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonFilter("dynamicFilter")
@@ -30,7 +30,7 @@ public class CampTypeResponse {
     int campSiteId;
     String image;
     List<FacilityResponse> facilities;
-    Long availableSlot = (long) quantity;
+    Long availableSlot;
     Double estimatedPrice;
 
     public static CampTypeResponse fromEntity(CampType campType, S3Service s3Service) {
@@ -38,7 +38,6 @@ public class CampTypeResponse {
             return null;
         }
 
-        System.out.println("Creating CampTypeResponse for CampType ID: " + campType.getId());
 
         CampTypeResponse response = CampTypeResponse.builder()
                 .id(campType.getId())
@@ -51,10 +50,13 @@ public class CampTypeResponse {
                 .status(campType.isStatus())
                 .image(s3Service.getFileUrl(campType.getImage()))
                 .facilities(FacilityResponse.fromEntity(campType.getFacilities(), s3Service))
-//                .estimatedPrice(campType.getPrice())
+                .estimatedPrice(campType.getPrice())
                 .build();
 
-        System.out.println("CampTypeResponse created: " + response);
+        if (response.getAvailableSlot() == null) {
+            response.setAvailableSlot((long) response.getQuantity());
+        }
+
         return response;
     }
 

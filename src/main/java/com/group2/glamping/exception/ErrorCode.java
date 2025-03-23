@@ -33,7 +33,11 @@ public enum ErrorCode {
     CAMP_NOT_FOUND(10021, "Camp not found", HttpStatus.NOT_FOUND),
     PAYMENT_NOT_FOUND(10022, "Payment not found", HttpStatus.NOT_FOUND),
     PAYMENT_FAILED(10023, "Payment failed", HttpStatus.INTERNAL_SERVER_ERROR),
-    INVALID_DATE_FORMAT(10024, "Invalid date format", HttpStatus.BAD_REQUEST)
+    INVALID_DATE_FORMAT(10024, "Invalid date format", HttpStatus.BAD_REQUEST),
+    NO_AVAILABLE_CAMP(10025, "No available camp", HttpStatus.NOT_FOUND),
+    FACILITY_LIST_CANNOT_BE_EMPTY(10026, "Facility list cannot be empty", HttpStatus.BAD_REQUEST),
+    PLACE_TYPE_LIST_CANNOT_BE_EMPTY(10027, "Place type list cannot be empty", HttpStatus.BAD_REQUEST),
+    UTILITY_LIST_CANNOT_BE_EMPTY(10028, "Utility list cannot be empty", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;

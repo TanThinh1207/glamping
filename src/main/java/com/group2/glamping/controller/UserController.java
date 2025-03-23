@@ -4,6 +4,7 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.group2.glamping.model.dto.requests.UserUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.service.interfaces.UserService;
+import com.stripe.exception.StripeException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -56,7 +57,7 @@ public class UserController {
             @PathVariable int id,
             @Valid @RequestBody
             @Parameter(description = "User update details", required = true)
-            UserUpdateRequest request) {
+            UserUpdateRequest request) throws StripeException {
 
         return new ResponseEntity<>(BaseResponse.builder()
                 .statusCode(HttpStatus.OK.value())
@@ -75,7 +76,7 @@ public class UserController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(
             @Parameter(description = "ID of the user to delete", required = true)
-            @PathVariable Integer id) throws FirebaseAuthException {
+            @PathVariable Integer id) throws FirebaseAuthException, StripeException {
         return new ResponseEntity<>(BaseResponse.builder()
                 .statusCode(HttpStatus.OK.value())
                 .message("Successfully deleted user")

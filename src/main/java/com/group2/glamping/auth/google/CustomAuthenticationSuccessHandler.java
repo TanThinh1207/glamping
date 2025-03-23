@@ -8,9 +8,11 @@ import com.group2.glamping.model.dto.response.UserResponse;
 import com.group2.glamping.model.entity.User;
 import com.group2.glamping.model.enums.Role;
 import com.group2.glamping.repository.UserRepository;
+import com.stripe.exception.StripeException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -29,6 +31,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     private final GoogleCallbackConfig googleCallbackConfig;
 
 
+    @SneakyThrows(StripeException.class)
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {

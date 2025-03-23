@@ -8,8 +8,10 @@ import com.group2.glamping.model.dto.requests.CampSiteRequest;
 import com.group2.glamping.model.dto.requests.CampSiteUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.service.interfaces.CampSiteService;
+import com.stripe.exception.StripeException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Min;
@@ -21,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -87,7 +90,6 @@ public class CampSiteController {
     @PostMapping
     public ResponseEntity<BaseResponse> createCampSite(@RequestBody CampSiteRequest campSiteRequest) {
         try {
-//            logger.info("Parsed campSiteRequest: {}", campSiteRequest);
             return ResponseEntity.ok().body(BaseResponse.builder()
                     .statusCode(HttpStatus.OK.value())
                     .data(campSiteService.saveCampSite(campSiteRequest)
@@ -125,7 +127,7 @@ public class CampSiteController {
     @PatchMapping(value = "/{id}")
     public ResponseEntity<BaseResponse> updateCampSite(
             @PathVariable int id,
-            @RequestBody CampSiteUpdateRequest updatedCampSite) throws JsonMappingException {
+            @RequestBody CampSiteUpdateRequest updatedCampSite) throws JsonMappingException, StripeException {
         return ResponseEntity.ok(BaseResponse.builder()
                 .statusCode(HttpStatus.OK.value())
                 .data(campSiteService.updateCampSite(id, updatedCampSite))
@@ -150,5 +152,56 @@ public class CampSiteController {
         return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Camp site deleted successfully", null));
     }
 
+    @PutMapping("/{id}/place-types/")
+    @Operation(
+            summary = "Update place types of a campsite",
+            description = "Update the list of place types associated with a campsite based on the given campsite ID.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Campsite place types updated successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid request data"),
+                    @ApiResponse(responseCode = "404", description = "Campsite not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<BaseResponse> updateCampSitePlaceType(
+            @PathVariable
+            @Parameter(description = "ID of the campsite to update", example = "1") int id,
+
+            @RequestBody
+            @Schema(description = "List of place type IDs to associate with the campsite", example = "[1, 2, 3]")
+            List<Integer> placeTypesId
+    ) throws StripeException {
+        return ResponseEntity.ok(new BaseResponse(
+                HttpStatus.OK.value(),
+                "Camp site update place types successfully",
+                campSiteService.updatePlaceType(id, placeTypesId)
+        ));
+    }
+
+    @PutMapping("/{id}/utilities/")
+    @Operation(
+            summary = "Update utilities of a campsite",
+            description = "Update the list of utilities associated with a campsite based on the given campsite ID.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Campsite utilities updated successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid request data"),
+                    @ApiResponse(responseCode = "404", description = "Campsite not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<BaseResponse> updateCampSiteUtilities(
+            @PathVariable
+            @Parameter(description = "ID of the campsite to update", example = "1") int id,
+
+            @RequestBody
+            @Schema(description = "List of utility IDs to associate with the campsite", example = "[1, 2, 3]")
+            List<Integer> utilitiesIds
+    ) throws StripeException {
+        return ResponseEntity.ok(new BaseResponse(
+                HttpStatus.OK.value(),
+                "Camp site update utilities successfully",
+                campSiteService.updateUtility(id, utilitiesIds)
+        ));
+    }
 
 }

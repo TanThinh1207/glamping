@@ -2,6 +2,7 @@ package com.group2.glamping.service.impl;
 
 import com.group2.glamping.exception.AppException;
 import com.group2.glamping.exception.ErrorCode;
+import com.group2.glamping.model.dto.requests.BookingDetailOrderRequest;
 import com.group2.glamping.model.dto.requests.BookingRequest;
 import com.group2.glamping.model.dto.response.BookingResponse;
 import com.group2.glamping.model.dto.response.PagingResponse;
@@ -9,11 +10,13 @@ import com.group2.glamping.model.entity.*;
 import com.group2.glamping.model.entity.id.IdBookingSelection;
 import com.group2.glamping.model.enums.BookingDetailStatus;
 import com.group2.glamping.model.enums.BookingStatus;
+import com.group2.glamping.model.enums.CampStatus;
 import com.group2.glamping.model.mapper.BookingMapper;
 import com.group2.glamping.repository.*;
 import com.group2.glamping.service.interfaces.BookingService;
 import com.group2.glamping.service.interfaces.EmailService;
 import com.group2.glamping.utils.ResponseFilterUtil;
+import com.stripe.exception.StripeException;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
@@ -25,6 +28,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -48,9 +52,12 @@ public class BookingServiceImpl implements BookingService {
     private final SelectionRepository selectionRepository;
     private final BookingMapper bookingMapper;
     private final EmailService emailService;
+    private final CampRepository campRepository;
+    private final BookingDetailOrderRepository bookingDetailOrderRepository;
+    private final StripeService stripeService;
 
     @Override
-    public Optional<BookingResponse> createBooking(BookingRequest bookingRequest) {
+    public Optional<BookingResponse> createBooking(BookingRequest bookingRequest) throws StripeException {
         User user = userRepository.findById(bookingRequest.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
@@ -71,26 +78,39 @@ public class BookingServiceImpl implements BookingService {
 
         Booking bookingDb = bookingRepository.save(booking);
 
+        Map<Integer, Selection> selectionMap = bookingRequest.getBookingSelectionRequestList().stream()
+                .map(bookingSelectionRequest -> selectionRepository.findById(bookingSelectionRequest.idSelection())
+                        .orElseThrow(() -> new AppException(ErrorCode.SELECTION_NOT_FOUND)))
+                .collect(Collectors.toMap(Selection::getId, selection -> selection));
+
+        double totalSelectionAmount = bookingRequest.getBookingSelectionRequestList().stream()
+                .mapToDouble(bookingSelectionRequest ->
+                        selectionMap.get(bookingSelectionRequest.idSelection()).getPrice() * bookingSelectionRequest.quantity())
+                .sum();
+
         List<BookingSelection> bookingSelections = bookingRequest.getBookingSelectionRequestList().stream()
                 .map(bookingSelectionRequest -> {
-                    Selection service = selectionRepository.findById(bookingSelectionRequest.idSelection())
-                            .orElseThrow(() -> new AppException(ErrorCode.SELECTION_NOT_FOUND));
-
+                    Selection selection = selectionMap.get(bookingSelectionRequest.idSelection());
                     return BookingSelection.builder()
-                            .idBookingService(new IdBookingSelection(bookingDb.getId(), service.getId()))
+                            .idBookingService(new IdBookingSelection(bookingDb.getId(), selection.getId()))
                             .booking(bookingDb)
-                            .selection(service)
+                            .selection(selection)
                             .quantity(bookingSelectionRequest.quantity())
-                            .name(service.getName())
+                            .name(selection.getName())
                             .build();
                 })
                 .collect(Collectors.toList());
 
         bookingSelectionRepository.saveAll(bookingSelections);
 
+        Map<Integer, CampType> campTypeMap = bookingRequest.getBookingDetails().stream()
+                .map(bookingDetailRequest -> campTypeRepository.findById(bookingDetailRequest.getCampTypeId())
+                        .orElseThrow(() -> new AppException(ErrorCode.CAMP_TYPE_NOT_FOUND)))
+                .collect(Collectors.toMap(CampType::getId, campType -> campType));
         LocalDate checkInDate = bookingDb.getCheckInTime().toLocalDate();
         LocalDate checkOutDate = bookingDb.getCheckOutTime().toLocalDate();
         long totalDays = Math.max(1, ChronoUnit.DAYS.between(checkInDate, checkOutDate));
+
         long weekendDays = IntStream.range(0, (int) totalDays)
                 .mapToObj(checkInDate::plusDays)
                 .filter(date -> {
@@ -101,31 +121,24 @@ public class BookingServiceImpl implements BookingService {
                 })
                 .count();
         long weekdayDays = totalDays - weekendDays;
+
         System.out.println("WeekendDays: " + weekendDays);
         System.out.println("Weekdays: " + weekdayDays);
+
         List<BookingDetail> bookingDetails = bookingRequest.getBookingDetails().stream()
                 .flatMap(bookingDetailRequest -> {
-                    CampType campType = campTypeRepository.findById(bookingDetailRequest.getCampTypeId())
-                            .orElseThrow(() -> new AppException(ErrorCode.CAMP_TYPE_NOT_FOUND));
-
-
+                    CampType campType = campTypeMap.get(bookingDetailRequest.getCampTypeId());
                     BigDecimal amountPerNight = BigDecimal.valueOf(campType.getPrice());
                     BigDecimal weekendRate = BigDecimal.valueOf(campType.getWeekendRate());
                     BigDecimal totalAmount = amountPerNight.multiply(BigDecimal.valueOf(weekdayDays))
                             .add(weekendRate.multiply(BigDecimal.valueOf(weekendDays)));
 
-                    System.out.println("Amount per night: " + amountPerNight);
-                    System.out.println("weekendRate: " + weekendRate);
-                    System.out.println("totalAmount: " + totalAmount);
-
                     return IntStream.range(0, bookingDetailRequest.getQuantity())
                             .mapToObj(i -> BookingDetail.builder()
+                                    .createdTime(LocalDateTime.now())
+                                    .status(BookingDetailStatus.Waiting)
                                     .booking(bookingDb)
                                     .campType(campType)
-                                    .createdTime(LocalDateTime.now())
-                                    .checkInTime(bookingDetailRequest.getCheckInAt())
-                                    .checkOutTime(bookingDetailRequest.getCheckOutAt())
-                                    .status(BookingDetailStatus.Waiting)
                                     .amount(totalAmount.doubleValue())
                                     .build());
                 })
@@ -135,19 +148,15 @@ public class BookingServiceImpl implements BookingService {
 
         double totalBookingAmount = bookingDetails.stream()
                 .mapToDouble(BookingDetail::getAmount)
-                .sum();
-
-        double systemFee = 0.1 * totalBookingAmount;
-        double netAmount = totalBookingAmount - systemFee;
+                .sum() + totalSelectionAmount;
 
         bookingDb.setTotalAmount(totalBookingAmount);
-        bookingDb.setSystemFee(systemFee);
-        bookingDb.setNetAmount(netAmount);
+        bookingDb.setSystemFee(0.1 * totalBookingAmount);
+        bookingDb.setNetAmount(totalBookingAmount - bookingDb.getSystemFee());
+        bookingDb.setBookingDetailList(bookingDetails);
+        bookingDb.setBookingSelectionList(bookingSelections);
 
         bookingRepository.save(bookingDb);
-
-        bookingDb.setBookingDetailList(bookingDetailRepository.findBookingDetails(bookingDb.getId()));
-        bookingDb.setBookingSelectionList(bookingSelectionRepository.findBookingSelections(bookingDb.getId()));
 
         return Optional.of(bookingMapper.toDto(bookingDb));
     }
@@ -155,7 +164,7 @@ public class BookingServiceImpl implements BookingService {
 
     //Accept Bookings
     @Override
-    public BookingResponse acceptBookings(Integer bookingId) {
+    public BookingResponse acceptBookings(Integer bookingId) throws StripeException {
         Optional<Booking> existedBooking = bookingRepository.findById(bookingId);
         Booking booking = new Booking();
         if (existedBooking.isPresent()) {
@@ -172,7 +181,7 @@ public class BookingServiceImpl implements BookingService {
 
     //Deny Bookings
     @Override
-    public BookingResponse denyBookings(Integer bookingId, String deniedReason) {
+    public BookingResponse denyBookings(Integer bookingId, String deniedReason) throws StripeException {
         Optional<Booking> existedBooking = bookingRepository.findById(bookingId);
         Booking booking = new Booking();
         if (existedBooking.isPresent()) {
@@ -245,8 +254,15 @@ public class BookingServiceImpl implements BookingService {
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Booking> bookingPage = bookingRepository.findAll(spec, pageable);
         List<BookingResponse> bookingResponses = bookingPage.getContent().stream()
-                .map(bookingMapper::toDto)
+                .map(booking -> {
+                    try {
+                        return bookingMapper.toDto(booking);
+                    } catch (StripeException e) {
+                        throw new RuntimeException("Lỗi khi gọi Stripe API: " + e.getMessage(), e);
+                    }
+                })
                 .toList();
+
 
         return new PagingResponse<>(
                 bookingResponses,
@@ -265,14 +281,33 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public BookingResponse checkInBooking(Integer bookingId) {
+    public BookingResponse checkInBooking(Integer bookingId) throws StripeException {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
-        List<BookingDetail> bookingDetails = bookingDetailRepository.findBookingDetails(booking.getId());
+
+        List<BookingDetail> bookingDetails = bookingDetailRepository.findBookingDetailByBooking(booking);
+        List<Camp> updatedCamps = new ArrayList<>();
 
         for (BookingDetail detail : bookingDetails) {
             detail.setCheckInTime(LocalDateTime.now());
             detail.setStatus(BookingDetailStatus.Check_In);
+
+            Optional<Camp> availableCamp = detail.getCampType().getCampList().stream()
+                    .filter(camp -> camp.getStatus().equals(CampStatus.Not_Assigned))
+                    .findFirst();
+
+            if (availableCamp.isPresent()) {
+                Camp camp = availableCamp.get();
+                detail.setCamp(camp);
+                camp.setStatus(CampStatus.Assigned);
+                updatedCamps.add(camp);
+            } else {
+                throw new AppException(ErrorCode.NO_AVAILABLE_CAMP);
+            }
+        }
+
+        if (!updatedCamps.isEmpty()) {
+            campRepository.saveAll(updatedCamps);
         }
 
         bookingDetailRepository.saveAll(bookingDetails);
@@ -283,23 +318,85 @@ public class BookingServiceImpl implements BookingService {
         return bookingMapper.toDto(booking);
     }
 
+
     @Override
-    public BookingResponse checkOutBooking(Integer bookingId) {
+    public BookingResponse checkOutBooking(Integer bookingId, List<BookingDetailOrderRequest> bookingDetailOrderRequests) throws StripeException, IOException {
+
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
-        List<BookingDetail> bookingDetails = bookingDetailRepository.findBookingDetails(booking.getId());
+        List<BookingDetail> bookingDetails = bookingDetailRepository.findBookingDetailByBooking(booking);
+
+        Map<Integer, List<BookingDetailOrderRequest>> orderMap = bookingDetailOrderRequests.stream()
+                .collect(Collectors.groupingBy(BookingDetailOrderRequest::bookingDetailId));
+
+        List<BookingDetailOrder> bookingDetailOrders = new ArrayList<>();
 
         for (BookingDetail detail : bookingDetails) {
-            detail.setCheckInTime(LocalDateTime.now());
+            detail.setCheckOutTime(LocalDateTime.now());
             detail.setStatus(BookingDetailStatus.Check_Out);
+            double totalOrderAmount = 0.0;
+            if (orderMap.containsKey(detail.getId())) {
+                for (BookingDetailOrderRequest orderRequest : orderMap.get(detail.getId())) {
+                    BookingDetailOrder order = BookingDetailOrder.builder()
+                            .bookingDetail(detail)
+                            .name(orderRequest.name())
+                            .quantity(orderRequest.quantity())
+                            .price(orderRequest.price())
+                            .totalAmount(orderRequest.totalAmount())
+                            .note(orderRequest.note())
+                            .build();
+                    bookingDetailOrders.add(order);
+                    totalOrderAmount += orderRequest.totalAmount();
+                }
+            }
+            detail.setAddOn(totalOrderAmount);
+            detail.getCamp().setStatus(CampStatus.Not_Assigned);
+            detail.getCamp().setUpdatedTime(LocalDateTime.now());
+            campRepository.save(detail.getCamp());
+        }
+
+        if (!bookingDetailOrders.isEmpty()) {
+            bookingDetailOrderRepository.saveAll(bookingDetailOrders);
+
         }
 
         bookingDetailRepository.saveAll(bookingDetails);
 
-        booking.setStatus(BookingStatus.Check_Out);
+        booking.setStatus(BookingStatus.Completed);
         bookingRepository.save(booking);
-
+        stripeService.transferToHost(booking.getCampSite().getUser().getId(), (long) (booking.getPaymentList().getFirst().getTotalAmount() - booking.getSystemFee()));
         return bookingMapper.toDto(booking);
     }
+
+    @Override
+    public Booking getBookingById(Integer bookingId) {
+        return bookingRepository.findById(bookingId).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+    }
+
+    @Override
+    public BookingResponse ratingBooking(Integer bookingId, Integer rating, String comment) throws StripeException {
+        if (rating == null || rating < 1 || rating > 5) {
+            throw new IllegalArgumentException("Rating must be between 1 and 5.");
+        }
+        Booking booking = getBookingById(bookingId);
+        if (booking == null) {
+            throw new AppException(ErrorCode.BOOKING_NOT_FOUND);
+        }
+        boolean isUpdated = false;
+        if (comment != null && !comment.equals(booking.getComment())) {
+            booking.setComment(comment);
+            isUpdated = true;
+        }
+
+        if (!rating.equals(booking.getRating())) {
+            booking.setRating(rating);
+            isUpdated = true;
+        }
+        if (isUpdated) {
+            bookingRepository.save(booking);
+        }
+        return bookingMapper.toDto(booking);
+    }
+
 }
 

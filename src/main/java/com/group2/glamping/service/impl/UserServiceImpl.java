@@ -14,6 +14,7 @@ import com.group2.glamping.repository.FcmTokenRepository;
 import com.group2.glamping.repository.UserRepository;
 import com.group2.glamping.service.interfaces.UserService;
 import com.group2.glamping.utils.ResponseFilterUtil;
+import com.stripe.exception.StripeException;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -82,8 +83,15 @@ public class UserServiceImpl implements UserService {
         Page<User> userPage = userRepository.findAll(spec, pageable);
 
         List<UserResponse> userResponses = userPage.getContent().stream()
-                .map(UserResponse::new)
+                .map(user -> {
+                    try {
+                        return new UserResponse(user);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Lỗi khi tạo UserResponse: " + e.getMessage(), e);
+                    }
+                })
                 .collect(Collectors.toList());
+
 
         return new PagingResponse<>(
                 userResponses,
@@ -96,7 +104,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public UserResponse updateUser(int id, UserUpdateRequest userUpdateRequest) {
+    public UserResponse updateUser(int id, UserUpdateRequest userUpdateRequest) throws StripeException {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
@@ -119,7 +127,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public UserResponse deleteUser(int id) throws FirebaseAuthException {
+    public UserResponse deleteUser(int id) throws FirebaseAuthException, StripeException {
         User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         user.setStatus(false);
         userRepository.save(user);

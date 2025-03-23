@@ -5,17 +5,19 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.model.entity.User;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.stripe.exception.StripeException;
+import com.stripe.model.Account;
+import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Data
+@Slf4j
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -32,9 +34,11 @@ public class UserResponse {
     private LocalDate birthday;
     private boolean status;
     private List<Integer> campSiteIds;
+    private String connectionId;
+    private boolean isRestricted;
 
 
-    public UserResponse(User user) {
+    public UserResponse(User user) throws StripeException {
         this.id = user.getId();
         this.email = user.getEmail();
         this.firstname = user.getFirstname();
@@ -46,7 +50,13 @@ public class UserResponse {
         this.campSiteIds = user.getCampSiteList() == null ? new ArrayList<>() : user.getCampSiteList().stream()
                 .map(CampSite::getId)
                 .collect(Collectors.toList());
+        this.connectionId = user.getConnectionId();
+        this.isRestricted = (connectionId != null) && isAccountRestricted(connectionId);
 
+    }
 
+    public boolean isAccountRestricted(String accountId) throws StripeException {
+        Account account = Account.retrieve(accountId);
+        return !account.getRequirements().getCurrentlyDue().isEmpty();
     }
 }

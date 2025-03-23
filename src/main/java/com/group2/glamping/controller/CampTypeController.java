@@ -5,14 +5,15 @@ import com.group2.glamping.model.dto.requests.CampTypeUpdateRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.service.impl.CampTypeServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 
@@ -22,16 +23,6 @@ import java.util.Map;
 public class CampTypeController {
 
     private final CampTypeServiceImpl campTypeService;
-
-    @GetMapping("/available-quantity")
-    public ResponseEntity<Long> getAvailableQuantity(
-            @RequestParam Integer campTypeId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime checkIn,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime checkOut) {
-        Long availableQuantity = campTypeService.findAvailableSlots(campTypeId, checkIn, checkOut);
-        return new ResponseEntity<>(availableQuantity, HttpStatus.OK);
-    }
-
 
     //CREATE
     @PostMapping
@@ -76,5 +67,33 @@ public class CampTypeController {
         BaseResponse response = campTypeService.softDeleteCampType(campTypeId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+
+    @PutMapping("/{campTypeId}/facilities/")
+    @Operation(
+            summary = "Update facilities of a camp type",
+            description = "Update the list of facilities associated with a camp type based on the given campTypeId.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Facilities updated successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid request data"),
+                    @ApiResponse(responseCode = "404", description = "Camp type not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<BaseResponse> updateFacilities(
+            @PathVariable
+            @Parameter(description = "ID of the camp type to update", example = "1") int campTypeId,
+
+            @RequestBody
+            @Schema(description = "List of facility IDs to associate with the camp type", example = "[101, 102, 103]")
+            List<Integer> facilities
+    ) {
+        return ResponseEntity.ok(BaseResponse.builder()
+                .data(campTypeService.updateFacility(campTypeId, facilities))
+                .message("Facilities updated successfully")
+                .statusCode(HttpStatus.OK.value())
+                .build());
+    }
+
+
 }
 

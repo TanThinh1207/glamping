@@ -1,14 +1,14 @@
 package com.group2.glamping.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity(name = "booking_detail_order")
+@Builder
 public class BookingDetailOrder {
 
     @Id
@@ -19,13 +19,16 @@ public class BookingDetailOrder {
     private String name;
 
     @Column(name = "quantity")
-    private Integer quantity;
+    private Long quantity;
+
+    @Column(name = "price")
+    private Double price;
 
     @Column(name = "total_amount")
     private Double totalAmount;
 
-    @Column(name = "text")
-    private String text;
+    @Column(name = "note")
+    private String note;
 
     @ManyToOne
     @JoinColumn(name = "id_booking_detail")
