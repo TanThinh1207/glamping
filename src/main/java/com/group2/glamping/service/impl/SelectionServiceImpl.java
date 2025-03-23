@@ -99,7 +99,7 @@ public class SelectionServiceImpl implements SelectionService {
                     case "name" -> predicates.add(criteriaBuilder.like(root.get("name"), "%" + value + "%"));
                     case "status" ->
                             predicates.add(criteriaBuilder.equal(root.get("status"), Boolean.parseBoolean(value)));
-                    case "campSiteId" ->{
+                    case "campSiteId" -> {
                         Join<Selection, CampSite> selectionCampSiteJoin = root.join("campSite");
                         predicates.add(criteriaBuilder.equal(selectionCampSiteJoin.get("id"), value));
                     }

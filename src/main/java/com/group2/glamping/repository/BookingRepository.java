@@ -7,12 +7,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Integer>, JpaSpecificationExecutor<Booking> {
 
-    @Query("SELECT b FROM booking b WHERE b.id = :id")
-    Optional<Booking> findByIdWithoutDetails(@Param("id") Integer id);
-
+    @Query("SELECT b FROM booking b " +
+            "WHERE b.campSite.user.id = :hostId " +
+            "AND b.status = 'Completed' " +
+            "AND b.checkOutTime BETWEEN :startDate AND :endDate")
+    List<Booking> findCompletedBookings(@Param("hostId") Long hostId,
+                                        @Param("startDate") LocalDateTime startDate,
+                                        @Param("endDate") LocalDateTime endDate);
 }

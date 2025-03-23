@@ -9,6 +9,7 @@ import com.group2.glamping.model.dto.response.filter.SelectionResponseFilter;
 import com.group2.glamping.model.dto.response.filter.UtilityResponseFilter;
 import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.service.interfaces.S3Service;
+import com.stripe.exception.StripeException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +24,7 @@ public class CampSiteMapper {
 
     private final S3Service s3Service;
 
-    public CampSiteResponse toDto(CampSite campSite) {
+    public CampSiteResponse toDto(CampSite campSite) throws StripeException {
         if (campSite == null) {
             return null;
         }

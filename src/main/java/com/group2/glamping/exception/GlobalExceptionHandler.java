@@ -66,4 +66,27 @@ public class GlobalExceptionHandler {
                         .data(null)
                         .build());
     }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<BaseResponse> handleRuntimeException(RuntimeException ex) {
+        Throwable cause = ex.getCause();
+        if (cause instanceof StripeException stripeEx) {
+            return ResponseEntity
+                    .status(stripeEx.getStatusCode())
+                    .body(BaseResponse.builder()
+                            .statusCode(stripeEx.getStatusCode())
+                            .message(stripeEx.getMessage())
+                            .data(null)
+                            .build());
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(BaseResponse.builder()
+                        .statusCode(9999)
+                        .message("Unexpected error: " + ex.getMessage())
+                        .data(null)
+                        .build());
+    }
+
 }

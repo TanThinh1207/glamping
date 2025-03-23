@@ -41,13 +41,13 @@ public class BookingDetail {
     private LocalDateTime checkOutTime;
 
     @Column(name = "amount")
-    private double amount;
+    private Double amount;
 
     @Column(name = "created_at")
     private LocalDateTime createdTime;
 
     @Column(name = "add_on")
-    private double addOn;
+    private Double addOn;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)

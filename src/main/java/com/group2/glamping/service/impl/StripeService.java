@@ -13,12 +13,10 @@ import com.group2.glamping.repository.BookingRepository;
 import com.group2.glamping.repository.PaymentRepository;
 import com.group2.glamping.repository.UserRepository;
 import com.stripe.exception.StripeException;
-import com.stripe.model.Account;
-import com.stripe.model.PaymentIntent;
-import com.stripe.model.Refund;
-import com.stripe.model.Transfer;
+import com.stripe.model.*;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.AccountCreateParams;
+import com.stripe.param.AccountLinkCreateParams;
 import com.stripe.param.RefundCreateParams;
 import com.stripe.param.TransferCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
@@ -76,8 +74,8 @@ public class StripeService {
         SessionCreateParams params = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
 
-                .setSuccessUrl(stripeCallback + "/api/payments/success?session_id={CHECKOUT_SESSION_ID}")
-                .setCancelUrl(stripeCallback + "/api/payments/cancel?session_id={CHECKOUT_SESSION_ID}")
+                .setSuccessUrl(stripeCallback + "api/payments/success?session_id={CHECKOUT_SESSION_ID}")
+                .setCancelUrl(stripeCallback + "api/payments/cancel?session_id={CHECKOUT_SESSION_ID}")
                 .addLineItem(lineItem)
                 .putMetadata("bookingId", String.valueOf(paymentRequest.bookingId()))
                 .build();
@@ -135,10 +133,9 @@ public class StripeService {
     // Transfer payout to Host
     public void transferToHost(int hostID, long amountVnd) throws StripeException, IOException {
         try {
-            long hostAmountVnd = (long) (amountVnd * 0.9);
-            System.out.println("Amount after 10% fee (VND): " + hostAmountVnd);
-
-            long amountUsdCents = (long) convertVndToUsd(hostAmountVnd, exchangeApiKey);
+            System.out.println("Amount after 10% fee (VND): " + amountVnd);
+            double amountUsd = convertVndToUsd(amountVnd, exchangeApiKey);
+            long amountUsdCents = Math.round(amountUsd * 100);
             System.out.println("Converted amount (USD cents): " + amountUsdCents);
 
             User user = userRepository.findById(hostID).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -268,5 +265,23 @@ public class StripeService {
     public Session getSessionDetails(String sessionId) throws StripeException {
         SessionRetrieveParams params = SessionRetrieveParams.builder().build();
         return Session.retrieve(sessionId, params, null);
+    }
+
+    public String createAccountLink(int hostId) throws StripeException {
+        User user = userRepository.findById(hostId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        AccountLinkCreateParams params =
+                AccountLinkCreateParams.builder()
+                        .setAccount(user.getConnectionId())
+                        .setRefreshUrl(stripeCallback + "api/payments/connected-success") // Fail
+                        .setReturnUrl(stripeCallback + "api/payments/connected-success") // Success
+                        .setType(AccountLinkCreateParams.Type.ACCOUNT_ONBOARDING)
+                        .build();
+        AccountLink accountLink = AccountLink.create(params);
+        return accountLink.getUrl();
+    }
+
+    public boolean isAccountRestricted(String accountId) throws StripeException {
+        Account account = Account.retrieve(accountId);
+        return !account.getRequirements().getCurrentlyDue().isEmpty();
     }
 }

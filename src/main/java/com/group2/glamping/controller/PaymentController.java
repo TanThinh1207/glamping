@@ -14,9 +14,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.io.IOException;
 
@@ -29,6 +31,11 @@ public class PaymentController {
 
     private final StripeService stripeService;
 
+    @Value("${stripe.url.redirect}")
+    private String redirectUrl;
+
+    @Value("${stripe.url.connect.account}")
+    private String connectUrl;
 
     @Operation(
             summary = "Process a Stripe payment",
@@ -48,35 +55,6 @@ public class PaymentController {
             @RequestBody PaymentRequest stripeRequest) throws AppException {
         StripeResponse stripeResponse = stripeService.pay(stripeRequest);
         return new ResponseEntity<>(stripeResponse, HttpStatus.OK);
-    }
-
-    @Operation(
-            summary = "Transfer funds to a host",
-            description = "Transfer a specified amount to a host's Stripe account",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Transfer successful"),
-                    @ApiResponse(responseCode = "400", description = "Invalid input or bad request"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
-    @PostMapping("/transfer")
-    public ResponseEntity<BaseResponse> transferToHost(
-            @Parameter(description = " ID of the host", example = "1")
-            @RequestParam Integer hostId,
-
-            @Parameter(description = "Amount to transfer (in cents)", example = "1000")
-            @RequestParam long amount
-    ) {
-        try {
-
-            stripeService.transferToHost(hostId, amount);
-            return ResponseEntity.ok(BaseResponse.builder()
-                    .statusCode(HttpStatus.OK.value())
-                    .message("Transfer successful")
-                    .build());
-        } catch (Exception e) {
-            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION, "Transfer failed: " + e.getMessage());
-        }
     }
 
     @Operation(
@@ -127,8 +105,6 @@ public class PaymentController {
 
             log.info("Payment successful for session ID: {}", sessionId);
 
-            // Redirect to frontend page (e.g., payment success page)
-            String redirectUrl = "http://localhost:4000/complete-booking";
             response.sendRedirect(redirectUrl);
         } catch (StripeException | IOException e) {
             log.error("Failed to update payment status for session ID: {}", sessionId, e);
@@ -155,8 +131,6 @@ public class PaymentController {
             stripeService.cancelPayment(sessionId);
             log.info("Payment cancelled for session ID: {}", sessionId);
 
-            // Redirect to frontend page (e.g., payment failed page)
-            String redirectUrl = "http://localhost:4000/complete-booking";
             response.sendRedirect(redirectUrl);
         } catch (StripeException | IOException e) {
             log.error("Failed to update payment status for session ID: {}", sessionId, e);
@@ -164,5 +138,15 @@ public class PaymentController {
         }
     }
 
+    @GetMapping("/connected-account")
+    public RedirectView connectedAccount(@RequestParam Integer hostId) throws StripeException {
+        String url = stripeService.createAccountLink(hostId);
+        return new RedirectView(url);
+    }
+
+    @GetMapping("/connected-success")
+    public RedirectView connectedSuccess() {
+        return new RedirectView(connectUrl);
+    }
 
 }
