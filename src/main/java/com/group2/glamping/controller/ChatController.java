@@ -1,5 +1,7 @@
 package com.group2.glamping.controller;
 
+import com.group2.glamping.model.dto.response.ChatHistoryResponse;
+import com.group2.glamping.model.dto.response.ChatMessageResponse;
 import com.group2.glamping.model.dto.response.UserChatInfoResponse;
 import com.group2.glamping.model.entity.ChatMessage;
 import com.group2.glamping.service.interfaces.ChatRedisService;
@@ -21,6 +23,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -80,18 +83,21 @@ public class ChatController {
                                                  @RequestParam(name = "sortBy", required = false, defaultValue = "timestamp") String sortBy,
                                                  @RequestParam(name = "direction", required = false, defaultValue = "DESC") String direction) {
         try {
-            Page<ChatMessage> chatHistory = chatRedisService.getChatHistory(senderId, recipientId, page, size, sortBy, direction);
+            ChatHistoryResponse chatHistory = chatRedisService.getChatHistory(senderId, recipientId, page, size, sortBy, direction);
 
-            if (chatHistory.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "No chat history found for the given users"));
+            if (chatHistory.getContent().isEmpty()) { 
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("message", "No chat history found for the given users"));
             }
 
             return ResponseEntity.ok(chatHistory);
         } catch (Exception e) {
             logger.error("Error retrieving chat history", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "An unexpected error occurred while retrieving chat history"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "An unexpected error occurred while retrieving chat history"));
         }
     }
+
 
     @DeleteMapping("/clear")
     @Operation(
