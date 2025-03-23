@@ -7,6 +7,7 @@ import com.group2.glamping.model.dto.response.UserResponse;
 import com.stripe.exception.StripeException;
 
 import java.util.Map;
+import java.util.Optional;
 
 public interface UserService {
 
@@ -22,4 +23,7 @@ public interface UserService {
     String removeFcmToken(int userId, String fcmToken);
 
     Object getFilteredUsers(Map<String, String> params, int page, int size, String fields, String sortBy, String direction);
+
+    Optional<UserResponse> getUserById(int id);
+
 }
