@@ -34,6 +34,7 @@ public class CampSiteFilterMapper {
                 .depositRate(campSite.getDepositRate())
                 .imageList(mapImages(campSite))
                 .description(campSite.getDescription())
+                .hostId(campSite.getUser().getId())
                 .build();
     }
 

@@ -30,5 +30,6 @@ public class CampSiteResponseFilter {
     private String description;
     private Double depositRate;
     private List<ImageResponse> imageList;
+    private Integer hostId;
 
 }
