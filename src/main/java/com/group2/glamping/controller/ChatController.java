@@ -85,7 +85,7 @@ public class ChatController {
         try {
             ChatHistoryResponse chatHistory = chatRedisService.getChatHistory(senderId, recipientId, page, size, sortBy, direction);
 
-            if (chatHistory.getContent().isEmpty()) { 
+            if (chatHistory.getContent().isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(Map.of("message", "No chat history found for the given users"));
             }
