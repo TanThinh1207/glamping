@@ -23,6 +23,15 @@ public class RevenueService {
 
     public RevenueGraphResponse getRevenueGraph(Long hostId, LocalDateTime startDate, LocalDateTime endDate, Long campSiteId, String interval) {
         List<Booking> bookings = bookingRepository.findCompletedBookings(hostId, startDate, endDate);
+        return calculateRevenueGraph(bookings, startDate, endDate, interval, campSiteId, false);
+    }
+
+    public RevenueGraphResponse getSystemRevenueGraph(LocalDateTime startDate, LocalDateTime endDate, String interval) {
+        List<Booking> bookings = bookingRepository.findCompletedBookingsForSystem(startDate, endDate);
+        return calculateRevenueGraph(bookings, startDate, endDate, interval, null, true);
+    }
+
+    private RevenueGraphResponse calculateRevenueGraph(List<Booking> bookings, LocalDateTime startDate, LocalDateTime endDate, String interval, Long campSiteId, boolean isSystemFee) {
         TreeMap<String, RevenueGraphDto> revenueMap = new TreeMap<>();
 
         for (Booking booking : bookings) {
@@ -30,32 +39,30 @@ public class RevenueService {
                     ? YearMonth.from(booking.getCheckOutTime()).toString()
                     : booking.getCheckOutTime().toLocalDate().toString();
 
-            double revenue = booking.getNetAmount();
-            double addOn = booking.getBookingDetailList().stream()
-                    .filter(bd -> campSiteId == null || bd.getCamp().getId() == (campSiteId))
-                    .mapToDouble(BookingDetail::getAddOn)
-                    .sum();
+            double revenue, profit;
+            if (isSystemFee) {
+                revenue = profit = booking.getSystemFee();
+            } else {
+                revenue = booking.getNetAmount();
+                double addOn = booking.getBookingDetailList().stream()
+                        .filter(bd -> campSiteId == null || bd.getCamp().getId() == (campSiteId))
+                        .mapToDouble(BookingDetail::getAddOn)
+                        .sum();
+                revenue += addOn;
 
-            double totalAmount = booking.getTotalAmount();
-            double firstPaymentAmount = booking.getPaymentList().stream()
-                    .findFirst()
-                    .map(Payment::getTotalAmount)
-                    .orElse(0.0);
-
-            double profit = firstPaymentAmount - (totalAmount * 0.1);
+                double totalAmount = booking.getTotalAmount();
+                double firstPaymentAmount = booking.getPaymentList().stream()
+                        .findFirst()
+                        .map(Payment::getTotalAmount)
+                        .orElse(0.0);
+                profit = firstPaymentAmount - (totalAmount * 0.1);
+            }
 
             revenueMap.computeIfAbsent(keyDate, k -> new RevenueGraphDto(k, 0.0, 0.0, 0))
-                    .addRevenueProfitAndBooking(revenue + addOn, profit, 1);
+                    .addRevenueProfitAndBooking(revenue, profit, 1);
         }
 
-        // Khúc này là để tính recentRevenue
-        // 2025-03-01 -> 2025-03-30 là lấy theo daily
-        //thì recent là tổng totalProfit của 2025-02-01 -> 2025-02-29
-        //còn nếu monthly thì thành 2024-03-01 -> 2025-03-01
-        //recent thành tổng totalProfit của 2023-03-01 -> 2024-03-01
-        List<RevenueGraphDto> profitList = new ArrayList<>(revenueMap.values());
-        LocalDateTime previousStartDate;
-        LocalDateTime previousEndDate;
+        LocalDateTime previousStartDate, previousEndDate;
         if ("daily".equals(interval)) {
             YearMonth previousMonth = YearMonth.from(startDate.minusMonths(1));
             previousStartDate = previousMonth.atDay(1).atStartOfDay();
@@ -65,10 +72,12 @@ public class RevenueService {
             previousEndDate = endDate.minusYears(1);
         }
 
-        double recentRevenue = bookingRepository.findCompletedBookings(hostId, previousStartDate, previousEndDate).stream()
-                .mapToDouble(Booking::getTotalAmount)
+        double recentRevenue = bookings.stream()
+                .filter(b -> !b.getCheckOutTime().isBefore(previousStartDate) && !b.getCheckOutTime().isAfter(previousEndDate))
+                .mapToDouble(isSystemFee ? Booking::getSystemFee : Booking::getTotalAmount)
                 .sum();
-        return new RevenueGraphResponse(recentRevenue, profitList);
+
+        return new RevenueGraphResponse(recentRevenue, new ArrayList<>(revenueMap.values()));
     }
 
 

@@ -18,7 +18,7 @@ import java.time.LocalTime;
 @RestController
 @RequestMapping("/api/revenue")
 @RequiredArgsConstructor
-@Tag(name = "Revenue", description = "Revenue API for hosts")
+@Tag(name = "Revenue", description = "Revenue API for hosts and system")
 public class RevenueController {
 
     private final RevenueService revenueService;
@@ -39,9 +39,29 @@ public class RevenueController {
 
         return ResponseEntity.ok(BaseResponse.builder()
                 .data(revenueService.getRevenueGraph(hostId, startDateTime, endDateTime, campSiteId, interval))
-                .message("Get successfully")
+                .message("Get revenue successfully")
+                .statusCode(HttpStatus.OK.value())
+                .build());
+    }
+
+    @Operation(summary = "Get system revenue graph", description = "Retrieve total system fee data within a specified time range.")
+    @GetMapping("/system")
+    public ResponseEntity<?> getSystemRevenueGraph(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @Parameter(description = "Start date in ISO format (yyyy-MM-dd)") LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @Parameter(description = "End date in ISO format (yyyy-MM-dd)") LocalDate endDate,
+            @RequestParam(defaultValue = "daily") @Parameter(description = "Interval (daily/monthly)") String interval) {
+
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+
+        return ResponseEntity.ok(BaseResponse.builder()
+                .data(revenueService.getSystemRevenueGraph(startDateTime, endDateTime, interval))
+                .message("Get system revenue successfully")
                 .statusCode(HttpStatus.OK.value())
                 .build());
     }
 
 }
+
