@@ -25,15 +25,17 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>, JpaS
                                         @Param("endDate") LocalDateTime endDate);
 
     @Query("""
-                SELECT new com.group2.glamping.model.dto.response.RatingResponse(
-                       b.user.id,\s
-                       CONCAT(b.user.firstname, ' ', b.user.lastname),\s
-                       b.checkOutTime,\s
-                       b.rating,\s
-                       b.comment)
-                FROM booking b\s
-                WHERE b.campSite.id = :campSiteId
-           \s""")
+                 SELECT new com.group2.glamping.model.dto.response.RatingResponse(
+                         b.user.id,
+                         CONCAT(b.user.firstname, ' ', b.user.lastname),
+                         b.checkOutTime,
+                         b.rating,
+                         b.comment)
+                 FROM booking b
+                 WHERE b.campSite.id = :campSiteId\s
+                   AND b.rating IS NOT NULL\s
+                   AND b.comment IS NOT NULL
+            \s""")
     Page<RatingResponse> findAllRatingsByCampSiteId(@Param("campSiteId") Integer campSiteId, Pageable pageable);
 
 
