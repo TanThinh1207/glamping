@@ -1,6 +1,9 @@
 package com.group2.glamping.repository;
 
+import com.group2.glamping.model.dto.response.RatingResponse;
 import com.group2.glamping.model.entity.Booking;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -20,4 +23,26 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>, JpaS
     List<Booking> findCompletedBookings(@Param("hostId") Long hostId,
                                         @Param("startDate") LocalDateTime startDate,
                                         @Param("endDate") LocalDateTime endDate);
+
+    @Query("""
+                SELECT new com.group2.glamping.model.dto.response.RatingResponse(
+                       b.user.id,\s
+                       CONCAT(b.user.firstname, ' ', b.user.lastname),\s
+                       b.checkOutTime,\s
+                       b.rating,\s
+                       b.comment)
+                FROM booking b\s
+                WHERE b.campSite.id = :campSiteId
+           \s""")
+    Page<RatingResponse> findAllRatingsByCampSiteId(@Param("campSiteId") Integer campSiteId, Pageable pageable);
+
+
+    @Query("""
+                 SELECT COALESCE(AVG(b.rating), 0)
+                 FROM booking b\s
+                 WHERE b.campSite.id = :campSiteId
+            \s""")
+    Double findAverageRatingByCampSiteId(@Param("campSiteId") Integer campSiteId);
+
+
 }

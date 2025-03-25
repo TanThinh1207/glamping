@@ -17,6 +17,7 @@ public class ChatServiceImpl implements ChatService {
     private final ChatRedisService chatRedisService;
     private final SimpMessagingTemplate messagingTemplate;
     private final PushNotificationService pushNotificationService;
+
     @Override
     public ChatMessage sendPublicMessage(ChatMessage chatMessage) {
         logger.info("Public message from {}: {}", chatMessage.getSenderId(), chatMessage.getContent());

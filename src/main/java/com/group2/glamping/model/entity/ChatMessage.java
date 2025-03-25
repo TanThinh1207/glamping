@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -30,7 +29,7 @@ public class ChatMessage implements Serializable {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-//    @OrderBy("local_datetime ASC")
+    //    @OrderBy("local_datetime ASC")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime timestamp;
 

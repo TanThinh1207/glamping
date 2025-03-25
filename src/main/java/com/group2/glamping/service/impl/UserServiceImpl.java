@@ -173,14 +173,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<UserResponse> getUserById(int id) {
         return userRepository.findById(id)
-                .map(user -> {
-                    try {
-                        return new UserResponse(user);
-                    } catch (StripeException e) {
-                        throw new RuntimeException("Failed to create UserResponse", e);
-                    }
-                });
-
+                .map(user -> UserResponse
+                        .builder()
+                        .id(user.getId())
+                        .firstname(user.getFirstname())
+                        .lastname(user.getLastname())
+                        .phone(user.getPhoneNumber())
+                        .email(user.getEmail())
+                        .address(user.getAddress())
+                        .birthday(user.getDob())
+                        .connectionId(user.getConnectionId())
+                        .build());
     }
 
 

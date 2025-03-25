@@ -8,6 +8,7 @@ public interface ChatService {
      * Gửi tin nhắn công khai đến tất cả người dùng
      */
     ChatMessage sendPublicMessage(ChatMessage chatMessage);
+
     /**
      * Gửi tin nhắn riêng tư giữa hai người dùng
      */

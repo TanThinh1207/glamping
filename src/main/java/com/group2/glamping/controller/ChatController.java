@@ -1,7 +1,6 @@
 package com.group2.glamping.controller;
 
 import com.group2.glamping.model.dto.response.ChatHistoryResponse;
-import com.group2.glamping.model.dto.response.ChatMessageResponse;
 import com.group2.glamping.model.dto.response.UserChatInfoResponse;
 import com.group2.glamping.model.entity.ChatMessage;
 import com.group2.glamping.service.interfaces.ChatRedisService;
@@ -16,14 +15,12 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 

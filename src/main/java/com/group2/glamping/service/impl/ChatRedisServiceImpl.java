@@ -13,9 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
-import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -114,7 +114,6 @@ public class ChatRedisServiceImpl implements ChatRedisService {
     }
 
 
-
     @Override
     public void clearChatHistory(Integer senderId, Integer recipientId) {
         String chatKey = getChatKey(senderId, recipientId);
@@ -169,8 +168,6 @@ public class ChatRedisServiceImpl implements ChatRedisService {
                 .map(UserChatInfoResponse::new) // Chuyển đổi thành UserChatInfoResponse
                 .collect(Collectors.toList());
     }
-
-
 
 
 }

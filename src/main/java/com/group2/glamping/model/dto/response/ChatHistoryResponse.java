@@ -1,6 +1,8 @@
 package com.group2.glamping.model.dto.response;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;

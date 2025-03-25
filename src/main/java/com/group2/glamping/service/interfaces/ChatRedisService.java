@@ -18,4 +18,4 @@ public interface ChatRedisService {
 
     List<UserChatInfoResponse> getRecipientsByUserId(Integer userId);
 
-    }
+}
