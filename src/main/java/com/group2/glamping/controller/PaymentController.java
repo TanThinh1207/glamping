@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -151,10 +152,8 @@ public class PaymentController {
 
 
     @GetMapping("/connected-success")
-    public ResponseEntity<Map<String, String>> connectedSuccess() {
-        Map<String, String> response = new HashMap<>();
-        response.put("redirectUrl", connectUrl);
-        return ResponseEntity.ok(response);
+    public RedirectView connectedSuccess() {
+        return new RedirectView(connectUrl);
     }
 
 
