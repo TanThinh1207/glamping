@@ -20,6 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -138,17 +140,23 @@ public class PaymentController {
     }
 
     @GetMapping("/connected-account")
-    public void connectedAccount(@RequestParam Integer hostId, HttpServletResponse response) throws StripeException, IOException {
+    public ResponseEntity<Map<String, String>> connectedAccount(@RequestParam Integer hostId) throws StripeException {
         String url = stripeService.createAccountLink(hostId);
-        response.sendRedirect(url);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("redirectUrl", url);
+
+        return ResponseEntity.ok(response);
     }
 
 
     @GetMapping("/connected-success")
-    public void connectedSuccess(HttpServletResponse response) {
-        response.setHeader("Location", connectUrl);
-        response.setStatus(HttpServletResponse.SC_FOUND); // 302
+    public ResponseEntity<Map<String, String>> connectedSuccess() {
+        Map<String, String> response = new HashMap<>();
+        response.put("redirectUrl", connectUrl);
+        return ResponseEntity.ok(response);
     }
+
 
 
 }
