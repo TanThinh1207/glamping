@@ -3,6 +3,7 @@ package com.group2.glamping.model.entity;
 import com.group2.glamping.model.enums.ReportStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Entity(name = "report")
 public class Report {
 

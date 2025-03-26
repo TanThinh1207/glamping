@@ -38,6 +38,8 @@ public enum ErrorCode {
     FACILITY_LIST_CANNOT_BE_EMPTY(10026, "Facility list cannot be empty", HttpStatus.BAD_REQUEST),
     PLACE_TYPE_LIST_CANNOT_BE_EMPTY(10027, "Place type list cannot be empty", HttpStatus.BAD_REQUEST),
     UTILITY_LIST_CANNOT_BE_EMPTY(10028, "Utility list cannot be empty", HttpStatus.BAD_REQUEST),
+    REPORT_NOT_FOUND(10029, "Report not found", HttpStatus.NOT_FOUND),
+    ID_REQUIRED_FOR_UPDATE(10030, "ID is required for update operation", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;
