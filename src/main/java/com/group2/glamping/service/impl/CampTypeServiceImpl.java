@@ -85,7 +85,11 @@ public class CampTypeServiceImpl implements CampTypeService {
                 .status(true)
                 .updatedTime(LocalDateTime.now())
                 .build();
-
+        List<Facility> facilities = request.getFacilities().stream()
+                .map(facilityId -> facilityRepository.findById(facilityId).orElseThrow(() -> new AppException(ErrorCode.FACILITY_NOT_FOUND)))
+                .filter(Objects::nonNull)
+                .toList();
+        campType.setFacilities(facilities);
         campTypeRepository.save(campType);
 
         CampTypeResponse campTypeResponse = CampTypeResponse.builder()
