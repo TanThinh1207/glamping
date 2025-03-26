@@ -272,8 +272,8 @@ public class StripeService {
         AccountLinkCreateParams params =
                 AccountLinkCreateParams.builder()
                         .setAccount(user.getConnectionId())
-                        .setRefreshUrl(stripeCallback + "account?status=fail")
-                        .setReturnUrl(stripeCallback + "account?status=success")
+                        .setRefreshUrl(stripeCallback + "api/payments/stripe-redirect?success=false")
+                        .setReturnUrl(stripeCallback + "api/payments/stripe-redirect?success=true")
                         .setType(AccountLinkCreateParams.Type.ACCOUNT_ONBOARDING)
                         .build();
         AccountLink accountLink = AccountLink.create(params);
