@@ -23,16 +23,46 @@ public class RevenueService {
     private final BookingRepository bookingRepository;
 
     public RevenueGraphResponse getRevenueGraph(Long hostId, LocalDateTime startDate, LocalDateTime endDate, Long campSiteId, String interval) {
-        List<Booking> bookings = bookingRepository.findCompletedBookings(hostId, startDate, endDate);
-        return calculateRevenueGraph(bookings, startDate, endDate, interval, campSiteId, false);
+        LocalDateTime previousStartDate, previousEndDate;
+        if ("daily".equals(interval)) {
+            long daysRange = ChronoUnit.DAYS.between(startDate.toLocalDate(), endDate.toLocalDate());
+            previousStartDate = startDate.minusDays(daysRange + 1);
+            previousEndDate = endDate.minusDays(daysRange + 1);
+        } else {
+            long monthsRange = ChronoUnit.MONTHS.between(
+                    YearMonth.from(startDate.toLocalDate()),
+                    YearMonth.from(endDate.toLocalDate())
+            );
+            previousStartDate = startDate.minusMonths(monthsRange + 1);
+            previousEndDate = endDate.minusMonths(monthsRange + 1);
+        }
+
+        List<Booking> bookings = bookingRepository.findCompletedBookings(hostId, previousStartDate, endDate);
+        return calculateRevenueGraph(bookings, previousStartDate, previousEndDate, interval, campSiteId, false);
     }
 
     public RevenueGraphResponse getSystemRevenueGraph(LocalDateTime startDate, LocalDateTime endDate, String interval) {
-        List<Booking> bookings = bookingRepository.findCompletedBookingsForSystem(startDate, endDate);
-        return calculateRevenueGraph(bookings, startDate, endDate, interval, null, true);
+        LocalDateTime previousStartDate, previousEndDate;
+        if ("daily".equals(interval)) {
+            long daysRange = ChronoUnit.DAYS.between(startDate.toLocalDate(), endDate.toLocalDate());
+            previousStartDate = startDate.minusDays(daysRange + 1);
+            previousEndDate = endDate.minusDays(daysRange + 1);
+        } else {
+            long monthsRange = ChronoUnit.MONTHS.between(
+                    YearMonth.from(startDate.toLocalDate()),
+                    YearMonth.from(endDate.toLocalDate())
+            );
+            previousStartDate = startDate.minusMonths(monthsRange + 1);
+            previousEndDate = endDate.minusMonths(monthsRange + 1);
+        }
+
+        List<Booking> bookings = bookingRepository.findCompletedBookingsForSystem(previousStartDate, endDate);
+        return calculateRevenueGraph(bookings, previousStartDate, previousEndDate, interval, null, true);
     }
 
-    private RevenueGraphResponse calculateRevenueGraph(List<Booking> bookings, LocalDateTime startDate, LocalDateTime endDate, String interval, Long campSiteId, boolean isSystemFee) {
+    private RevenueGraphResponse calculateRevenueGraph(List<Booking> bookings,
+                                                       LocalDateTime previousStartDate, LocalDateTime previousEndDate,
+                                                       String interval, Long campSiteId, boolean isSystemFee) {
         TreeMap<String, RevenueGraphDto> revenueMap = new TreeMap<>();
 
         for (Booking booking : bookings) {
@@ -63,22 +93,6 @@ public class RevenueService {
                     .addRevenueProfitAndBooking(revenue, profit, 1);
         }
 
-        LocalDateTime previousStartDate, previousEndDate;
-        if ("daily".equals(interval)) {
-            long daysRange = ChronoUnit.DAYS.between(startDate.toLocalDate(), endDate.toLocalDate());
-            previousStartDate = startDate.minusDays(daysRange + 1);
-            previousEndDate = endDate.minusDays(daysRange + 1);
-        } else {
-            long monthsRange = ChronoUnit.MONTHS.between(
-                    YearMonth.from(startDate.toLocalDate()),
-                    YearMonth.from(endDate.toLocalDate())
-            );
-
-            previousStartDate = startDate.minusMonths(monthsRange + 1);
-            previousEndDate = endDate.minusMonths(monthsRange + 1);
-        }
-        System.out.println("Previous Start Date: " + previousStartDate);
-        System.out.println("Previous End Date: " + previousEndDate);
         double recentRevenue = bookings.stream()
                 .filter(b -> !b.getCheckOutTime().isBefore(previousStartDate) && !b.getCheckOutTime().isAfter(previousEndDate))
                 .mapToDouble(b -> {
@@ -94,9 +108,6 @@ public class RevenueService {
                 })
                 .sum();
 
-
         return new RevenueGraphResponse(recentRevenue, new ArrayList<>(revenueMap.values()));
     }
-
-
 }
