@@ -7,6 +7,7 @@ import com.group2.glamping.model.entity.PlaceType;
 import com.group2.glamping.repository.PlaceTypeRepository;
 import com.group2.glamping.service.interfaces.PlaceTypeService;
 import com.group2.glamping.service.interfaces.S3Service;
+import com.group2.glamping.utils.RedisUtil;
 import com.group2.glamping.utils.ResponseFilterUtil;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class PlaceTypeServiceImpl implements PlaceTypeService {
 
     private final PlaceTypeRepository placeTypeRepository;
     private final S3Service s3Service;
+    private final RedisUtil redisUtil;
 
     @Override
     public PlaceTypeResponse createPlaceType(PlaceTypeRequest request) {
@@ -56,6 +58,8 @@ public class PlaceTypeServiceImpl implements PlaceTypeService {
 //            placeType.setImage(filename);
 //        }
 //        placeType.setImage(s3Service.uploadFile(image, "PlaceType", "place_type_" + placeType.getId()));
+        redisUtil.deleteCache("filteredCampSites:*");
+        redisUtil.deleteCache("campSites:*");
         placeTypeRepository.save(placeType);
         return convertToResponse(placeType);
     }
@@ -106,6 +110,8 @@ public class PlaceTypeServiceImpl implements PlaceTypeService {
                 .orElseThrow(() -> new RuntimeException("Place type not found"));
         placeType.setStatus(false);
         placeTypeRepository.save(placeType);
+        redisUtil.deleteCache("filteredCampSites:*");
+        redisUtil.deleteCache("campSites:*");
         return convertToResponse(placeType);
     }
 
