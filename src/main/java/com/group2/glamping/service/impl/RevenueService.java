@@ -75,7 +75,7 @@ public class RevenueService {
             } else {
                 revenue = booking.getNetAmount();
                 double addOn = booking.getBookingDetailList().stream()
-                        .filter(bd -> campSiteId == null || bd.getCamp().getId() == (campSiteId))
+                        .filter(bd -> campSiteId == null || bd.getBooking().getCampSite().getId() == (campSiteId))
                         .mapToDouble(BookingDetail::getAddOn)
                         .sum();
                 revenue += addOn;
