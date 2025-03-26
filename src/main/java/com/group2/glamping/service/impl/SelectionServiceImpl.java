@@ -77,11 +77,7 @@ public class SelectionServiceImpl implements SelectionService {
         if (request.description() != null) {
             selection.setDescription(request.description());
         }
-//        selection.setPrice(request.price());
-//        if (request.image() != null && !request.image().isEmpty()) {
-//            String filename = request.image().getOriginalFilename();
-//            selection.setImageUrl(filename);
-//        }
+        selection.setPrice(request.price());
         selection.setUpdatedTime(LocalDateTime.now());
         if (request.campSiteId() != null) {
             CampSite campSite = campSiteRepository.findById(request.campSiteId())
