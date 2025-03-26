@@ -44,7 +44,8 @@ public class SecurityConfig {
             "/error",
             "/home",
             "/login",
-            "/api/s3/image/**"
+            "/api/s3/image/**",
+            "/api/revenue/**"
     };
 
 
@@ -55,7 +56,8 @@ public class SecurityConfig {
             "/api/reports/**",
             "/api/campsites/**",
             "/api/camp-types/**",
-            "/api/selections/**"
+            "/api/selections/**",
+            "/api/chat/**"
     };
 
     private static final String[] MANAGER_LIST = {
