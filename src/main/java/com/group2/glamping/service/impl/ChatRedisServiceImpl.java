@@ -13,8 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.KeyScanOptions;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -126,8 +126,10 @@ public class ChatRedisServiceImpl implements ChatRedisService {
         List<String> chatKeys = new ArrayList<>();
         String pattern = CHAT_PREFIX + "*"; // Tìm tất cả khóa bắt đầu với "chat:"
 
-        try (Cursor<byte[]> cursor = redisTemplate.getConnectionFactory().getConnection()
-                .scan(ScanOptions.scanOptions().match(pattern).count(1000).build())) {
+        try (Cursor<byte[]> cursor = Objects.requireNonNull(redisTemplate.getConnectionFactory())
+                .getConnection()
+                .keyCommands()
+                .scan(KeyScanOptions.scanOptions().match(pattern).count(1000).build())) {
 
             while (cursor.hasNext()) {
                 String key = new String(cursor.next());
@@ -138,6 +140,7 @@ public class ChatRedisServiceImpl implements ChatRedisService {
         } catch (Exception e) {
             logger.error("Error fetching chat keys for user {}", userId, e);
         }
+
 
         return chatKeys;
     }
@@ -164,7 +167,8 @@ public class ChatRedisServiceImpl implements ChatRedisService {
 
         return recipientIds.stream()
                 .map(userService::getUserById) // Trả về Optional<UserResponse>
-                .flatMap(Optional::stream) // Chỉ giữ lại những UserResponse có giá trị (bỏ qua Optional.empty())
+                .filter(Optional::isPresent) // Bỏ qua Optional.empty() để tránh lỗi 404
+                .map(Optional::get) // Lấy UserResponse từ Optional
                 .map(UserChatInfoResponse::new) // Chuyển đổi thành UserChatInfoResponse
                 .collect(Collectors.toList());
     }

@@ -146,9 +146,6 @@ public class ChatController {
     public ResponseEntity<?> getRecipientsByUserId(@RequestParam Integer userId) {
         try {
             List<UserChatInfoResponse> recipients = chatRedisService.getRecipientsByUserId(userId);
-            if (recipients.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No chat recipients found for userId " + userId);
-            }
             return ResponseEntity.ok(recipients);
         } catch (Exception e) {
             logger.error("Error retrieving chat recipients", e);
