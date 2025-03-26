@@ -155,8 +155,11 @@ public class PaymentController {
 
 
     @GetMapping("/connected-success")
-    public RedirectView connectedSuccess() {
-        return new RedirectView(connectUrl);
+    public RedirectView connectedSuccess(@Parameter boolean isSuccess) {
+        if (isSuccess) {
+            return new RedirectView(connectUrl + "?status=success");
+        }
+        return new RedirectView(connectUrl + "?status=fail");
     }
 
 
