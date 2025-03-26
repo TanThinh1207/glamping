@@ -33,8 +33,11 @@ public class PaymentController {
 
     private final StripeService stripeService;
 
-    @Value("${stripe.url.redirect}")
+    @Value("${stripe.url.redirect.success}")
     private String redirectUrl;
+
+    @Value("${stripe.url.redirect.cancel}")
+    private String cancelUrl;
 
     @Value("${stripe.url.connect.account}")
     private String connectUrl;
@@ -130,10 +133,10 @@ public class PaymentController {
             @RequestParam("session_id") String sessionId,
             HttpServletResponse response) {
         try {
-            stripeService.cancelPayment(sessionId);
+            int bookingId = stripeService.cancelPayment(sessionId);
             log.info("Payment cancelled for session ID: {}", sessionId);
 
-            response.sendRedirect(redirectUrl);
+            response.sendRedirect(cancelUrl + bookingId);
         } catch (StripeException | IOException e) {
             log.error("Failed to update payment status for session ID: {}", sessionId, e);
             throw new AppException(ErrorCode.PAYMENT_FAILED, "Failed to update payment status: " + e.getMessage());
@@ -155,7 +158,6 @@ public class PaymentController {
     public RedirectView connectedSuccess() {
         return new RedirectView(connectUrl);
     }
-
 
 
 }

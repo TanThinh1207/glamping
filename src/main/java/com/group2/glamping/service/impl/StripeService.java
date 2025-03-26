@@ -73,7 +73,6 @@ public class StripeService {
 
         SessionCreateParams params = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
-
                 .setSuccessUrl(stripeCallback + "api/payments/success?session_id={CHECKOUT_SESSION_ID}")
                 .setCancelUrl(stripeCallback + "api/payments/cancel?session_id={CHECKOUT_SESSION_ID}")
                 .addLineItem(lineItem)
@@ -213,7 +212,7 @@ public class StripeService {
         bookingRepository.save(booking);
     }
 
-    public void cancelPayment(String sessionId) throws StripeException {
+    public Integer cancelPayment(String sessionId) throws StripeException {
         Session session = getSessionDetails(sessionId);
 
         if (!"expired".equals(session.getStatus())) {
@@ -236,6 +235,7 @@ public class StripeService {
         payment.setStatus(PaymentStatus.Failed);
         booking.setStatus(BookingStatus.Cancelled);
         bookingRepository.save(booking);
+        return bookingId;
     }
 
     @Scheduled(fixedRate = 86400000)
