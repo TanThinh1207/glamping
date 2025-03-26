@@ -82,12 +82,12 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                                .anyRequest().permitAll()
-//                        .requestMatchers(WHITE_LIST).permitAll()
-//                        .requestMatchers(USER_LIST).hasRole("USER")
-//                        .requestMatchers(MANAGER_LIST).hasRole("MANAGER")
-//                        .requestMatchers(ADMIN_LIST).hasRole("ADMIN")
-//                        .anyRequest().authenticated()
+//                                .anyRequest().permitAll()
+                        .requestMatchers(WHITE_LIST).permitAll()
+                        .requestMatchers(USER_LIST).hasRole("USER")
+                        .requestMatchers(MANAGER_LIST).hasRole("MANAGER")
+                        .requestMatchers(ADMIN_LIST).hasRole("ADMIN")
+                        .anyRequest().authenticated()
                 )
                 .securityContext(security -> security.requireExplicitSave(true))
                 .exceptionHandling(exception -> exception
@@ -103,16 +103,4 @@ public class SecurityConfig {
         return new DefaultOAuth2UserService();
     }
 
-    @Bean
-    public CorsFilter customCorsFilter() {
-        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        final CorsConfiguration config = new CorsConfiguration();
-
-        config.setAllowedOrigins(Collections.singletonList("*"));
-        config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept"));
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "OPTIONS", "DELETE", "PATCH"));
-        source.registerCorsConfiguration("/**", config);
-        config.setAllowCredentials(true); // Cho phép gửi credentials
-        return new CorsFilter(source);
-    }
 }
