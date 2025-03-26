@@ -77,7 +77,9 @@ public class SelectionServiceImpl implements SelectionService {
         if (request.description() != null) {
             selection.setDescription(request.description());
         }
-        selection.setPrice(request.price());
+        if (request.price() != null){
+            selection.setPrice(request.price());
+        }
         selection.setUpdatedTime(LocalDateTime.now());
         if (request.campSiteId() != null) {
             CampSite campSite = campSiteRepository.findById(request.campSiteId())

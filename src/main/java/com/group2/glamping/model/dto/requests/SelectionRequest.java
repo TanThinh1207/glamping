@@ -25,7 +25,7 @@ public record SelectionRequest(
 
         @Schema(description = "Price of the Selection", example = "30.00")
         @Pattern(regexp = "^\\d{1,10}(\\.\\d{1,2})?$", message = "Price must be a valid decimal number with up to 10 digits and optionally 2 decimals.")
-        double price,
+        Double price,
 
         @Schema(description = "ID of the Campsite for attaching this selection", example = "1")
         @Min(value = 1, message = "ID must be a positive integer greater than 0")
