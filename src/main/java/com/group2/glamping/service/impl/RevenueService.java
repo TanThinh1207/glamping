@@ -23,25 +23,26 @@ public class RevenueService {
     private final BookingRepository bookingRepository;
 
     public RevenueGraphResponse getRevenueGraph(Long hostId, LocalDateTime startDate, LocalDateTime endDate, Long campSiteId, String interval) {
-        LocalDateTime previousStartDate, previousEndDate;
-        if ("daily".equals(interval)) {
-            long daysRange = ChronoUnit.DAYS.between(startDate.toLocalDate(), endDate.toLocalDate());
-            previousStartDate = startDate.minusDays(daysRange + 1);
-            previousEndDate = endDate.minusDays(daysRange + 1);
-        } else {
-            long monthsRange = ChronoUnit.MONTHS.between(
-                    YearMonth.from(startDate.toLocalDate()),
-                    YearMonth.from(endDate.toLocalDate())
-            );
-            previousStartDate = startDate.minusMonths(monthsRange + 1);
-            previousEndDate = endDate.minusMonths(monthsRange + 1);
-        }
+        LocalDateTime[] previousRange = calculatePreviousDateRange(startDate, endDate, interval);
+        LocalDateTime previousStartDate = previousRange[0];
+        LocalDateTime previousEndDate = previousRange[1];
 
-        List<Booking> bookings = bookingRepository.findCompletedBookings(hostId, previousStartDate, endDate);
-        return calculateRevenueGraph(bookings, previousStartDate, previousEndDate, interval, campSiteId, false);
+        List<Booking> recentBookings = bookingRepository.findCompletedBookings(hostId, previousStartDate, previousEndDate);
+        List<Booking> bookings = bookingRepository.findCompletedBookings(hostId, startDate, endDate);
+        return calculateRevenueGraph(recentBookings, bookings, interval, campSiteId, false);
     }
 
     public RevenueGraphResponse getSystemRevenueGraph(LocalDateTime startDate, LocalDateTime endDate, String interval) {
+        LocalDateTime[] previousRange = calculatePreviousDateRange(startDate, endDate, interval);
+        LocalDateTime previousStartDate = previousRange[0];
+        LocalDateTime previousEndDate = previousRange[1];
+
+        List<Booking> recentBookings = bookingRepository.findCompletedBookingsForSystem(previousStartDate, previousEndDate);
+        List<Booking> bookings = bookingRepository.findCompletedBookingsForSystem(startDate, endDate);
+        return calculateRevenueGraph(recentBookings, bookings, interval, null, true);
+    }
+
+    private LocalDateTime[] calculatePreviousDateRange(LocalDateTime startDate, LocalDateTime endDate, String interval) {
         LocalDateTime previousStartDate, previousEndDate;
         if ("daily".equals(interval)) {
             long daysRange = ChronoUnit.DAYS.between(startDate.toLocalDate(), endDate.toLocalDate());
@@ -55,13 +56,11 @@ public class RevenueService {
             previousStartDate = startDate.minusMonths(monthsRange + 1);
             previousEndDate = endDate.minusMonths(monthsRange + 1);
         }
-
-        List<Booking> bookings = bookingRepository.findCompletedBookingsForSystem(previousStartDate, endDate);
-        return calculateRevenueGraph(bookings, previousStartDate, previousEndDate, interval, null, true);
+        return new LocalDateTime[]{previousStartDate, previousEndDate};
     }
 
-    private RevenueGraphResponse calculateRevenueGraph(List<Booking> bookings,
-                                                       LocalDateTime previousStartDate, LocalDateTime previousEndDate,
+
+    private RevenueGraphResponse calculateRevenueGraph(List<Booking> recentBookings, List<Booking> bookings,
                                                        String interval, Long campSiteId, boolean isSystemFee) {
         TreeMap<String, RevenueGraphDto> revenueMap = new TreeMap<>();
 
@@ -93,8 +92,7 @@ public class RevenueService {
                     .addRevenueProfitAndBooking(revenue, profit, 1);
         }
 
-        double recentRevenue = bookings.stream()
-                .filter(b -> !b.getCheckOutTime().isBefore(previousStartDate) && !b.getCheckOutTime().isAfter(previousEndDate))
+        double recentRevenue = recentBookings.stream()
                 .mapToDouble(b -> {
                     if (isSystemFee) {
                         return b.getSystemFee();
