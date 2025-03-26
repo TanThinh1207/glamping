@@ -15,6 +15,6 @@ public interface ReportService {
     PagingResponse<?> getReports(Map<String, String> params, int page, int size, String sortBy, String direction);
     Object getFilteredReports(Map<String, String> params, int page, int size, String fields, String sortBy, String direction);
     ReportResponse softDeleteReport(int id);
-
+    ReportResponse acceptReport(int reportId);
 
 }

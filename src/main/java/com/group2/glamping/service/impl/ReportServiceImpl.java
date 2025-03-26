@@ -11,6 +11,7 @@ import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.model.entity.PlaceType;
 import com.group2.glamping.model.entity.Report;
 import com.group2.glamping.model.entity.User;
+import com.group2.glamping.model.enums.CampSiteStatus;
 import com.group2.glamping.model.enums.ReportStatus;
 import com.group2.glamping.model.mapper.CampSiteMapper;
 import com.group2.glamping.repository.CampSiteRepository;
@@ -130,6 +131,28 @@ public class ReportServiceImpl implements ReportService {
         PagingResponse<?> reports = getReports(params, page, size, sortBy, direction);
         return ResponseFilterUtil.getFilteredResponse(fields, reports, "Return using dynamic filter successfully");
     }
+
+    @Override
+    public ReportResponse acceptReport(int reportId) {
+        Report report = reportRepository.findById(reportId)
+                .orElseThrow(() -> new AppException(ErrorCode.REPORT_NOT_FOUND));
+
+        report.setStatus(ReportStatus.Resolved);
+        reportRepository.save(report);
+
+        CampSite campSite = report.getCampSite();
+
+        long acceptedReportsCount = reportRepository.countByCampSiteAndStatus(campSite, ReportStatus.Resolved);
+
+        if (acceptedReportsCount >= 3) {
+            campSite.setStatus(CampSiteStatus.Not_Available);
+            campSiteRepository.save(campSite);
+            log.info("CampSite {} has been set to Not Available due to multiple accepted reports", campSite.getId());
+        }
+
+        return ReportResponse.fromEntity(report);
+    }
+
 
     @Override
     public ReportResponse softDeleteReport(int id) {

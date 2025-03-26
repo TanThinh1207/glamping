@@ -239,6 +239,61 @@ public class ReportController {
 
     // </editor-fold>
 
+    // <editor-fold default state="collapsed" desc="Accept a report">
+    @PutMapping("/{id}/accept")
+    @Operation(
+            summary = "Accept a report",
+            description = "Marks a report as accepted by a manager. If a campsite has 3 accepted reports, it will be marked as Not Available.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Report accepted successfully",
+                            content = @Content(mediaType = "application/json",
+                                    examples = @ExampleObject(value = """
+                                    {
+                                        "statusCode": 200,
+                                        "message": "Report accepted successfully",
+                                        "data": {
+                                            "id": 6,
+                                            "campSite": {
+                                                "id": 1,
+                                                "name": "Sa Đéc Glamping",
+                                                "address": "353 ĐT848, Tân Khánh Đông, Sa Đéc, Đồng Tháp 81000"
+                                            },
+                                            "user": {
+                                                "id": 2,
+                                                "email": "manager@example.com",
+                                                "firstname": "John",
+                                                "lastname": "Doe"
+                                            },
+                                            "status": "Accepted",
+                                            "createdTime": "2025-03-26 16:57:01",
+                                            "updatedTime": "2025-03-26 18:00:00",
+                                            "message": "The WC is dirty but has been cleaned",
+                                            "reportType": "Facility Issue"
+                                        }
+                                    }
+                                    """))),
+                    @ApiResponse(responseCode = "400", description = "Bad request"),
+                    @ApiResponse(responseCode = "404", description = "Report not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<BaseResponse> acceptReport(
+            @Parameter(description = "ID of the report to accept") @PathVariable Integer id) {
+        try {
+            ReportResponse response = reportService.acceptReport(id);
+            return ResponseEntity.ok(new BaseResponse(HttpStatus.OK.value(), "Report accepted successfully", response));
+        } catch (AppException e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.badRequest().body(new BaseResponse(e.getErrorCode().getCode(), e.getMessage(), null));
+        } catch (Exception e) {
+            logger.error("Error while accepting report: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred.", null));
+        }
+    }
+// </editor-fold>
+
+
     // <editor-fold default state="collapsed" desc="Soft delete a report">
     @DeleteMapping("/{id}")
     @Operation(

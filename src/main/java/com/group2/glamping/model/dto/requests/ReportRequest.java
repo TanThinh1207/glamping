@@ -21,7 +21,7 @@ public record ReportRequest(
 
         @Schema(description = "Message of the report",
                 example = "The air conditioner is broken.")
-        @Pattern(regexp = "^[a-zA-Z0-9\\s-_]{3,255}$",
+        @Pattern(regexp = "^[a-zA-Z0-9\\s-_.]{3,255}$",
                 message = "Name must be between 3-50 characters and contain only letters, numbers, spaces, '-', or '_'")
         String message,
 
