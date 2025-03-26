@@ -9,6 +9,7 @@ import com.group2.glamping.repository.CampSiteRepository;
 import com.group2.glamping.repository.SelectionRepository;
 import com.group2.glamping.service.interfaces.S3Service;
 import com.group2.glamping.service.interfaces.SelectionService;
+import com.group2.glamping.utils.RedisUtil;
 import com.group2.glamping.utils.ResponseFilterUtil;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
@@ -32,6 +33,7 @@ public class SelectionServiceImpl implements SelectionService {
     private final SelectionRepository selectionRepository;
     private final CampSiteRepository campSiteRepository;
     private final S3Service s3Service;
+    private final RedisUtil redisUtil;
 
     // Create selection
     @Override
@@ -64,19 +66,18 @@ public class SelectionServiceImpl implements SelectionService {
         if (request.id() == null) {
             throw new RuntimeException("ID is required for update");
         }
+
         Selection selection = selectionRepository.findById(request.id())
                 .orElseThrow(() -> new RuntimeException("Selection not found with id: " + request.id()));
+        redisUtil.deleteCache("filteredCampSites:*");
+        redisUtil.deleteCache("campSites:*");
         if (request.name() != null) {
             selection.setName(request.name());
         }
         if (request.description() != null) {
             selection.setDescription(request.description());
         }
-//        selection.setPrice(request.price());
-//        if (request.image() != null && !request.image().isEmpty()) {
-//            String filename = request.image().getOriginalFilename();
-//            selection.setImageUrl(filename);
-//        }
+        selection.setPrice(request.price());
         selection.setUpdatedTime(LocalDateTime.now());
         if (request.campSiteId() != null) {
             CampSite campSite = campSiteRepository.findById(request.campSiteId())
@@ -139,6 +140,8 @@ public class SelectionServiceImpl implements SelectionService {
                 .orElseThrow(() -> new RuntimeException("Selection not found with id: " + id));
         selection.setStatus(false);
         selectionRepository.save(selection);
+        redisUtil.deleteCache("filteredCampSites:*");
+        redisUtil.deleteCache("campSites:*");
         return convertToResponse(selection);
     }
 
@@ -149,9 +152,7 @@ public class SelectionServiceImpl implements SelectionService {
         response.setName(selection.getName());
         response.setDescription(selection.getDescription());
         response.setPrice(selection.getPrice());
-        response.setImage(selection.getImageUrl() == null || selection.getImageUrl().isEmpty() ?
-                "" :
-                s3Service.generatePresignedUrl(selection.getImageUrl(), 86400));
+        response.setImage(s3Service.getFileUrl(selection.getImageUrl()));
         response.setStatus(selection.isStatus());
         return response;
     }

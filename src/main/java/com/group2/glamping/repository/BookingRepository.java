@@ -46,5 +46,13 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>, JpaS
             \s""")
     Double findAverageRatingByCampSiteId(@Param("campSiteId") Integer campSiteId);
 
+    @Query("""
+                 SELECT b FROM booking b\s
+                 WHERE b.status = 'COMPLETED'
+                 AND b.checkOutTime BETWEEN :startDate AND :endDate
+            \s""")
+    List<Booking> findCompletedBookingsForSystem(@Param("startDate") LocalDateTime startDate,
+                                                 @Param("endDate") LocalDateTime endDate);
+
 
 }
