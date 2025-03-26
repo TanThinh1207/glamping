@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
 
 import java.io.IOException;
 
@@ -139,14 +138,17 @@ public class PaymentController {
     }
 
     @GetMapping("/connected-account")
-    public RedirectView connectedAccount(@RequestParam Integer hostId) throws StripeException {
+    public void connectedAccount(@RequestParam Integer hostId, HttpServletResponse response) throws StripeException, IOException {
         String url = stripeService.createAccountLink(hostId);
-        return new RedirectView(url);
+        response.sendRedirect(url);
     }
 
+
     @GetMapping("/connected-success")
-    public RedirectView connectedSuccess() {
-        return new RedirectView(connectUrl);
+    public void connectedSuccess(HttpServletResponse response) {
+        response.setHeader("Location", connectUrl);
+        response.setStatus(HttpServletResponse.SC_FOUND); // 302
     }
+
 
 }
