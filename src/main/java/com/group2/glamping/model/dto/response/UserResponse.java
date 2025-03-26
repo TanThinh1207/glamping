@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.group2.glamping.model.entity.CampSite;
 import com.group2.glamping.model.entity.User;
+import com.group2.glamping.model.enums.Role;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Account;
 import lombok.*;
@@ -33,6 +34,7 @@ public class UserResponse {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthday;
     private boolean status;
+    private Role role;
     private List<Integer> campSiteIds;
     private String connectionId;
     private boolean isRestricted;
@@ -47,6 +49,7 @@ public class UserResponse {
         this.phone = user.getPhoneNumber();
         this.birthday = user.getDob();
         this.status = user.isStatus();
+        this.role = user.getRole();
         this.campSiteIds = user.getCampSiteList() == null ? new ArrayList<>() : user.getCampSiteList().stream()
                 .map(CampSite::getId)
                 .collect(Collectors.toList());
