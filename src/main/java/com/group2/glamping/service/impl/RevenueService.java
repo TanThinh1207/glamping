@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
@@ -64,18 +65,35 @@ public class RevenueService {
 
         LocalDateTime previousStartDate, previousEndDate;
         if ("daily".equals(interval)) {
-            YearMonth previousMonth = YearMonth.from(startDate.minusMonths(1));
-            previousStartDate = previousMonth.atDay(1).atStartOfDay();
-            previousEndDate = previousMonth.atEndOfMonth().atTime(23, 59, 59);
+            long daysRange = ChronoUnit.DAYS.between(startDate.toLocalDate(), endDate.toLocalDate());
+            previousStartDate = startDate.minusDays(daysRange + 1);
+            previousEndDate = endDate.minusDays(daysRange + 1);
         } else {
-            previousStartDate = startDate.minusYears(1);
-            previousEndDate = endDate.minusYears(1);
-        }
+            long monthsRange = ChronoUnit.MONTHS.between(
+                    YearMonth.from(startDate.toLocalDate()),
+                    YearMonth.from(endDate.toLocalDate())
+            );
 
+            previousStartDate = startDate.minusMonths(monthsRange + 1);
+            previousEndDate = endDate.minusMonths(monthsRange + 1);
+        }
+        System.out.println("Previous Start Date: " + previousStartDate);
+        System.out.println("Previous End Date: " + previousEndDate);
         double recentRevenue = bookings.stream()
                 .filter(b -> !b.getCheckOutTime().isBefore(previousStartDate) && !b.getCheckOutTime().isAfter(previousEndDate))
-                .mapToDouble(isSystemFee ? Booking::getSystemFee : Booking::getTotalAmount)
+                .mapToDouble(b -> {
+                    if (isSystemFee) {
+                        return b.getSystemFee();
+                    } else {
+                        double addOn = b.getBookingDetailList().stream()
+                                .filter(bd -> campSiteId == null || bd.getCamp().getId() == (campSiteId))
+                                .mapToDouble(BookingDetail::getAddOn)
+                                .sum();
+                        return b.getNetAmount() + addOn;
+                    }
+                })
                 .sum();
+
 
         return new RevenueGraphResponse(recentRevenue, new ArrayList<>(revenueMap.values()));
     }

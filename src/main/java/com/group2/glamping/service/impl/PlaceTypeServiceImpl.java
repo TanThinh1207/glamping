@@ -39,8 +39,6 @@ public class PlaceTypeServiceImpl implements PlaceTypeService {
                 .name(request.name())
                 .status(true)
                 .build();
-
-//        placeType.setImage(s3Service.uploadFile(image, "PlaceType", "place_type_" + placeType.getId()));
         placeTypeRepository.save(placeType);
         return convertToResponse(placeType);
     }
@@ -53,11 +51,6 @@ public class PlaceTypeServiceImpl implements PlaceTypeService {
         PlaceType placeType = placeTypeRepository.findById(request.id())
                 .orElseThrow(() -> new RuntimeException("Place type not found"));
         placeType.setName(request.name());
-//        if (image != null && !image.isEmpty()) {
-//            String filename = image.getOriginalFilename();
-//            placeType.setImage(filename);
-//        }
-//        placeType.setImage(s3Service.uploadFile(image, "PlaceType", "place_type_" + placeType.getId()));
         redisUtil.deleteCache("filteredCampSites:*");
         redisUtil.deleteCache("campSites:*");
         placeTypeRepository.save(placeType);
