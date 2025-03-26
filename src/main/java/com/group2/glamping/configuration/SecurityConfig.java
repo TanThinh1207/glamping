@@ -82,12 +82,12 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-//                                .anyRequest().permitAll()
-                        .requestMatchers(WHITE_LIST).permitAll()
-                        .requestMatchers(USER_LIST).hasRole("USER")
-                        .requestMatchers(MANAGER_LIST).hasRole("MANAGER")
-                        .requestMatchers(ADMIN_LIST).hasRole("ADMIN")
-                        .anyRequest().authenticated()
+                                .anyRequest().permitAll()
+//                        .requestMatchers(WHITE_LIST).permitAll()
+//                        .requestMatchers(USER_LIST).hasRole("USER")
+//                        .requestMatchers(MANAGER_LIST).hasRole("MANAGER")
+//                        .requestMatchers(ADMIN_LIST).hasRole("ADMIN")
+//                        .anyRequest().authenticated()
                 )
                 .securityContext(security -> security.requireExplicitSave(true))
                 .exceptionHandling(exception -> exception
