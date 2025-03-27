@@ -5,9 +5,12 @@ import com.group2.glamping.exception.ErrorCode;
 import com.group2.glamping.model.dto.requests.PaymentRequest;
 import com.group2.glamping.model.dto.response.BaseResponse;
 import com.group2.glamping.model.dto.response.StripeResponse;
+import com.group2.glamping.model.entity.User;
 import com.group2.glamping.model.enums.PaymentStatus;
+import com.group2.glamping.repository.UserRepository;
 import com.group2.glamping.service.impl.StripeService;
 import com.stripe.exception.StripeException;
+import com.stripe.model.Account;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -32,6 +35,7 @@ import java.util.Map;
 public class PaymentController {
 
     private final StripeService stripeService;
+    private final UserRepository userRepository;
 
     @Value("${stripe.url.redirect.success}")
     private String redirectUrl;
@@ -155,8 +159,15 @@ public class PaymentController {
 
 
     @GetMapping("/connected-success")
-    public RedirectView connectedSuccess(@RequestParam(required = false, defaultValue = "false") boolean isSuccess) {
-        String status = isSuccess ? "success" : "fail";
+    public RedirectView connectedSuccess(@RequestParam int hostId) throws StripeException {
+        User user = userRepository.findById(hostId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        Account account = Account.retrieve(user.getConnectionId());
+
+        boolean isCompleted = Boolean.TRUE.equals(account.getDetailsSubmitted());
+        String status = isCompleted ? "success" : "fail";
+
         return new RedirectView(connectUrl + "?status=" + status);
     }
 
