@@ -29,6 +29,7 @@ import java.util.Optional;
 @RequestMapping("/api/bookings")
 @Tag(name = "Booking API", description = "API for managing Bookings")
 @RequiredArgsConstructor
+@CrossOrigin
 public class BookingController {
 
     private static final Logger logger = LoggerFactory.getLogger(BookingController.class);

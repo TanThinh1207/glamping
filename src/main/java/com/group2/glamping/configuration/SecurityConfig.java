@@ -7,6 +7,7 @@ import com.group2.glamping.auth.google.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -23,6 +24,7 @@ import org.springframework.web.filter.CorsFilter;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -45,24 +47,29 @@ public class SecurityConfig {
             "/home",
             "/login",
             "/api/s3/image/**",
-            "/api/revenue/**"
+            "/api/revenue/**",
+            "/api/users/**",
+            "/api/campsites/**",
+            "/api/camp-types/**",
+            "/api/selections/**",
+            "/api/chat/**",
+            "/api/facilities/**",
+            "/api/utilities/**",
+            "/api/place-types/**",
+            "/api/ratings/**",
+            "/ws/**",
+            "/api/payments/**",
     };
 
 
     private static final String[] USER_LIST = {
             "/api/bookings/**",
             "/api/fcm-tokens/**",
-            "/api/payments/**",
             "/api/reports/**",
-            "/api/campsites/**",
-            "/api/camp-types/**",
-            "/api/selections/**",
-            "/api/chat/**"
     };
 
     private static final String[] MANAGER_LIST = {
             "/api/bookings/**",
-            "/api/campsites/**",
             "/api/reports/**",
             "/api/payments/**"
     };
@@ -80,14 +87,15 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                                .anyRequest().permitAll()
-//                        .requestMatchers(WHITE_LIST).permitAll()
-//                        .requestMatchers(USER_LIST).hasRole("USER")
-//                        .requestMatchers(MANAGER_LIST).hasRole("MANAGER")
-//                        .requestMatchers(ADMIN_LIST).hasRole("ADMIN")
-//                        .anyRequest().authenticated()
+//                                .anyRequest().permitAll()
+                        .requestMatchers(WHITE_LIST).permitAll()
+                        .requestMatchers(USER_LIST).hasRole("USER")
+                        .requestMatchers(MANAGER_LIST).hasRole("MANAGER")
+                        .requestMatchers(ADMIN_LIST).hasRole("ADMIN")
+                        .anyRequest().authenticated()
                 )
                 .securityContext(security -> security.requireExplicitSave(true))
                 .exceptionHandling(exception -> exception
@@ -102,5 +110,21 @@ public class SecurityConfig {
     public OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService() {
         return new DefaultOAuth2UserService();
     }
+
+    @Bean
+    public CorsFilter corsFilter() {
+
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOriginPatterns(Collections.singletonList("*")); // Accept all origins
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        config.setExposedHeaders(Arrays.asList("Authorization"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+
+        return new CorsFilter(source);
+    }
+
 
 }

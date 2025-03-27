@@ -39,12 +39,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwt;
         final String username;
 
+
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            System.out.println(authorizationHeader);
+            System.out.println("Authorization header not found");
             filterChain.doFilter(request, response);
             return;
         }
+
         jwt = authorizationHeader.substring(7); // behind the "Bearer "
         username = jwtService.extractUsername(jwt);
+        System.out.println("username : " + username);
         // check if username is null or already authenticated
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username); // get user details from the database
